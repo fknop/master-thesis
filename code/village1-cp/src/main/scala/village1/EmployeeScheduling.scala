@@ -38,7 +38,7 @@ object EmployeeScheduling extends CPModel with App {
   // For all i Array[i], sum j Array[i][j] <= 1 for all j
   val workerVars = Array.tabulate(W, T, D)((n, t, d) => {
     val demand = demands(d)
-    val worksOnTForD = workers(n).availabilities.contains(t) && demand.availabilities.contains(t)
+    val worksOnTForD = workers(n).availabilities.contains(t) && demand.periods.contains(t)
     val name = s"Worker $n works for demand: $d at time $t"
 
     // We're sure that the worker is not available for period t or demand is not "working" for period t

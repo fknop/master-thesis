@@ -2,8 +2,8 @@ package village1
 
 case class Demand(
   id: Int,
-  availabilities: Set[Int],
+  periods: Set[Int],
   workers: Int,
   vehicles: Int = 0,
-  zones: Set[Int] = null
+  zones: Set[Int] = Set()
 )

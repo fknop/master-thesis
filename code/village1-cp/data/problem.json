@@ -1,0 +1,83 @@
+{
+  "T": 5,
+  "vehicles": 3,
+  "zones": 3,
+  "workers": [
+    {
+      "id": 0,
+      "availabilities": [0, 1, 2],
+      "skills": [],
+      "restrictions": [
+        {
+          "name": "WEIGHT",
+          "type": "MAX",
+          "value": 20
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "availabilities": [0, 1, 2],
+      "skills": [],
+      "restrictions": []
+    },
+    {
+      "id": 2,
+      "availabilities": [1, 2, 3],
+      "skills": [],
+      "restrictions": []
+    },
+    {
+      "id": 3,
+      "availabilities": [3, 4, 0],
+      "skills": [],
+      "restrictions": []
+    }
+  ],
+  "workersIncompatibilities": [
+    [0, 2]
+  ],
+  "demands": [
+    {
+      "id": 0,
+      "periods": [0, 1, 2],
+      "workers": 2,
+      "vehicles": 1,
+      "restrictions": [
+        {
+          "name": "WEIGHT",
+          "type": "MAX",
+          "value": 20
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "periods": [1, 2, 3],
+      "workers": 1,
+      "vehicles": 1,
+      "restrictions": [
+        {
+          "name": "WEIGHT",
+          "type": "MAX",
+          "value": 20
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "periods": [0, 3, 4],
+      "workers": 1,
+      "vehicles": 0,
+      "restrictions": [
+        {
+          "name": "WEIGHT",
+          "type": "MAX",
+          "value": 20
+        }
+      ]
+    }
+  ]
+}
+
+
