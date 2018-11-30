@@ -2,63 +2,62 @@ package village1
 
 import oscar.cp._
 import oscar.util._
+import village1.format.json.{JsonParser, JsonSerializer}
+import village1.util._
 
-object EmployeeScheduling2 extends CPModel with App {
 
-  val problem = Problem.parse("data/problem.json")
+object VillageOneCPModel extends CPModel with App {
+
+  val problem = JsonParser.parse("data/problem.json")
 
   val T = problem.T
   val demands = problem.demands
   val workers = problem.workers
   val V = problem.vehicles
   val Z = problem.zones
-  val W = workers.length
-  val D = demands.length
+  val W = problem.workers.length
+  val D = problem.demands.length
   val Demands = 0 until D
   val Workers = 0 until W
   val Periods = 0 until T
   val Vehicles = 0 until V
   val Zones = 0 until Z
 
+  val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
-  val vars = Array.tabulate(T)(t => {
-    Array.tabulate(D)(d => {
-      val demand = demands(d)
-      if (demand.periods.contains(t)) {
-        Array.tabulate(demand.workers)(_ => CPIntVar(0, W - 1))
-      }
-      else {
-        Array.empty[CPIntVar]
-      }
-    })
+
+  val workerVars = Array.tabulate(T, D)((t, d) => {
+    val demand = demands(d)
+    if (demand.hasPeriod(t)) {
+      Array.tabulate(demand.workers)(_ => CPIntVar(0, W - 1))
+    }
+    else {
+      EMPTY_INT_VAR_ARRAY
+    }
   })
 
 
-  val vehicleVars = Array.tabulate(T)(t => {
-    Array.tabulate(D)(d => {
-      val demand = demands(d)
-      Array.tabulate(demand.vehicles)(_ => CPIntVar(0, V - 1))
-    })
+  val vehicleVars = Array.tabulate(T, D)((_, d) => {
+    val demand = demands(d)
+    Array.tabulate(demand.vehicles)(_ => CPIntVar(0, V - 1))
   })
 
 
-  val zonesVar = Array.tabulate(T)(t => {
-    Array.tabulate(D)(d => {
-      val demand = demands(d)
-      Array.tabulate(demand.zones.size)(_ => CPIntVar(0, Z - 1))
-    })
+  val zoneVars = Array.tabulate(T, D)((_, d) => {
+    if (demands(d).zones.isEmpty) null
+    else CPIntVar(0, Z - 1)
   })
 
 
   // All workers for a given time must be different
   for (period <- Periods) {
-    val workersForPeriod = vars(period).flatten
+    val workersForPeriod = workerVars(period).flatten
     add(allDifferent(workersForPeriod))
   }
 
   // All zones for a given time must be different
   for (period <- Periods) {
-    val zonesForPeriod = zonesVar(period).flatten
+    val zonesForPeriod = zoneVars(period).filter(_ != null)
     if (zonesForPeriod.length >= 2) {
       add(allDifferent(zonesForPeriod))
     }
@@ -66,11 +65,11 @@ object EmployeeScheduling2 extends CPModel with App {
 
   // All workers must work in a time in which they are available
   for (worker <- Workers; period <- Periods) {
-    val isAvailable = workers(worker).availabilities.contains(period)
+    val isAvailable = workers(worker).available(period)
     if (!isAvailable) {
       for (demand <- Demands) {
-        for (i <- vars(period)(demand).indices) {
-          val workerVar = vars(period)(demand)(i)
+        for (i <- workerVars(period)(demand).indices) {
+          val workerVar = workerVars(period)(demand)(i)
           add(workerVar !== worker)
         }
       }
@@ -86,6 +85,21 @@ object EmployeeScheduling2 extends CPModel with App {
     }
   }
 
+  // All zones in a demand must be a possible zone for that demand
+  for (t <- Periods; d <- Demands) {
+    val demand = demands(d)
+    val zones = demand.zones
+
+    if (zoneVars(t)(d) != null) {
+      for (z <- Zones) {
+        if (!zones.contains(z)) {
+          add(zoneVars(t)(d) !== z)
+        }
+      }
+    }
+  }
+
+
 
   // Worker incompatibilities
 
@@ -94,9 +108,9 @@ object EmployeeScheduling2 extends CPModel with App {
 
   // Workers with incompatibilities cannot work together
   for (period <- Periods; demand <- Demands) {
-    val demandVar = vars(period)(demand)
+    val demandVar = workerVars(period)(demand)
     if (demandVar.length >= 2) {
-      val permutations = Util.generatePermutationsOfTwo(demandVar.length)
+      val permutations = Utilities.generatePermutationsOfTwo(demandVar.length)
       for (permutation <- permutations) {
         val (i, j) = permutation
         add(negativeTable(Array(demandVar(i), demandVar(j)), incompatibilities))
@@ -106,9 +120,18 @@ object EmployeeScheduling2 extends CPModel with App {
   }
 
 
+//  for (d <- Demands) {
+//    val demand = demands(d)
+    // val demandSkills
+    // Loop over demandSkills ds
+    // Get workers without that skills
+    // Loop over workers
+    // vars(0..T-1)(d)(ds) notEqual worker
+//  }
+
 
   search {
-    val flatVars = vars.flatten.flatten
+    val flatVars = workerVars.flatten.flatten
     val flatVehiclesVars = vehicleVars.flatten.flatten
 
     val variables = flatVars ++ flatVehiclesVars
@@ -123,10 +146,10 @@ object EmployeeScheduling2 extends CPModel with App {
 
     for (period <- Periods) {
       for (demand <- Demands) {
-        val workerVars = vars(period)(demand)
-        if (!workerVars.isEmpty) {
+        val workersTD = workerVars(period)(demand)
+        if (!workersTD.isEmpty) {
           println(s"Period = $period, demand = $demand")
-          println("Workers: " + vars(period)(demand).deep)
+          println("Workers: " + workerVars(period)(demand).deep)
 
           val vehicles = vehicleVars(period)(demand)
           if (!vehicles.isEmpty) {

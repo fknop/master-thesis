@@ -1,4 +1,4 @@
-package village1
+package village1.data
 
 object ParameterType extends Enumeration {
   type ParameterType = Value

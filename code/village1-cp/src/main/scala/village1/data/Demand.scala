@@ -1,4 +1,4 @@
-package village1
+package village1.data
 
 case class Demand(
   id: Int,
@@ -6,4 +6,7 @@ case class Demand(
   workers: Int,
   vehicles: Int = 0,
   zones: Set[Int] = Set()
-)
+) {
+
+  def hasPeriod (t: Int) = periods.contains(t)
+}

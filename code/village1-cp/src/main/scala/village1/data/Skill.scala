@@ -1,6 +1,6 @@
-package village1
+package village1.data
 
-import village1.ParameterType._
+import ParameterType._
 
 case class Skill(
   name: String, // Change to enum ?

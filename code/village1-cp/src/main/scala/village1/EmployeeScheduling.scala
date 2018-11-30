@@ -1,11 +1,13 @@
 package village1
 
+import village1.data.{Demand, Skill, Worker}
 import oscar.cp._
 import oscar.util._
-
-
+import village1.format.json.JsonSerializer
 
 object EmployeeScheduling extends CPModel with App {
+
+
 
   val T = 5
 
