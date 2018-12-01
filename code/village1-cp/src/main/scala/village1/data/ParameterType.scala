@@ -1,6 +1,6 @@
 package village1.data
 
-object ParameterType extends Enumeration {
-  type ParameterType = Value
-  val Min, Max = Value
-}
+sealed trait ParameterType
+
+case object Monday extends ParameterType
+case object Tuesday extends ParameterType

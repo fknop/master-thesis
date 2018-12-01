@@ -1,12 +1,18 @@
 package village1.data
 
+import village1.data.Skill.SkillGroup
+
 case class Demand(
   id: Int,
   periods: Set[Int],
-  workers: Int,
   vehicles: Int = 0,
-  zones: Set[Int] = Set()
+  zones: Set[Int] = Set(),
+  workersRequirements: IndexedSeq[WorkerRequirement],
 ) {
 
-  def hasPeriod (t: Int) = periods.contains(t)
+  val workers: Int = workersRequirements.length
+
+  def hasPeriod (t: Int): Boolean = periods.contains(t)
+
+  def worker (w: Int): WorkerRequirement = workersRequirements(w)
 }

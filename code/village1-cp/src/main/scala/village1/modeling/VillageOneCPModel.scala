@@ -1,12 +1,13 @@
-package village1
+package village1.modeling
 
+import village1.format.json.JsonParser
+import village1.util.Utilities
 import oscar.cp._
 import oscar.util._
-import village1.format.json.{JsonParser, JsonSerializer}
-import village1.util._
 
 
-object VillageOneCPModel extends CPModel with App {
+
+class VillageOneCPModel extends CPModel {
 
   val problem = JsonParser.parse("data/problem.json")
 
@@ -120,53 +121,27 @@ object VillageOneCPModel extends CPModel with App {
   }
 
 
-//  for (d <- Demands) {
-//    val demand = demands(d)
-    // val demandSkills
-    // Loop over demandSkills ds
-    // Get workers without that skills
-    // Loop over workers
-    // vars(0..T-1)(d)(ds) notEqual worker
-//  }
+  // Demands should have workers with required skills
+  for (d <- Demands) {
+    val demand = demands(d)
+    for (w <- 0 until demand.workers) {
+      val requirements = demand.worker(w)
+      val skills = requirements.skills
 
-
-  search {
-    val flatVars = workerVars.flatten.flatten
-    val flatVehiclesVars = vehicleVars.flatten.flatten
-
-    val variables = flatVars ++ flatVehiclesVars
-    conflictOrderingSearch(variables, i => variables(i).size, i => variables(i).min)
-  }
-
-
-  var solFound = false
-  onSolution {
-    solFound = true
-    println("sol found")
-
-    for (period <- Periods) {
-      for (demand <- Demands) {
-        val workersTD = workerVars(period)(demand)
-        if (!workersTD.isEmpty) {
-          println(s"Period = $period, demand = $demand")
-          println("Workers: " + workerVars(period)(demand).deep)
-
-          val vehicles = vehicleVars(period)(demand)
-          if (!vehicles.isEmpty) {
-            println("Vehicles: " + vehicles.deep)
+      if (!skills.isEmpty) {
+        for (worker <- workers.indices) {
+          // If worker doesn't have required skills
+          // TODO: this is a simplification
+          // name of the skill is not enough, we also need to compare values
+          if (!workers(worker).hasSkills(skills)) {
+            for (t <- Periods if demand.hasPeriod(t)) {
+              add(workerVars(t)(d)(w) !== worker)
+            }
           }
         }
       }
+
     }
-  }
-  // use restarts to break heavy tails phenomena
-  var restart = 0
-  val t = time {
-    do {
-      start(nSols = 1, failureLimit = 5000)
-      restart += 1
-    } while (!solFound)
   }
 
 }
-

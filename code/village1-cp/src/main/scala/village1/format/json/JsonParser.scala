@@ -1,8 +1,7 @@
 package village1.format.json
 
-import play.api.libs.json.{JsValue, Json}
-import village1.data.{Demand, Worker}
-import village1.modeling
+import play.api.libs.json.{JsString, JsValue, Json}
+import village1.data.{Demand, Worker, WorkerRequirement}
 import village1.modeling.Problem
 
 import scala.io.Source
@@ -13,7 +12,7 @@ object JsonParser {
     Demand(
       id = value("id").as[Int],
       periods = Set(value("periods").as[Array[Int]]: _*),
-      workers = value("workers").as[Int],
+      workersRequirements = (0 until value("workers").as[Int]).map(_ => WorkerRequirement()),
       vehicles = value("vehicles").as[Int]
     )
   }
@@ -27,6 +26,7 @@ object JsonParser {
   private def parseWorker(value: JsValue): Worker = {
     Worker(
       id = value("id").as[Int],
+      name = (value \ "name").getOrElse(JsString("Anonymous")).as[String],
       availabilities = Set(value("availabilities").as[Array[Int]]: _*)
     )
   }
@@ -52,7 +52,7 @@ object JsonParser {
 
     val json = Json.parse(content)
 
-    modeling.Problem(
+    Problem(
       T = parseT(json),
       vehicles = parseVehicleNumber(json),
       zones = parseZoneNumber(json),

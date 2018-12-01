@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "JSON Schema for Village1",
+
+  "definitions": {
+
+    "parameterType": {
+      "type": "string",
+      "enum": ["MIN", "MAX"]
+    },
+
+    "skill": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/parameterType"
+        },
+        "value": {
+          "type": ["string", "number", "integer"]
+        }
+      },
+      "required": ["name", "type"],
+      "additionalProperties": false
+    },
+
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/skill"
+      },
+      "uniqueItems": true
+    },
+
+    "periods": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "examples": [
+        [0, 2, 4]
+      ]
+    }
+
+
+  },
+
+
+
+  "type": "object",
+  "properties": {
+
+    "T": {
+      "type": "integer",
+      "minimum": 1
+    },
+
+    "vehicles": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "zones": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "workers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "skills": {
+            "$ref": "#/definitions/skills"
+          },
+          "availabilities": {
+            "$ref": "#/definitions/periods"
+          }
+        },
+        "required": ["id", "availabilities"],
+        "additionalProperties": false
+      }
+    },
+
+    "workersIncompatibilities": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "uniqueItems": true
+        }
+      },
+      "uniqueItems": true
+    },
+
+    "demands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+
+          "vehicles": {
+            "type": "integer",
+            "minimum": 0
+          },
+
+          "periods": {
+            "$ref": "#/definitions/periods"
+          },
+
+          "requiredWorkers": {
+            "type": ["integer", "array"],
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "$comment": "If this is set, the worker will be pre-assigned"
+                },
+                "skills": { "$ref": "#/definitions/skills" }
+              },
+              "additionalProperties": false,
+              "$comment": "An empty object means any worker, no specific skills"
+            }
+          }
+        },
+        "required": ["id", "periods", "requiredWorkers"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "T",
+    "demands",
+    "vehicles",
+    "workers",
+    "workersIncompatibilities",
+    "zones"
+  ],
+  "additionalProperties": false
+}

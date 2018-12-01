@@ -1,9 +1,12 @@
 package village1.data
 
-import ParameterType._
-
 case class Skill(
-  name: String, // Change to enum ?
+  name: String,
   parameterType: ParameterType,
   value: Int
 )
+
+
+object Skill {
+  type SkillGroup = Array[Skill]
+}

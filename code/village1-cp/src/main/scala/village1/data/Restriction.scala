@@ -1,9 +1,7 @@
 package village1.data
 
-import ParameterType._
-
 case class Restriction(
-  name: String, // Change to enum ?
+  name: String,
   parameterType: ParameterType,
   value: Int
 )
