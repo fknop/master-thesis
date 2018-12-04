@@ -4,9 +4,19 @@
 
   "definitions": {
 
+    "client": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["name"]
+    },
+
     "parameterType": {
       "type": "string",
-      "enum": ["MIN", "MAX"]
+      "enum": ["MIN", "MAX", "NONE"]
     },
 
     "skill": {
@@ -19,17 +29,46 @@
           "$ref": "#/definitions/parameterType"
         },
         "value": {
-          "type": ["string", "number", "integer"]
+          "type": ["number", "integer"],
+          "description": "Only used if type is None"
         }
       },
       "required": ["name", "type"],
       "additionalProperties": false
     },
 
+
     "skills": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/skill"
+      },
+      "uniqueItems": true
+    },
+
+
+    "restriction": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/parameterType"
+        },
+        "value": {
+          "type": ["number", "integer"],
+          "description": "Only used if type is None"
+        }
+      },
+      "required": ["name", "type"],
+      "additionalProperties": false
+    },
+
+    "restrictions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/restriction"
       },
       "uniqueItems": true
     },
@@ -55,17 +94,20 @@
 
     "T": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 1,
+      "description": "Number of periods"
     },
 
-    "vehicles": {
+    "machines": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Number of machines"
     },
 
-    "zones": {
+    "locations": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Number of locations"
     },
 
     "workers": {
@@ -91,13 +133,24 @@
       }
     },
 
-    "workersIncompatibilities": {
+    "workerWorkerIncompatibilities": {
       "type": "array",
       "items": {
         "type": "array",
         "items": {
           "type": "integer",
           "uniqueItems": true
+        }
+      },
+      "uniqueItems": true
+    },
+
+    "workerClientIncompatibilities": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
         }
       },
       "uniqueItems": true
@@ -112,9 +165,25 @@
             "type": "integer"
           },
 
-          "vehicles": {
-            "type": "integer",
-            "minimum": 0
+          "client": {
+            "$ref": "#/definitions/client"
+          },
+
+          "machines": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "uniqueItems": true
+          },
+
+
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "uniqueItems": true
           },
 
           "periods": {
@@ -137,7 +206,7 @@
             }
           }
         },
-        "required": ["id", "periods", "requiredWorkers"],
+        "required": ["id", "client", "periods", "requiredWorkers"],
         "additionalProperties": false
       }
     }
@@ -145,10 +214,9 @@
   "required": [
     "T",
     "demands",
-    "vehicles",
+    "machines",
     "workers",
-    "workersIncompatibilities",
-    "zones"
+    "locations"
   ],
   "additionalProperties": false
 }

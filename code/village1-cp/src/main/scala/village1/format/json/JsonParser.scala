@@ -1,19 +1,26 @@
 package village1.format.json
 
 import play.api.libs.json.{JsString, JsValue, Json}
-import village1.data.{Demand, Worker, WorkerRequirement}
+import village1.data.{Client, Demand, Worker, WorkerRequirement}
 import village1.modeling.Problem
 
 import scala.io.Source
 
 object JsonParser {
 
+  private def parseClient(value: JsValue): Client = {
+    val client = (value \ "client").as[JsValue]
+
+    val name = (client \ "name").as[String]
+    Client(name)
+  }
+
   private def parseDemand(value: JsValue): Demand = {
     Demand(
       id = value("id").as[Int],
+      client = parseClient(value),
       periods = Set(value("periods").as[Array[Int]]: _*),
-      workersRequirements = (0 until value("workers").as[Int]).map(_ => WorkerRequirement()),
-      vehicles = value("vehicles").as[Int]
+      workersRequirements = (0 until value("workers").as[Int]).map(_ => WorkerRequirement())
     )
   }
 
@@ -38,11 +45,11 @@ object JsonParser {
 
   private def parseT(json: JsValue)= json("T").as[Int]
 
-  private def parseVehicleNumber(json: JsValue) = json("vehicles").as[Int]
 
-  private def parseZoneNumber(json: JsValue) = json("zones").as[Int]
+  private def parseLocationsNumber(json: JsValue) = json("locations").as[Int]
 
-  private def parseWorkerIncompatibilities(json: JsValue) = json("workersIncompatibilities").as[Array[Array[Int]]]
+  private def parseWorkerWorkerIncompatibilities(json: JsValue) = json("workerWorkerIncompatibilities").as[Array[Array[Int]]]
+  private def parseWorkerClientIncompatibilities(json: JsValue) = json("workerClientIncompatibilities").as[Array[Array[Int]]]
 
   def parse (path: String): Problem = {
 
@@ -54,11 +61,11 @@ object JsonParser {
 
     Problem(
       T = parseT(json),
-      vehicles = parseVehicleNumber(json),
-      zones = parseZoneNumber(json),
+      locations = parseLocationsNumber(json),
       workers = parseWorkers(json),
       demands = parseDemands(json),
-      workersIncompatibilities = parseWorkerIncompatibilities(json)
+      workerWorkerIncompatibilities = parseWorkerWorkerIncompatibilities(json),
+      workerClientIncompatibilities = parseWorkerClientIncompatibilities(json)
     )
   }
 }

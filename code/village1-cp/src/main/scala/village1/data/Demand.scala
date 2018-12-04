@@ -1,12 +1,12 @@
 package village1.data
 
-import village1.data.Skill.SkillGroup
 
 case class Demand(
   id: Int,
+  client: Client,
   periods: Set[Int],
-  vehicles: Int = 0,
-  zones: Set[Int] = Set(),
+  machines: Set[Int] = Set(),
+  locations: Set[Int] = Set(),
   workersRequirements: IndexedSeq[WorkerRequirement],
 ) {
 

@@ -2,5 +2,6 @@ package village1.data
 
 sealed trait ParameterType
 
-case object Monday extends ParameterType
-case object Tuesday extends ParameterType
+case object Min extends ParameterType
+case object Max extends ParameterType
+case object None extends ParameterType

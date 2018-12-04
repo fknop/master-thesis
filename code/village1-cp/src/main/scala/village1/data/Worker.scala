@@ -14,6 +14,9 @@ case class Worker(
   def hasSkills (required: IndexedSeq[Skill]): Boolean = required.forall(hasSkill)
 
 
+  def satisfySkill (required: Skill): Boolean = hasSkill(required) && skills(required.name).satisfy(required)
+  def satisfySkills (required: IndexedSeq[Skill]): Boolean = required.forall(satisfySkill)
+
   def hasRestriction (name: String): Boolean = restrictions.contains(name)
 
   // Suppose that hasSkill(name) is true

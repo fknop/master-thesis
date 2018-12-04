@@ -14,15 +14,15 @@ class VillageOneCPModel extends CPModel {
   val T = problem.T
   val demands = problem.demands
   val workers = problem.workers
-  val V = problem.vehicles
-  val Z = problem.zones
+//  val V = problem.vehicles
+  val L = problem.locations
   val W = problem.workers.length
   val D = problem.demands.length
   val Demands = 0 until D
   val Workers = 0 until W
   val Periods = 0 until T
-  val Vehicles = 0 until V
-  val Zones = 0 until Z
+//  val Vehicles = 0 until V
+  val Locations = 0 until L
 
   val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
@@ -37,16 +37,16 @@ class VillageOneCPModel extends CPModel {
     }
   })
 
+//
+//  val vehicleVars = Array.tabulate(T, D)((_, d) => {
+//    val demand = demands(d)
+//    Array.tabulate(demand.vehicles)(_ => CPIntVar(0, V - 1))
+//  })
 
-  val vehicleVars = Array.tabulate(T, D)((_, d) => {
-    val demand = demands(d)
-    Array.tabulate(demand.vehicles)(_ => CPIntVar(0, V - 1))
-  })
 
-
-  val zoneVars = Array.tabulate(T, D)((_, d) => {
-    if (demands(d).zones.isEmpty) null
-    else CPIntVar(0, Z - 1)
+  val locationVars = Array.tabulate(T, D)((_, d) => {
+    if (demands(d).locations.isEmpty) null
+    else CPIntVar(0, L - 1)
   })
 
 
@@ -58,7 +58,7 @@ class VillageOneCPModel extends CPModel {
 
   // All zones for a given time must be different
   for (period <- Periods) {
-    val zonesForPeriod = zoneVars(period).filter(_ != null)
+    val zonesForPeriod = locationVars(period).filter(_ != null)
     if (zonesForPeriod.length >= 2) {
       add(allDifferent(zonesForPeriod))
     }
@@ -79,22 +79,22 @@ class VillageOneCPModel extends CPModel {
 
 
   // All vehicles used for a given time must be different
-  for (period <- Periods) {
-    val vehiclesForPeriod = vehicleVars(period).flatten
-    if (vehiclesForPeriod.length >= 2) {
-      add(allDifferent(vehiclesForPeriod))
-    }
-  }
+//  for (period <- Periods) {
+//    val vehiclesForPeriod = vehicleVars(period).flatten
+//    if (vehiclesForPeriod.length >= 2) {
+//      add(allDifferent(vehiclesForPeriod))
+//    }
+//  }
 
   // All zones in a demand must be a possible zone for that demand
   for (t <- Periods; d <- Demands) {
     val demand = demands(d)
-    val zones = demand.zones
+    val locations = demand.locations
 
-    if (zoneVars(t)(d) != null) {
-      for (z <- Zones) {
-        if (!zones.contains(z)) {
-          add(zoneVars(t)(d) !== z)
+    if (locationVars(t)(d) != null) {
+      for (z <- Locations) {
+        if (!locations.contains(z)) {
+          add(locationVars(t)(d) !== z)
         }
       }
     }
@@ -105,7 +105,7 @@ class VillageOneCPModel extends CPModel {
   // Worker incompatibilities
 
   // Incompatibilities i -> j and j -> i
-  val incompatibilities = problem.workersIncompatibilities ++ problem.workersIncompatibilities.map(_.reverse)
+  val incompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
 
   // Workers with incompatibilities cannot work together
   for (period <- Periods; demand <- Demands) {
@@ -131,9 +131,7 @@ class VillageOneCPModel extends CPModel {
       if (!skills.isEmpty) {
         for (worker <- workers.indices) {
           // If worker doesn't have required skills
-          // TODO: this is a simplification
-          // name of the skill is not enough, we also need to compare values
-          if (!workers(worker).hasSkills(skills)) {
+          if (!workers(worker).satisfySkills(skills)) {
             for (t <- Periods if demand.hasPeriod(t)) {
               add(workerVars(t)(d)(w) !== worker)
             }

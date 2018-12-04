@@ -4,9 +4,10 @@ import village1.data.{Demand, Worker}
 
 case class Problem(
   T: Int,
-  vehicles: Int,
-  zones: Int,
+//  vehicles: Int,
+  locations: Int,
   demands: Array[Demand],
   workers: Array[Worker],
-  workersIncompatibilities: Array[Array[Int]] = Array()
+  workerWorkerIncompatibilities: Array[Array[Int]] = Array(),
+  workerClientIncompatibilities: Array[Array[Int]] = Array()
 )

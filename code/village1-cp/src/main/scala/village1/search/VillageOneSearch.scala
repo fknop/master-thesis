@@ -8,9 +8,9 @@ object VillageOneSearch extends VillageOneCPModel with App {
 
   search {
     val flatVars = workerVars.flatten.flatten
-    val flatVehiclesVars = vehicleVars.flatten.flatten
+//    val flatVehiclesVars = vehicleVars.flatten.flatten
 
-    val variables = flatVars ++ flatVehiclesVars
+    val variables = flatVars //++ flatVehiclesVars
     conflictOrderingSearch(variables, i => variables(i).size, i => variables(i).min)
   }
 
@@ -28,10 +28,10 @@ object VillageOneSearch extends VillageOneCPModel with App {
           workersTD.map(_.value).map(workers(_).name).foreach(println(_))
 //          println("Workers: " + workerVars(period)(demand).deep)
 
-          val vehicles = vehicleVars(period)(demand)
-          if (!vehicles.isEmpty) {
-            println(s"Vehicles: ${vehicles.map(_.value).mkString(" ")}")
-          }
+//          val vehicles = vehicleVars(period)(demand)
+//          if (!vehicles.isEmpty) {
+//            println(s"Vehicles: ${vehicles.map(_.value).mkString(" ")}")
+//          }
         }
       }
     }
