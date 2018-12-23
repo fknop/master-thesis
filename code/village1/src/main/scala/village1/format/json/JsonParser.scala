@@ -1,12 +1,18 @@
 package village1.format.json
 
-import play.api.libs.json.{JsArray, JsString, JsValue, Json}
+import com.eclipsesource.schema.{SchemaType, SchemaValidator}
+import com.eclipsesource.schema.drafts._
+
+import play.api.libs.json._
 import village1.data._
 import village1.modeling.Problem
+import JsonUtils.parseJsonFile
 
 import scala.io.Source
 
 object JsonParser {
+
+  final val PROBLEM_SCHEMA_PATH = "schema/problem.schema.json"
 
   private def parseClient(value: JsValue): Client = {
     val client = (value \ "client").as[JsValue]
@@ -94,13 +100,22 @@ object JsonParser {
     case None => Array[Array[Int]]()
   }
 
+  def validate (jsonSchema: JsValue, json: JsValue): JsResult[JsValue] = {
+    import Version7._
+    val schema = Json.fromJson[SchemaType](jsonSchema).get
+    val validator = SchemaValidator(Some(Version7))
+    validator.validate(schema, json)
+  }
+
   def parse (path: String): Problem = {
 
-    val file = Source.fromFile(path)
-    val content = file.getLines.mkString("\n")
-    file.close()
+    val json = parseJsonFile(path)
+    val schema = parseJsonFile(PROBLEM_SCHEMA_PATH)
+    val result = validate(schema, json)
 
-    val json = Json.parse(content)
+    if (result.isError) {
+      throw new JsonSchemaValidationError(result)
+    }
 
     Problem(
       T = parseT(json),
