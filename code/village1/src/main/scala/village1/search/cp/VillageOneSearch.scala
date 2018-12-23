@@ -1,8 +1,9 @@
-package village1.search
+package village1.search.cp
 
-import oscar.cp.{conflictOrderingSearch, onSolution, search, start}
 import oscar.util.time
-import village1.modeling.VillageOneCPModel
+import oscar.cp._
+
+import village1.modeling.cp.VillageOneCPModel
 
 object VillageOneSearch extends VillageOneCPModel with App {
 
@@ -11,7 +12,7 @@ object VillageOneSearch extends VillageOneCPModel with App {
 //    val flatVehiclesVars = vehicleVars.flatten.flatten
 
     val variables = flatVars //++ flatVehiclesVars
-    conflictOrderingSearch(variables, i => variables(i).size, i => variables(i).min)
+    conflictOrderingSearch(variables, variables(_).size, variables(_).min)
   }
 
 

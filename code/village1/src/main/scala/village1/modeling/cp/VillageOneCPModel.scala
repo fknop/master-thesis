@@ -1,10 +1,8 @@
-package village1.modeling
+package village1.modeling.cp
 
+import oscar.cp._
 import village1.format.json.JsonParser
 import village1.util.Utilities
-import oscar.cp._
-import oscar.util._
-
 
 
 class VillageOneCPModel extends CPModel {

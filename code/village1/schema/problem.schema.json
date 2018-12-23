@@ -83,10 +83,7 @@
         [0, 2, 4]
       ]
     }
-
-
   },
-
 
 
   "type": "object",
@@ -191,18 +188,14 @@
           },
 
           "requiredWorkers": {
-            "type": ["integer", "array"],
+            "type": "integer",
+            "minimum": 0
+          },
+
+          "requiredSkills": {
+            "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer",
-                  "$comment": "If this is set, the worker will be pre-assigned"
-                },
-                "skills": { "$ref": "#/definitions/skills" }
-              },
-              "additionalProperties": false,
-              "$comment": "An empty object means any worker, no specific skills"
+              "$ref": "#/definitions/skills"
             }
           }
         },

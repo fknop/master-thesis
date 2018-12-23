@@ -1,6 +1,6 @@
 import sbt.librarymanagement.Resolver
 
-name := "village1-cp"
+name := "village1"
 
 version := "0.1"
 

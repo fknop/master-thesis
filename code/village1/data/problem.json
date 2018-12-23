@@ -34,7 +34,7 @@
         "name": "Client 1"
       },
       "periods": [0, 1, 2],
-      "requiredWorkers": [{}, {}]
+      "requiredWorkers": 2
     },
     {
       "id": 1,
