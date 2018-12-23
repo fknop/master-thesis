@@ -5,7 +5,7 @@ import oscar.cp._
 
 import village1.modeling.cp.VillageOneCPModel
 
-object VillageOneSearch extends VillageOneCPModel with App {
+object VillageOneSearch extends VillageOneCPModel("data/problem.json") with App {
 
   search {
     val flatVars = workerVars.flatten.flatten

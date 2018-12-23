@@ -107,6 +107,13 @@
       "description": "Number of locations"
     },
 
+    "clients": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/client"
+      }
+    },
+
     "workers": {
       "type": "array",
       "items": {
@@ -163,7 +170,7 @@
           },
 
           "client": {
-            "$ref": "#/definitions/client"
+            "type": "integer"
           },
 
           "machines": {
@@ -208,6 +215,7 @@
     "T",
     "demands",
     "machines",
+    "clients",
     "workers",
     "locations"
   ],

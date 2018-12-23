@@ -3,7 +3,7 @@ package village1.data
 
 case class Demand(
   id: Int,
-  client: Client,
+  client: Int,
   periods: Set[Int],
   machines: Set[Int] = Set(),
   locations: Set[Int] = Set(),

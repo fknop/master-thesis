@@ -60,7 +60,7 @@ object JsonParser {
 
     Demand(
       id = value("id").as[Int],
-      client = parseClient(value),
+      client = value("client").as[Int],
       periods = Set(value("periods").as[Array[Int]]: _*),
       requiredWorkers = value("requiredWorkers").as[Int],
       requiredSkills = skills

@@ -5,9 +5,9 @@ import village1.format.json.JsonParser
 import village1.util.Utilities
 
 
-class VillageOneCPModel extends CPModel {
+class VillageOneCPModel(path: String) extends CPModel {
 
-  val problem = JsonParser.parse("data/problem.json")
+  val problem = JsonParser.parse(path)
 
   val T = problem.T
   val demands = problem.demands
@@ -103,7 +103,7 @@ class VillageOneCPModel extends CPModel {
   // Worker incompatibilities
 
   // Incompatibilities i -> j and j -> i
-  val incompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
+  val wwIncompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
 
   // Workers with incompatibilities cannot work together
   for (period <- Periods; demand <- Demands) {
@@ -112,12 +112,31 @@ class VillageOneCPModel extends CPModel {
       val permutations = Utilities.generatePermutationsOfTwo(demandVar.length)
       for (permutation <- permutations) {
         val (i, j) = permutation
-        add(negativeTable(Array(demandVar(i), demandVar(j)), incompatibilities))
+        add(negativeTable(Array(demandVar(i), demandVar(j)), wwIncompatibilities))
 //          add(negativeTable(Array(demandVar(j), demandVar(i)), problem.workersIncompatibilities))
       }
     }
   }
 
+  val wcIncompatibilities = problem.workerClientIncompatibilities
+
+  // For each incompatibility between a client and a worker
+  // Remove the worker from the demands where the worker cannot work with that client
+  for (incompatibility <- wcIncompatibilities) {
+    val workerId = incompatibility(0)
+    val client = incompatibility(1)
+    for (d <- Demands) {
+      val demand = demands(d)
+      if (demand.client == client) {
+        for (period <- demand.periods) {
+          val demandWorkers: Array[CPIntVar] = workerVars(period)(demand)
+          for (worker <- demandWorkers) {
+            add(worker !== workerId)
+          }
+        }
+      }
+    }
+  }
 
   // Demands should have workers with required skills
   for (d <- Demands) {
