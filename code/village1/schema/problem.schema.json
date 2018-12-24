@@ -132,7 +132,7 @@
             "$ref": "#/definitions/periods"
           }
         },
-        "required": ["id", "availabilities"],
+        "required": ["id", "availabilities", "name"],
         "additionalProperties": false
       }
     },

@@ -8,8 +8,6 @@ import village1.data._
 import village1.modeling.Problem
 import JsonUtils.parseJsonFile
 
-import scala.io.Source
-
 object JsonParser {
 
   final val PROBLEM_SCHEMA_PATH = "schema/problem.schema.json"
@@ -19,6 +17,11 @@ object JsonParser {
 
     val name = (client \ "name").as[String]
     Client(name)
+  }
+
+  private def parseClients (value: JsValue): Array[Client] = {
+    val clients = (value \ "clients").as[JsArray]
+    clients.value.map(parseClient).toArray[Client]
   }
 
   private def parseSkill(value: JsValue): Skill = {
@@ -122,6 +125,7 @@ object JsonParser {
       locations = parseLocationsNumber(json),
       workers = parseWorkers(json),
       demands = parseDemands(json),
+      clients = parseClients(json),
       workerWorkerIncompatibilities = parseWorkerWorkerIncompatibilities(json),
       workerClientIncompatibilities = parseWorkerClientIncompatibilities(json)
     )
