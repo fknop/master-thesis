@@ -1,5 +1,5 @@
 package village1.modeling
 
-class Solution {
+case class Solution(
 
-}
+)
