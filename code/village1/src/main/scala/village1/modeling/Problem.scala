@@ -8,6 +8,7 @@ case class Problem(
   locations: Int,
   demands: Array[Demand],
   workers: Array[Worker],
+  machines: Set[Int] = Set(),
   workerWorkerIncompatibilities: Array[Array[Int]] = Array(),
   workerClientIncompatibilities: Array[Array[Int]] = Array()
 )

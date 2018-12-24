@@ -8,7 +8,7 @@ import village1.modeling.cp.VillageOneCPModel
 object VillageOneSearch extends VillageOneCPModel("data/problem.json") with App {
 
   search {
-    val flatVars = workerVars.flatten.flatten
+    val flatVars = workerVariables.flatten.flatten
 //    val flatVehiclesVars = vehicleVars.flatten.flatten
 
     val variables = flatVars //++ flatVehiclesVars
@@ -23,7 +23,7 @@ object VillageOneSearch extends VillageOneCPModel("data/problem.json") with App 
 
     for (period <- Periods) {
       for (demand <- Demands) {
-        val workersTD = workerVars(period)(demand)
+        val workersTD = workerVariables(period)(demand)
         if (!workersTD.isEmpty) {
           println(s"Period = $period, demand = $demand")
           workersTD.map(_.value).map(workers(_).name).foreach(println(_))
