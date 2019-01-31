@@ -13,9 +13,9 @@ object JsonParser {
   final val PROBLEM_SCHEMA_PATH = "schema/problem.schema.json"
 
   private def parseClient(value: JsValue): Client = {
-    val client = (value \ "client").as[JsValue]
+   // val client = (value \ "client").as[JsValue]
 
-    val name = (client \ "name").as[String]
+    val name = (value \ "name").as[String]
     Client(name)
   }
 
