@@ -1,14 +1,11 @@
 package village1.modeling.cp
 
 import oscar.cp._
-import village1.format.json.JsonParser
-import village1.modeling.UnsolvableException
+import village1.modeling.{Problem}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(path: String) extends CPModel {
-
-  val problem = JsonParser.parse(path)
+class VillageOneCPModel(problem: Problem) extends CPModel {
 
   val T = problem.T
   val demands = problem.demands
@@ -28,6 +25,7 @@ class VillageOneCPModel(path: String) extends CPModel {
 
   val workerVariables = generateWorkerVariables()
   val locationVariables = generateLocationVariables()
+  val machineVariables = generateMachineVariables()
 
   applyAllDifferentWorkers()
   applyAvailableWorkers()
@@ -65,12 +63,12 @@ class VillageOneCPModel(path: String) extends CPModel {
     })
   }
 
-//  def generateMachineVariables (): Array[Array[Array[Any]]] = {
-//    Array.tabulate(T, D)((_, d) => {
-//      val demand = demands(d)
-//      Array.tabulate(/*demand.vehicles*/ 0)(_ => CPIntVar(0, /*V - */1))
-//    })
-//  }
+  def generateMachineVariables (): Array[Array[Array[CPIntVar]]] = {
+    Array.tabulate(T, D)((_, d) => {
+      val demand = demands(d)
+      Array.tabulate(demand.machines.size)(_ => CPIntVar(0, M - 1))
+    })
+  }
 
   // All workers for a given time must be different
   def applyAllDifferentWorkers (): Unit = {
