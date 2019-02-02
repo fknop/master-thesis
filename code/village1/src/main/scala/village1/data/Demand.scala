@@ -5,10 +5,10 @@ case class Demand(
   id: Int,
   client: Int,
   periods: Set[Int],
+  requiredWorkers: Int,
   machines: Set[Int] = Set(),
   locations: Set[Int] = Set(),
-  requiredWorkers: Int,
-  requiredSkills: IndexedSeq[IndexedSeq[Skill]]
+  requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq()
 ) {
 
 
@@ -27,3 +27,5 @@ case class Demand(
 
   def worker (w: Int): WorkerRequirement = requirements(w)
 }
+
+

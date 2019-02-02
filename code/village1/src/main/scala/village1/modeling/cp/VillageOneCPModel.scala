@@ -7,6 +7,10 @@ import village1.util.Utilities
 
 class VillageOneCPModel(problem: Problem) extends CPModel {
 
+  type WorkerVariables = Array[Array[Array[CPIntVar]]]
+  type MachineVariables = Array[Array[Array[CPIntVar]]]
+  type LocationVariables = Array[Array[CPIntVar]]
+
   val T = problem.T
   val demands = problem.demands
   val workers = problem.workers
@@ -23,9 +27,9 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
 
-  val workerVariables = generateWorkerVariables()
-  val locationVariables = generateLocationVariables()
-  val machineVariables = generateMachineVariables()
+  val workerVariables: WorkerVariables = generateWorkerVariables()
+  val machineVariables: MachineVariables = generateMachineVariables()
+  val locationVariables: LocationVariables = generateLocationVariables()
 
   applyAllDifferentWorkers()
   applyAvailableWorkers()
@@ -42,7 +46,7 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   // Methods definitions
 
 
-  def generateWorkerVariables (): Array[Array[Array[CPIntVar]]] = {
+  def generateWorkerVariables (): WorkerVariables = {
     Array.tabulate(T, D)((t, d) => {
       val demand = demands(d)
       if (demand.hasPeriod(t)) {
@@ -54,7 +58,7 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
     })
   }
 
-  def generateLocationVariables (): Array[Array[CPIntVar]] = {
+  def generateLocationVariables (): LocationVariables = {
     Array.tabulate(T, D)((_, d) => {
       if (demands(d).locations.isEmpty) null
       // Filter locations that might be out of range
@@ -63,7 +67,7 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
     })
   }
 
-  def generateMachineVariables (): Array[Array[Array[CPIntVar]]] = {
+  def generateMachineVariables (): MachineVariables = {
     Array.tabulate(T, D)((_, d) => {
       val demand = demands(d)
       Array.tabulate(demand.machines.size)(_ => CPIntVar(0, M - 1))

@@ -7,7 +7,7 @@ import village1.format.json.JsonParser
 import village1.modeling.Solution
 import village1.modeling.cp.VillageOneCPModel
 
-class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(path)) with SearchSolutionListener {
+class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(path)) with Search {
 
   def solve(): Unit = {
 

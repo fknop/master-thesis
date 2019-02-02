@@ -28,3 +28,9 @@ case class Worker(
   def available (t: Int): Boolean = availabilities.contains(t)
 }
 
+object Worker {
+  def addAvailability(worker: Worker, t: Int): Worker = {
+    Worker(worker.id, worker.name, worker.availabilities + t, worker.skills, worker.restrictions)
+  }
+}
+
