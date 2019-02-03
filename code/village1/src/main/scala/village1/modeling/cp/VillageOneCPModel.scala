@@ -1,7 +1,8 @@
 package village1.modeling.cp
 
 import oscar.cp._
-import village1.modeling.{Problem}
+import oscar.cp.core.CPPropagStrength
+import village1.modeling.Problem
 import village1.util.Utilities
 
 
@@ -41,6 +42,7 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
 
   applyAllDifferentZones()
 
+  applyNameTODO()
 
 
   // Methods definitions
@@ -170,4 +172,29 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
       }
     }
   }
+
+  /**
+    * A worker should work on the same demand as time goes on
+    * This is a soft constraint, it can be violated but need to be maximized.
+    *
+    * TODO: implementation (check if this is the best way to do this)
+    * For now:
+    * For each demand, each position should have the same worker over the time periods.
+    * Add a softAllDifferent with violations and try to maximize the sum of violations
+    */
+  def applyNameTODO (): Unit = {
+    val violations = Array.tabulate(D)(d => CPIntVar(0, demands(d).requiredWorkers))
+
+    maximize(sum(violations))
+
+    for (d <- Demands) {
+      val demand = demands(d)
+      for (w <- 0 until demand.requiredWorkers) {
+        val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
+        add(softAllDifferent(workersForDemand, violations(d)), CPPropagStrength.Weak)
+      }
+    }
+  }
+
+
 }

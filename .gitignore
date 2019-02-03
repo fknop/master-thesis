@@ -8,6 +8,7 @@
 
 thesis/**/*.pdf
 code/**/**/target
+code/village1/results
 
 notes
 

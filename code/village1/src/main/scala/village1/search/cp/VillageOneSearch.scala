@@ -3,7 +3,7 @@ package village1.search.cp
 import oscar.util.time
 import oscar.cp._
 import village1.data._
-import village1.format.json.JsonParser
+import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.Solution
 import village1.modeling.cp.VillageOneCPModel
 
@@ -29,19 +29,18 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
       println("sol found")
 
       for (t <- Periods) {
-
-        var workerAssignments: List[WorkerAssignment] = List()
-        var machineAssignments: List[MachineAssignment] = List()
-        var locationAssignments: List[LocationAssignment] = List()
-        var demandsForTimeSlot: List[Demand] = List()
+        var demandAssignments: List[DemandAssignment] = List()
 
         for (d <- Demands) {
           val demand = demands(d)
           if (demand.periods.contains(t)) {
-            demandsForTimeSlot = demand :: demandsForTimeSlot
             val workerValues = workerVariables(t)(d)
             val machineValues = machineVariables(t)(d)
             val locationValue = locationVariables(t)(d)
+
+            var workerAssignments: List[WorkerAssignment] = List()
+            var machineAssignments: List[MachineAssignment] = List()
+            var locationAssignments: List[LocationAssignment] = List()
 
             if (!workerValues.isEmpty) {
               workerAssignments = workerValues
@@ -59,10 +58,12 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
             if (locationValue != null) {
               locationAssignments = LocationAssignment(locationValue.value, demand, t) :: locationAssignments
             }
+
+            demandAssignments = DemandAssignment(t, demand, workerAssignments, locationAssignments, machineAssignments) :: demandAssignments
           }
         }
 
-        plannings = Planning(workerAssignments, locationAssignments, machineAssignments, demandsForTimeSlot, t) :: plannings
+        plannings = Planning(t, demandAssignments) :: plannings
       }
 
       emitSolution(Solution(plannings))
@@ -77,4 +78,12 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
       } while (!solFound)
     }
   }
+}
+
+object Main extends App {
+  val search = new VillageOneSearch("data/instances/problem.json")
+  search.onSolutionFound { solution =>
+    JsonSerializer.serialize(solution)("results/results.json")
+  }
+  search.solve()
 }

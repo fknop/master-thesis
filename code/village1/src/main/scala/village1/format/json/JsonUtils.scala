@@ -1,5 +1,7 @@
 package village1.format.json
 
+import java.io.PrintWriter
+
 import play.api.libs.json.{JsResult, JsValue, Json}
 import com.eclipsesource.schema._
 
@@ -22,5 +24,12 @@ object JsonUtils {
     file.close()
 
     Json.parse(content)
+  }
+
+  def writeJsonFile (path: String, content: JsValue): Unit = {
+    new PrintWriter(path) {
+      write(Json.prettyPrint(content))
+      close()
+    }
   }
 }
