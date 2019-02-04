@@ -1,6 +1,8 @@
 package village1.generator
 
-import village1.data.{Demand, Worker}
+import village1.data.{Client, Demand, Worker}
+import village1.format.json.JsonSerializer
+import village1.modeling.Problem
 
 object InstanceGenerator extends App {
   val random = new scala.util.Random
@@ -54,6 +56,7 @@ object InstanceGenerator extends App {
     workers.sortBy(_.id)
   }
 
+  // TODO: generate different clients
   def generate(t: Int, d: Int, w: Int): Unit = {
     val demands = generateDemands(d, Math.min(d, Math.max(w / d, 1)))
         .map(d => generatePeriodForDemand(d, t))
@@ -62,12 +65,22 @@ object InstanceGenerator extends App {
 
     val workers = generateWorkersAvailabilities(workforce, demands, t)
 
-    demands.map(_.periods).foreach(println)
-    demands.map(_.requiredWorkers).foreach(println)
 
-    println("WORKERS")
-    workers.map(_.availabilities).foreach(println)
+    // Add a random number at the end of the file name to be able to create enough files with the same settings
+
+    val problem = Problem(
+      T = t,
+      locations = 0,
+      workers = workers.toArray,
+      demands = demands.toArray,
+      clients = demands.map(d => Client(name = s"Client ${d.client}")).toArray
+    )
+
+    val fileName = s"instance-t=$t-d=$d-w=$w-${rand(0, 1000)}"
+
+    JsonSerializer.serialize(problem)(s"data/instances/generated/$fileName.json")
   }
 
-  generate(3, 5, 10)
+
+  generate(10, 30, 400)
 }

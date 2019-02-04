@@ -16,7 +16,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
       val flatVars = workerVariables.flatten.flatten
       //    val flatVehiclesVars = vehicleVars.flatten.flatten
 
-      val variables = flatVars //++ flatVehiclesVars
+      val variables = flatVars ++ sameWorkerViolations //++ flatVehiclesVars
       conflictOrderingSearch(variables, variables(_).size, variables(_).min)
     }
 
@@ -81,9 +81,10 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
 }
 
 object Main extends App {
-  val search = new VillageOneSearch("data/instances/problem.json")
+
+  val search = new VillageOneSearch("data/instances/generated/instance-t=10-d=30-w=400-408.json")
   search.onSolutionFound { solution =>
-    JsonSerializer.serialize(solution)("results/results.json")
+    JsonSerializer.serialize(solution)("results/results2.json")
   }
   search.solve()
 }

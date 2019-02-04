@@ -1,6 +1,7 @@
 package village1.modeling.cp
 
 import oscar.cp._
+import oscar.cp.constraints.AtMostNValue
 import oscar.cp.core.CPPropagStrength
 import village1.modeling.Problem
 import village1.util.Utilities
@@ -31,6 +32,10 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
+
+  val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(0 until demands(d).periods.size))
+  //val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
+
 
   applyAllDifferentWorkers()
   applyAvailableWorkers()
@@ -178,20 +183,20 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
     * This is a soft constraint, it can be violated but need to be maximized.
     *
     * TODO: implementation (check if this is the best way to do this)
-    * For now:
-    * For each demand, each position should have the same worker over the time periods.
-    * Add a softAllDifferent with violations and try to maximize the sum of violations
     */
   def applyNameTODO (): Unit = {
-    val violations = Array.tabulate(D)(d => CPIntVar(0, demands(d).requiredWorkers))
 
-    maximize(sum(violations))
+    maximize(sum(sameWorkerViolations))
+//    minimize(sum(sameWorkerViolations))
 
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
-        add(softAllDifferent(workersForDemand, violations(d)), CPPropagStrength.Weak)
+        if (workersForDemand.length > 1) {
+          add(softAllDifferent(workersForDemand, sameWorkerViolations(d)), CPPropagStrength.Strong)
+          //add(new AtMostNValue(workersForDemand, sameWorkerViolations(d)))
+        }
       }
     }
   }
