@@ -10,8 +10,11 @@ import village1.util.Utilities
 class VillageOneCPModel(problem: Problem) extends CPModel {
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
-  type MachineVariables = Array[Array[Array[CPIntVar]]]
-  type LocationVariables = Array[Array[CPIntVar]]
+
+  // We make a guess (for now) that machines and locations will be the same for the entire duration of the demand
+  // and that overlapping demands will not be able to have the same locations.
+  type MachineVariables = Array[Array[CPIntVar]]
+  type LocationVariables = Array[CPIntVar]
 
   val T = problem.T
   val demands = problem.demands
@@ -28,6 +31,8 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
 
   val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
+  private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
+
 
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
@@ -37,17 +42,19 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   //val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
 
 
-  applyAllDifferentWorkers()
+  // Workers constraints
   applyAvailableWorkers()
-
+  applyAllDifferentWorkers()
   applyWorkerWorkerIncompatibilities()
   applyWorkerClientIncompatibilities()
-
   applyRequiredSkills()
 
-  applyAllDifferentZones()
-
   applyNameTODO()
+
+
+  // Locations constraints
+  applyAllDifferentLocations()
+
 
 
   // Methods definitions
@@ -66,16 +73,16 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   }
 
   def generateLocationVariables (): LocationVariables = {
-    Array.tabulate(T, D)((_, d) => {
+    Array.tabulate(D)(d => {
       if (demands(d).locations.isEmpty) null
       // Filter locations that might be out of range
       // TODO: throw a warning/error if location is out of range.
-      else CPIntVar(demands(d).locations.filter(l => 0 <= l && l <= L - 1))
+      else CPIntVar(demands(d).locations.filter(l => 0 <= l && l < L))
     })
   }
 
   def generateMachineVariables (): MachineVariables = {
-    Array.tabulate(T, D)((_, d) => {
+    Array.tabulate(D)(d => {
       val demand = demands(d)
       Array.tabulate(demand.machines.size)(_ => CPIntVar(0, M - 1))
     })
@@ -93,14 +100,30 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   }
 
   // All zones for a given time must be different
-  def applyAllDifferentZones (): Unit = {
+  def applyAllDifferentLocations(): Unit = {
+    for (d <- Demands if locationVariables(d) != null) {
+      val overlappingDemands = overlappingSets(d)
+      val locations = (overlappingDemands + d).map(locationVariables(_)).filter(_ != null)
+      add(allDifferent(locations))
+    }
+
+
+    /**
     for (period <- Periods) {
       val zonesForPeriod = locationVariables(period).filter(_ != null)
       if (zonesForPeriod.length >= 2) {
         add(allDifferent(zonesForPeriod))
       }
     }
+    **/
   }
+
+  def applyAllDifferentMachines(): Unit = {
+    for (d <- Demands) {
+      // TODO
+    }
+  }
+
 
   // All workers must work in a time in which they are available
   def applyAvailableWorkers (): Unit = {

@@ -25,7 +25,24 @@ case class Demand(
 
   def hasPeriod (t: Int): Boolean = periods.contains(t)
 
+
+  def overlapWith (demand: Demand): Boolean = {
+    val (smaller, larger) =
+      if (demand.periods.size < periods.size) (demand.periods, periods)
+      else (periods, demand.periods)
+
+    var overlap = false
+    val iterator = smaller.iterator
+    while (iterator.hasNext && !overlap) {
+      overlap = larger.contains(iterator.next())
+    }
+
+    overlap
+  }
+
   def worker (w: Int): WorkerRequirement = requirements(w)
 }
+
+
 
 
