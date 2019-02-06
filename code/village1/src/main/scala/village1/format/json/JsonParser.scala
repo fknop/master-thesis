@@ -91,7 +91,19 @@ object JsonParser {
 
   private def parseT(json: JsValue)= json("T").as[Int]
 
-  private def parseLocationsNumber(json: JsValue) = json("locations").as[Int]
+  private def parseLocations (json: JsValue): Array[Location] = {
+    (json \ "machines").toOption match {
+      case Some(value) => value.as[Array[JsValue]].map(m => Location(m("name").as[String]))
+      case None => Array[Location]()
+    }
+  }
+
+  private def parseMachines (json: JsValue): Array[Machine] = {
+    (json \ "machines").toOption match {
+      case Some(value) => value.as[Array[JsValue]].map(m => Machine(m("name").as[String]))
+      case None => Array[Machine]()
+    }
+  }
 
   private def parseWorkerWorkerIncompatibilities(json: JsValue) = (json \ "workerWorkerIncompatibilities").toOption match {
     case Some(value) => value.as[Array[Array[Int]]]
@@ -122,7 +134,8 @@ object JsonParser {
 
     Problem(
       T = parseT(json),
-      locations = parseLocationsNumber(json),
+      locations = parseLocations(json),
+      machines = parseMachines(json),
       workers = parseWorkers(json),
       demands = parseDemands(json),
       clients = parseClients(json),

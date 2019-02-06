@@ -1,3 +1,3 @@
 package village1.data
 
-case class WorkerAssignment(worker: Worker, demand: Demand, timeslot: Int)
+case class WorkerAssignment(workers: Array[Int], timeslot: Int)

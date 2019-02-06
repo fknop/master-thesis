@@ -70,7 +70,6 @@ object InstanceGenerator extends App {
 
     val problem = Problem(
       T = t,
-      locations = 0,
       workers = workers.toArray,
       demands = demands.toArray,
       clients = demands.map(d => Client(name = s"Client ${d.client}")).toArray

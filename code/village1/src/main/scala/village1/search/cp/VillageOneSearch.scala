@@ -23,50 +23,44 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
     var solFound = false
     onSolution {
 
-      var plannings = List[Planning]()
-
       solFound = true
       println("sol found")
 
-      for (t <- Periods) {
-        var demandAssignments: List[DemandAssignment] = List()
+      var demandAssignments: List[DemandAssignment] = List()
 
-        for (d <- Demands) {
-          val demand = demands(d)
-          if (demand.periods.contains(t)) {
-            val workerValues = workerVariables(t)(d)
-            val machineValues = machineVariables(t)(d)
-            val locationValue = locationVariables(t)(d)
+      for (d <- Demands) {
+        val demand = demands(d)
+        val slots = demand.periods
 
-            var workerAssignments: List[WorkerAssignment] = List()
-            var machineAssignments: List[MachineAssignment] = List()
-            var locationAssignments: List[LocationAssignment] = List()
+        val machineValues = machineVariables(d)
+        val locationValue = locationVariables(d)
 
-            if (!workerValues.isEmpty) {
-              workerAssignments = workerValues
-                  .map(_.value)
-                  .map(workers(_))
-                  .map(worker => WorkerAssignment(worker, demand, t)) ++: workerAssignments
-            }
+        val machineAssignments: Option[Array[Int]] =
+          if (machineValues.nonEmpty)
+            Some(machineValues.map(_.value))
+          else
+            None
 
-            if (!machineValues.isEmpty) {
-              machineAssignments = machineValues
-                  .map(_.value)
-                  .map(machine => MachineAssignment(machine, demand, t)) ++: machineAssignments
-            }
+        val locationAssignment =
+          if (locationValue != null) Some(locationValue.value)
+          else None
 
-            if (locationValue != null) {
-              locationAssignments = LocationAssignment(locationValue.value, demand, t) :: locationAssignments
-            }
+        var workerAssignments: List[WorkerAssignment] = List()
 
-            demandAssignments = DemandAssignment(t, demand, workerAssignments, locationAssignments, machineAssignments) :: demandAssignments
+        for (t <- slots) {
+          val workerValues = workerVariables(t)(d)
+
+          if (workerValues.nonEmpty) {
+            val workers: Array[Int] = workerValues.map(_.value)
+            val assignment = WorkerAssignment(workers, t)
+            workerAssignments = assignment :: workerAssignments
           }
         }
 
-        plannings = Planning(t, demandAssignments) :: plannings
+        demandAssignments = DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment) :: demandAssignments
       }
 
-      emitSolution(Solution(plannings))
+      emitSolution(Solution(demandAssignments))
     }
 
     // use restarts to break heavy tails phenomena
@@ -82,9 +76,9 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
 
 object Main extends App {
 
-  val search = new VillageOneSearch("data/instances/generated/instance-t=10-d=30-w=400-408.json")
+  val search = new VillageOneSearch("data/instances/problem.json")
   search.onSolutionFound { solution =>
-    JsonSerializer.serialize(solution)("results/results2.json")
+    JsonSerializer.serialize(solution)("results/problem.json")
   }
   search.solve()
 }

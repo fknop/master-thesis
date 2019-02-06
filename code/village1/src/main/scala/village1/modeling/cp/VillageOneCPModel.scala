@@ -19,8 +19,8 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   val T = problem.T
   val demands = problem.demands
   val workers = problem.workers
-  val M = problem.machines.size
-  val L = problem.locations
+  val M = problem.machines.length
+  val L = problem.locations.length
   val W = problem.workers.length
   val D = problem.demands.length
   val Demands = 0 until D
@@ -49,7 +49,7 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   applyWorkerClientIncompatibilities()
   applyRequiredSkills()
 
-  applyNameTODO()
+  //applyNameTODO()
 
 
   // Locations constraints
@@ -148,10 +148,8 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
       val demandVar = workerVariables(period)(demand)
       if (demandVar.length >= 2) {
         val permutations = Utilities.generatePermutationsOfTwo(demandVar.length)
-        for (permutation <- permutations) {
-          val (i, j) = permutation
+        for ((i, j) <- permutations) {
           add(negativeTable(Array(demandVar(i), demandVar(j)), wwIncompatibilities))
-          //          add(negativeTable(Array(demandVar(j), demandVar(i)), problem.workersIncompatibilities))
         }
       }
     }

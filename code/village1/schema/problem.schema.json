@@ -46,6 +46,25 @@
       "uniqueItems": true
     },
 
+    "machine": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "location": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
 
     "restriction": {
       "type": "object",
@@ -96,15 +115,21 @@
     },
 
     "machines": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Number of machines"
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/machine"
+      },
+      "uniqueItems": true,
+      "description": "All the machines"
     },
 
     "locations": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Number of locations"
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/location"
+      },
+      "uniqueItems": true,
+      "description": "All the locations"
     },
 
     "clients": {
@@ -146,7 +171,8 @@
           "uniqueItems": true
         }
       },
-      "uniqueItems": true
+      "uniqueItems": true,
+      "description": "List of [worker, worker] incompatibilities"
     },
 
     "workerClientIncompatibilities": {
@@ -157,7 +183,18 @@
           "type": "integer"
         }
       },
-      "uniqueItems": true
+      "uniqueItems": true,
+      "description": "List of [worker, client] incompatibilities"
+    },
+
+    "clientWorkerPreferences": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
     },
 
     "demands": {
@@ -170,24 +207,29 @@
           },
 
           "client": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The client index from the clients list declared in the root object"
           },
 
-          "machines": {
+          "machineNeeds": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/machine"
+              }
+            },
+            "description": "List of machine needs, each sublist is the possible machines for that need. One of them need to be assigned for each need"
+          },
+
+
+          "possibleLocations": {
             "type": "array",
             "items": {
               "type": "integer"
             },
-            "uniqueItems": true
-          },
-
-
-          "locations": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            },
-            "uniqueItems": true
+            "uniqueItems": true,
+            "description": "Set of possible locations"
           },
 
           "periods": {
@@ -203,7 +245,16 @@
             "type": "array",
             "items": {
               "$ref": "#/definitions/skills"
-            }
+            },
+            "description": "List of required skills. Each sublist of skill is required by only one worker in the team."
+          },
+
+          "additionalSkills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/skill"
+            },
+            "description": "List of required skills that at least one worker in the team need to have"
           }
         },
         "required": ["id", "client", "periods", "requiredWorkers"],

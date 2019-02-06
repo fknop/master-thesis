@@ -1,6 +1,6 @@
 package village1.format.json
 
-import play.api.libs.json.{JsNumber, JsObject, Json}
+import play.api.libs.json.{JsArray, JsNumber, JsObject, Json}
 import village1.data.Skill
 import village1.modeling.{Problem, Solution}
 
@@ -10,19 +10,31 @@ object JsonSerializer {
 
     val plannings = solution.plannings.reverse
     val json = Json.toJson(plannings.map { p =>
-      val timeslot = p.timeslot
 
-      val demands = p.demandAssignments.reverse.map { assignment =>
-        Json.obj(
-          "demand" -> assignment.demand.id,
-          "workers" -> assignment.workerAssignments.map(_.worker.id)
-        )
+      var demand = Json.obj(
+        "demand" -> p.demand,
+        "workerAssignments" -> p.workerAssignments.sortBy(_.timeslot).map(w => {
+
+          Json.obj(
+            "t" -> w.timeslot,
+            "workers" -> w.workers.reverse
+          )
+        })
+      )
+
+      p.machineAssignments match {
+        case Some(machines) =>
+          demand = demand + ("machineAssignments", Json.toJson(machines))
+        case None =>
       }
 
-      Json.obj(
-        "timeslot" -> p.timeslot,
-        "demands" -> demands
-      )
+      p.locationAssignment match {
+        case Some(location) =>
+          demand = demand + ("locationAssignment", JsNumber(location))
+        case None =>
+      }
+
+      demand
     })
 
     path: String => {
@@ -34,8 +46,16 @@ object JsonSerializer {
 
     val json = Json.obj(
       "T" -> problem.T,
-      "machines" -> problem.machines.size,
-      "locations" -> problem.locations,
+      "machines" -> problem.machines.map(m =>
+        Json.obj(
+          "name" -> m.name
+        )
+      ),
+      "locations" -> problem.locations.map(l =>
+        Json.obj(
+          "name" -> l.name
+        )
+      ),
       "workers" -> problem.workers.map(w =>
         Json.obj(
           "id" -> w.id,

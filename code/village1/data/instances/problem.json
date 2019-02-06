@@ -1,7 +1,7 @@
 {
   "T": 5,
-  "machines": 3,
-  "locations": 3,
+  "machines": [],
+  "locations": [],
   "workers": [
     {
       "id": 0,

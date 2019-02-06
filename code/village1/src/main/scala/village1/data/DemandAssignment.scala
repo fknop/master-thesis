@@ -2,9 +2,8 @@ package village1.data
 
 // Assignment for demands
 case class DemandAssignment(
-  timeslot: Int,
-  demand: Demand,
+  demand: Int,
   workerAssignments: Seq[WorkerAssignment],
-  locationAssignments: Seq[LocationAssignment],
-  machineAssignments: Seq[MachineAssignment]
+  machineAssignments: Option[Array[Int]] = None,
+  locationAssignment: Option[Int] = None
 )

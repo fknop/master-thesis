@@ -1,5 +1,5 @@
 package village1.modeling
 
-import village1.data.Planning
+import village1.data.{DemandAssignment}
 
-case class Solution(plannings: List[Planning])
+case class Solution(plannings: List[DemandAssignment])
