@@ -21,7 +21,7 @@ object InstanceGenerator extends App {
   }
 
   def updatePeriods(demand: Demand, periods: Set[Int]): Demand = {
-    Demand(demand.id, demand.client, periods, demand.requiredWorkers, demand.machines, demand.locations, demand.requiredSkills)
+    Demand(demand.id, demand.client, periods, demand.requiredWorkers, demand.machineNeeds, demand.possibleLocations, demand.requiredSkills)
   }
 
   def generatePeriodForDemand(demand: Demand, t: Int): Demand = {

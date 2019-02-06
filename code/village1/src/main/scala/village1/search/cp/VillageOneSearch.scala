@@ -13,18 +13,28 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
 
 
     search {
-      val flatVars = workerVariables.flatten.flatten
-      //    val flatVehiclesVars = vehicleVars.flatten.flatten
+      val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
+      val flatMachines: Array[CPIntVar] = machineVariables.flatten
+      val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
-      val variables = flatVars ++ sameWorkerViolations //++ flatVehiclesVars
-      conflictOrderingSearch(variables, variables(_).size, variables(_).min)
+      var branching = binaryFirstFail(flatWorkers)
+
+      if (flatMachines.nonEmpty) {
+        branching = branching ++ binaryFirstFail(flatMachines)
+      }
+
+      if (flatLocations.nonEmpty) {
+        branching = branching ++ binaryFirstFail(flatLocations)
+      }
+
+      /*binarySplit(sameWorkerViolations) ++ */
+
+      branching
     }
 
-    var solFound = false
     onSolution {
 
-      solFound = true
-      println("sol found")
+      println("Solution found")
 
       var demandAssignments: List[DemandAssignment] = List()
 
@@ -64,19 +74,22 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
     }
 
     // use restarts to break heavy tails phenomena
-    var restart = 0
     val t = time {
-      do {
-        start(nSols = 1, failureLimit = 5000)
-        restart += 1
-      } while (!solFound)
+      val stats = start(nSols = 100, failureLimit = 50000)
+      println(stats)
     }
   }
 }
 
 object Main extends App {
 
-  val search = new VillageOneSearch("data/instances/problem.json")
+  val folder = "data/instances"
+  val instance = s"$folder/problem.json"
+  val generatedInstances: Array[String] = Array(
+    s"$folder/generated/instance-t=10-d=30-w=400-122.json"
+  )
+
+  val search = new VillageOneSearch(instance)
   search.onSolutionFound { solution =>
     JsonSerializer.serialize(solution)("results/problem.json")
   }

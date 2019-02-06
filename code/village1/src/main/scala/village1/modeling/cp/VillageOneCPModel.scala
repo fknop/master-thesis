@@ -34,12 +34,13 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
 
 
+  val possibleMachines = precomputeMachineNeeds()
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
 
-  val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(0 until demands(d).periods.size))
-  //val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
+  //val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(0 until demands(d).periods.size))
+  val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
 
 
   // Workers constraints
@@ -55,6 +56,31 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   // Locations constraints
   applyAllDifferentLocations()
 
+  // Machine constraints
+  applyAllDifferentMachines()
+
+
+  // Precompute
+
+  /**
+    * For each machine needed, setup a list of possible machines for that need
+    */
+  def precomputeMachineNeeds (): Map[String, Set[Int]] = {
+    var map = Map[String, Set[Int]]()
+    val machines = problem.machines
+    for (d <- Demands if demands(d).machineNeeds.nonEmpty) {
+      for (m <- demands(d).machineNeeds if !map.contains(m.name)) {
+        var set = Set[Int]()
+        for (i <- machines.indices if m.name == machines(i).name) {
+          set += i
+        }
+
+        map = map.updated(m.name, set)
+      }
+    }
+
+    map
+  }
 
 
   // Methods definitions
@@ -74,17 +100,20 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
 
   def generateLocationVariables (): LocationVariables = {
     Array.tabulate(D)(d => {
-      if (demands(d).locations.isEmpty) null
+      if (demands(d).possibleLocations.isEmpty) null
       // Filter locations that might be out of range
       // TODO: throw a warning/error if location is out of range.
-      else CPIntVar(demands(d).locations.filter(l => 0 <= l && l < L))
+      else CPIntVar(demands(d).possibleLocations.filter(l => 0 <= l && l < L))
     })
   }
 
   def generateMachineVariables (): MachineVariables = {
     Array.tabulate(D)(d => {
       val demand = demands(d)
-      Array.tabulate(demand.machines.size)(_ => CPIntVar(0, M - 1))
+      Array.tabulate(demand.machineNeeds.length)(m => {
+        val possibleValues = possibleMachines(demand.machineNeeds(m).name)
+        CPIntVar(possibleValues)
+      })
     })
   }
 
@@ -118,9 +147,14 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
     **/
   }
 
+
   def applyAllDifferentMachines(): Unit = {
     for (d <- Demands) {
-      // TODO
+      val overlappingDemands = overlappingSets(d)
+      val machines = (overlappingDemands + d).flatMap(machineVariables(_))
+      if (machines.nonEmpty) {
+        add(allDifferent(machines))
+      }
     }
   }
 
@@ -207,16 +241,16 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
     */
   def applyNameTODO (): Unit = {
 
-    maximize(sum(sameWorkerViolations))
-//    minimize(sum(sameWorkerViolations))
+//    maximize(sum(sameWorkerViolations))
+    minimize(sum(sameWorkerViolations))
 
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
         if (workersForDemand.length > 1) {
-          add(softAllDifferent(workersForDemand, sameWorkerViolations(d)), CPPropagStrength.Strong)
-          //add(new AtMostNValue(workersForDemand, sameWorkerViolations(d)))
+          //add(softAllDifferent(workersForDemand, sameWorkerViolations(d)), CPPropagStrength.Strong)
+          add(new AtMostNValue(workersForDemand, sameWorkerViolations(d)))
         }
       }
     }

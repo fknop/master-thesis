@@ -2,13 +2,13 @@ package village1.data
 
 
 case class Demand(
-  id: Int,
-  client: Int,
-  periods: Set[Int],
-  requiredWorkers: Int,
-  machines: Set[Int] = Set(),
-  locations: Set[Int] = Set(),
-  requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq()
+   id: Int,
+   client: Int,
+   periods: Set[Int],
+   requiredWorkers: Int,
+   machineNeeds: Array[Machine] = Array(),
+   possibleLocations: Set[Int] = Set(),
+   requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq()
 ) {
 
 
