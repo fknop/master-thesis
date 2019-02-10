@@ -8,7 +8,8 @@ case class Demand(
    requiredWorkers: Int,
    machineNeeds: Array[Machine] = Array(),
    possibleLocations: Set[Int] = Set(),
-   requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq()
+   requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq(),
+   additionalSkills: IndexedSeq[Skill] = IndexedSeq()
 ) {
 
 

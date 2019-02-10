@@ -3,11 +3,11 @@ package village1.modeling.cp
 import oscar.cp._
 import oscar.cp.constraints.AtMostNValue
 import oscar.cp.core.CPPropagStrength
-import village1.modeling.Problem
+import village1.modeling.{Problem, UnsolvableException}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(problem: Problem) extends CPModel {
+class VillageOneCPModel(problem: Problem) extends CPPrecomputedData(problem) with CPModel {
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
 
@@ -16,25 +16,13 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   type MachineVariables = Array[Array[CPIntVar]]
   type LocationVariables = Array[CPIntVar]
 
-  val T = problem.T
-  val demands = problem.demands
-  val workers = problem.workers
-  val M = problem.machines.length
-  val L = problem.locations.length
-  val W = problem.workers.length
-  val D = problem.demands.length
-  val Demands = 0 until D
-  val Workers = 0 until W
-  val Periods = 0 until T
-  val Machines = 0 until M
-  val Locations = 0 until L
 
   val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
   private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
 
 
-  val possibleMachines = precomputeMachineNeeds()
+
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
@@ -44,11 +32,12 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
 
 
   // Workers constraints
-  applyAvailableWorkers()
+
   applyAllDifferentWorkers()
   applyWorkerWorkerIncompatibilities()
   applyWorkerClientIncompatibilities()
   applyRequiredSkills()
+  applyAdditionalSkills()
 
   //applyNameTODO()
 
@@ -60,28 +49,6 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   applyAllDifferentMachines()
 
 
-  // Precompute
-
-  /**
-    * For each machine needed, setup a list of possible machines for that need
-    */
-  def precomputeMachineNeeds (): Map[String, Set[Int]] = {
-    var map = Map[String, Set[Int]]()
-    val machines = problem.machines
-    for (d <- Demands if demands(d).machineNeeds.nonEmpty) {
-      for (m <- demands(d).machineNeeds if !map.contains(m.name)) {
-        var set = Set[Int]()
-        for (i <- machines.indices if m.name == machines(i).name) {
-          set += i
-        }
-
-        map = map.updated(m.name, set)
-      }
-    }
-
-    map
-  }
-
 
   // Methods definitions
 
@@ -89,8 +56,10 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   def generateWorkerVariables (): WorkerVariables = {
     Array.tabulate(T, D)((t, d) => {
       val demand = demands(d)
+
       if (demand.hasPeriod(t)) {
-        Array.tabulate(demand.workers)(_ => CPIntVar(0, W - 1))
+        val possibleWorkers: Set[Int] = availableWorkers(d)(t)
+        Array.tabulate(demand.requiredWorkers)(_ => CPIntVar(possibleWorkers))
       }
       else {
         EMPTY_INT_VAR_ARRAY
@@ -159,21 +128,6 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
   }
 
 
-  // All workers must work in a time in which they are available
-  def applyAvailableWorkers (): Unit = {
-    for (worker <- Workers; period <- Periods) {
-      val isAvailable = workers(worker).available(period)
-      if (!isAvailable) {
-        for (demand <- Demands) {
-          for (i <- workerVariables(period)(demand).indices) {
-            val workerVar = workerVariables(period)(demand)(i)
-            add(workerVar !== worker)
-          }
-        }
-      }
-    }
-  }
-
   def applyWorkerWorkerIncompatibilities(): Unit = {
     val wwIncompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
 
@@ -213,6 +167,8 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
 
   // Demands should have workers with required skills
   def applyRequiredSkills (): Unit = {
+
+    val allWorkers = workers.indices.toSet
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.workers) {
@@ -220,15 +176,58 @@ class VillageOneCPModel(problem: Problem) extends CPModel {
         val skills = requirements.skills
 
         if (skills.nonEmpty) {
-          for (worker <- workers.indices) {
-            // If worker doesn't have required skills
-            if (!workers(worker).satisfySkills(skills)) {
-              for (t <- Periods if demand.hasPeriod(t)) {
-                add(workerVariables(t)(d)(w) !== worker)
-              }
-            }
+
+          // Workers that possess all the skills required
+          // TODO: add this as precompute step
+          val possibleWorkers: Set[Int] = skills.foldLeft(Set[Int]()) {
+            (acc, skill) => acc.intersect(workersWithSkills(skill.name))
+          }.filter(w => workers(w).satisfySkills(skills))
+
+          val impossibleWorkers = allWorkers.diff(possibleWorkers)
+          for (worker <- impossibleWorkers; t <- demand.periods) {
+            add(workerVariables(t)(d)(w) !== worker)
           }
         }
+      }
+    }
+  }
+
+  def applyAdditionalSkills (): Unit = {
+    for (d <- Demands) {
+      val demand = demands(d)
+      for (t <- demand.periods) {
+        val workersForDemand = workerVariables(t)(d)
+
+        var valueOccurrences = Array[(Int, CPIntVar)]()
+        for (skill <- demand.additionalSkills) {
+          val name = skill.name
+
+          // TODO: remove values with precomputed values from possible workers for a demand
+          val possibleWorkers =
+            workersWithSkills(name)
+              .intersect(availableWorkers(d)(t))
+              .filter(w => workers(w).satisfySkill(skill))
+
+          if (possibleWorkers.isEmpty) {
+            throw UnsolvableException(s"No workers with skill $name")
+          }
+
+          val valuesOccurrencesForSkill = possibleWorkers.map(w => (w, CPBoolVar()))
+          val occurrences = valuesOccurrencesForSkill.map(_._2)
+
+          add(
+            sum(occurrences) >= 1
+          )
+
+          valueOccurrences = valueOccurrences ++ valuesOccurrencesForSkill
+        }
+
+        if (valueOccurrences.nonEmpty) {
+          add(
+            gcc(workersForDemand, valueOccurrences)
+          )
+        }
+
       }
     }
   }
