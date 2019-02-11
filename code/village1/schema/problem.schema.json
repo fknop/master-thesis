@@ -20,23 +20,29 @@
     },
 
     "skill": {
-      "type": "object",
-      "properties": {
-        "name": {
+      "anyOf": [
+        {
           "type": "string"
         },
-        "type": {
-          "$ref": "#/definitions/parameterType"
-        },
-        "value": {
-          "type": ["number", "integer"],
-          "description": "Only used if type is None"
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "$ref": "#/definitions/parameterType"
+            },
+            "value": {
+              "type": ["number", "integer"],
+              "description": "Only used if type is None"
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false
         }
-      },
-      "required": ["name", "type"],
-      "additionalProperties": false
+      ]
     },
-
 
     "skills": {
       "type": "array",

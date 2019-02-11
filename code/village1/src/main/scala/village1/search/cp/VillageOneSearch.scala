@@ -70,7 +70,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
         demandAssignments = DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment) :: demandAssignments
       }
 
-      emitSolution(Solution(demandAssignments))
+      emitSolution(Solution(problem, demandAssignments))
     }
 
     // use restarts to break heavy tails phenomena

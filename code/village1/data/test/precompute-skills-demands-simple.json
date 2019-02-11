@@ -1,0 +1,74 @@
+{
+  "T": 2,
+  "machines": [],
+  "locations": [],
+  "workers": [
+    {
+      "id": 0,
+      "name": "Worker 0",
+      "availabilities": [0],
+      "skills": ["A", "B"]
+    },
+    {
+      "id": 1,
+      "name": "Worker 1",
+      "availabilities": [1],
+      "skills": ["A", "B"]
+    },
+    {
+      "id": 2,
+      "name": "Worker 2",
+      "availabilities": [0],
+      "skills": ["C", "D"]
+    },
+    {
+      "id": 3,
+      "name": "Worker 3",
+      "availabilities": [1],
+      "skills": ["C", "D"]
+    },
+    {
+      "id": 4,
+      "name": "Worker 3",
+      "availabilities": [0],
+      "skills": ["C", "D"]
+    },
+    {
+      "id": 5,
+      "name": "Worker 3",
+      "availabilities": [1],
+      "skills": ["C", "A"]
+    }
+  ],
+  "clients": [
+    {
+      "name": "Client 0"
+    },
+    {
+      "name": "Client 1"
+    }
+  ],
+  "demands": [
+    {
+      "id": 0,
+      "client": 1,
+      "periods": [0],
+      "requiredWorkers": 2,
+      "requiredSkills": [
+        ["A", "B"],
+        ["C", "D"]
+      ]
+    },
+    {
+      "id": 1,
+      "client": 2,
+      "periods": [1],
+      "requiredWorkers": 2,
+      "requiredSkills": [
+        ["C", "A"]
+      ]
+    }
+  ]
+}
+
+

@@ -2,7 +2,6 @@ package village1.modeling.cp
 
 import village1.data.{Demand, Worker}
 import village1.modeling.Problem
-import village1.util.Utilities
 
 /**
   * Common precomputed data for CP model(s)
@@ -23,11 +22,12 @@ class CPPrecomputedData(problem: Problem) {
   val Machines: Range = 0 until M
   val Locations: Range = 0 until L
 
+  val allWorkers: Set[Int] = workers.indices.toSet
   val workersAvailabilities: Map[Int, Set[Int]] = precomputeWorkersAvailabilities()
   val availableWorkers: Map[Int, Map[Int, Set[Int]]] = precomputeAvailableWorkers()
   val workersWithSkills: Map[String, Set[Int]] = precomputeWorkersWithSkills()
 
-
+  val possibleWorkersForDemands = precomputePossibleWorkersForDemand()
 
   val possibleMachines: Map[String, Set[Int]] = precomputeMachineNeeds()
 
@@ -76,32 +76,54 @@ class CPPrecomputedData(problem: Problem) {
   }
 
   /**
-  private[this] def precomputePossibleWorkersForDemand (): Map[Int, Map[Int, Set[Int]]] = {
-    var map = Map[Int, Map[Int, Set[Int]]]()
+    * Returns a map with:
+    *   key: demand index
+    *   value: map with:
+    *     key: time period
+    *     value: array of Set[Int] (array of sets of workers)
+    */
+  private[this] def precomputePossibleWorkersForDemand (): Map[Int, Map[Int, Array[Set[Int]]]] = {
+    Demands.foldLeft(Map[Int, Map[Int, Array[Set[Int]]]]()) { (precomputed, d) =>
 
-    for (d <- Demands) {
       val demand = demands(d)
-      for (w <- 0 until demand.requiredWorkers) {
-        val requirements = demand.worker(w)
+
+      val initialPossibleWorkers = Array.tabulate(demand.requiredWorkers) { position =>
+        val requirements = demand.worker(position)
         val skills = requirements.skills
 
         if (skills.nonEmpty) {
-
           // Possible workers that fit the skills of worker w
-          val possibleWorkers: Set[Int] = skills.foldLeft(Set[Int]()) {
+          skills.foldLeft(allWorkers) {
             (acc, skill) => acc.intersect(workersWithSkills(skill.name))
           }.filter(w => workers(w).satisfySkills(skills))
-
-          // For each time period, compute intersection of available workers and workers with required skills
-          Periods.foldLeft(Map[Int, Set[Int]]()) {
-            (acc, t) => acc.updated(t, availableWorkers(d)(t).intersect(possibleWorkers))
-          }
-
+        }
+        else {
+          null
         }
       }
+
+
+      precomputed.updated(
+        d,
+        demand.periods.foldLeft(Map[Int, Array[Set[Int]]]()) {
+          (acc, t) => {
+            val positions = Array.tabulate(demand.requiredWorkers) { i =>
+              val possibleWorkers =
+                if (initialPossibleWorkers(i) == null)
+                  availableWorkers(d)(t)
+                else
+                  initialPossibleWorkers(i).intersect(availableWorkers(d)(t))
+
+              possibleWorkers
+            }
+
+            acc.updated(t, positions)
+          }
+        }
+      )
     }
   }
-    **/
+
 
   private[this] def precomputeMachineNeeds (): Map[String, Set[Int]] = {
     var map = Map[String, Set[Int]]()

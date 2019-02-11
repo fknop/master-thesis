@@ -7,7 +7,7 @@ import village1.modeling.{Problem, UnsolvableException}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(problem: Problem) extends CPPrecomputedData(problem) with CPModel {
+class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem) with CPModel {
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
 
@@ -168,7 +168,6 @@ class VillageOneCPModel(problem: Problem) extends CPPrecomputedData(problem) wit
   // Demands should have workers with required skills
   def applyRequiredSkills (): Unit = {
 
-    val allWorkers = workers.indices.toSet
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.workers) {

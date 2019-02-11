@@ -30,7 +30,7 @@ case class Worker(
 
 object Worker {
   def addAvailability(worker: Worker, t: Int): Worker = {
-    Worker(worker.id, worker.name, worker.availabilities + t, worker.skills, worker.restrictions)
+    worker.copy(availabilities = worker.availabilities + t)
   }
 }
 

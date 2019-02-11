@@ -2,7 +2,6 @@ package village1.format.json
 
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import com.eclipsesource.schema.drafts._
-
 import play.api.libs.json._
 import village1.data._
 import village1.modeling.Problem
@@ -12,43 +11,55 @@ object JsonParser {
 
   final val PROBLEM_SCHEMA_PATH = "schema/problem.schema.json"
 
-  private def parseClient(value: JsValue): Client = {
-   // val client = (value \ "client").as[JsValue]
 
+  /**
+    * Parse client value
+    * @param value { "name": "value" }
+    * @return the client
+    */
+  private def parseClient(value: JsValue): Client = {
     val name = (value \ "name").as[String]
     Client(name)
   }
 
+  /**
+    * Parse clients
+    * @param value { "clients": [client1, client2] }
+    * @return list of clients
+    */
   private def parseClients (value: JsValue): Array[Client] = {
     val clients = (value \ "clients").as[JsArray]
     clients.value.map(parseClient).toArray[Client]
   }
 
   private def parseSkill(value: JsValue): Skill = {
+    value match {
+      case s: JsString => Skill(s.as[String])
+      case o: JsObject =>
+        val parameterType = (o \ "type").toOption match {
+          case Some(t) => ParameterType.from(t.as[String])
+          case None => ParameterType.None
+        }
 
-    val parameterType = (value \ "type").toOption match {
-      case Some(t) => ParameterType.from(t.as[String])
-      case None => ParameterType.None
-    }
+        val name = o("name").as[String]
 
-    val name = value("name").as[String]
-
-    if (parameterType == ParameterType.None) {
-      Skill(
-        name,
-        parameterType
-      )
-    }
-    else {
-      Skill(
-        name,
-        parameterType,
-        value = value("value").as[Double]
-      )
+        if (parameterType == ParameterType.None) {
+          Skill(
+            name,
+            parameterType
+          )
+        }
+        else {
+          Skill(
+            name,
+            parameterType,
+            value = o("value").as[Double]
+          )
+        }
     }
   }
 
-  private def parseSkills(array: JsArray): IndexedSeq[Skill] = {
+  private def parseDemandSkills(array: JsArray): IndexedSeq[Skill] = {
     array.value.map(parseSkill)
   }
 
@@ -57,7 +68,7 @@ object JsonParser {
     val skillsJson = (value \ "requiredSkills").toOption
 
     val skills = skillsJson match {
-      case Some(jsValue) => jsValue.as[IndexedSeq[JsArray]].map(parseSkills)
+      case Some(jsValue) => jsValue.as[IndexedSeq[JsArray]].map(parseDemandSkills)
       case None => IndexedSeq[IndexedSeq[Skill]]()
     }
 
@@ -76,11 +87,34 @@ object JsonParser {
   }
 
 
+  private def parseWorkersSkills(values: Array[JsValue]): Map[String, Skill] = {
+
+    var map = Map[String, Skill]()
+
+    for (v <- values) {
+      val skill = parseSkill(v)
+      map = map.updated(skill.name, skill)
+    }
+
+    map
+  }
+
+  // value: a value that possibly contains an array "skills"
+  private def parseWorkersSkills(value: JsValue): Map[String, Skill] = {
+    val json = (value \ "skills").toOption
+
+    json match {
+      case Some(s) => parseWorkersSkills(s.as[Array[JsValue]])
+      case None => Map[String, Skill]()
+    }
+  }
+
   private def parseWorker(value: JsValue): Worker = {
     Worker(
       id = value("id").as[Int],
       name = (value \ "name").getOrElse(JsString("Anonymous")).as[String],
-      availabilities = Set(value("availabilities").as[Array[Int]]: _*)
+      availabilities = Set(value("availabilities").as[Array[Int]]: _*),
+      skills = parseWorkersSkills(value)
     )
   }
 

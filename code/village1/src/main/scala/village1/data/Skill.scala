@@ -2,7 +2,7 @@ package village1.data
 
 case class Skill(
   name: String,
-  parameterType: ParameterType,
+  parameterType: ParameterType = ParameterType.None,
   value: Double = .0
 ) {
 
