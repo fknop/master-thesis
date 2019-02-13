@@ -91,7 +91,7 @@ class CPPrecomputedDataSpec extends FunSpec with Matchers {
 
       val d2t4 = d2(4)
       d2t4 should have size 1
-      d2t4 should contain only (3)
+      d2t4 should contain only 3
     }
   }
 

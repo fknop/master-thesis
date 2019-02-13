@@ -1,5 +1,6 @@
 package village1.search.cp
 
+import oscar.algo.search.SearchStatistics
 import oscar.util.time
 import oscar.cp._
 import village1.data._
@@ -9,8 +10,7 @@ import village1.modeling.cp.VillageOneCPModel
 
 class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(path)) with Search {
 
-  def solve(): Unit = {
-
+  def solve(): SearchStatistics = {
 
     search {
       val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
@@ -74,10 +74,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
     }
 
     // use restarts to break heavy tails phenomena
-    val t = time {
-      val stats = start(nSols = 100, failureLimit = 50000)
-      println(stats)
-    }
+    start(nSols = 1, failureLimit = 50000)
   }
 }
 
@@ -85,13 +82,16 @@ object Main extends App {
 
   val folder = "data/instances"
   val instance = s"$folder/problem.json"
+  val generatedFolder = s"$folder/generated/"
   val generatedInstances: Array[String] = Array(
-    s"$folder/generated/instance-t=10-d=30-w=400-122.json"
-  )
+    "instance-t=10-d=30-w=400-350.json",
+    "instance-t=7-d=5-w=20-985.json"
+  ).map(f => s"$generatedFolder/$f")
 
-  val search = new VillageOneSearch(instance)
-  search.onSolutionFound { solution =>
-    JsonSerializer.serialize(solution)("results/problem.json")
-  }
+
+  val search = new VillageOneSearch(generatedInstances(1))
   search.solve()
+  if (search.lastSolution != null) {
+    JsonSerializer.serialize(search.lastSolution)("results/results3.json")
+  }
 }

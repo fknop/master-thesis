@@ -36,7 +36,7 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
   applyAllDifferentWorkers()
   applyWorkerWorkerIncompatibilities()
   applyWorkerClientIncompatibilities()
-  applyRequiredSkills()
+  //applyRequiredSkills()
   applyAdditionalSkills()
 
   //applyNameTODO()
@@ -202,10 +202,7 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
           val name = skill.name
 
           // TODO: remove values with precomputed values from possible workers for a demand
-          val possibleWorkers =
-            workersWithSkills(name)
-              .intersect(availableWorkers(d)(t))
-              .filter(w => workers(w).satisfySkill(skill))
+          val possibleWorkers = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b))
 
           if (possibleWorkers.isEmpty) {
             throw UnsolvableException(s"No workers with skill $name")

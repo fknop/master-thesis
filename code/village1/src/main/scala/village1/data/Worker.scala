@@ -28,9 +28,3 @@ case class Worker(
   def available (t: Int): Boolean = availabilities.contains(t)
 }
 
-object Worker {
-  def addAvailability(worker: Worker, t: Int): Worker = {
-    worker.copy(availabilities = worker.availabilities + t)
-  }
-}
-

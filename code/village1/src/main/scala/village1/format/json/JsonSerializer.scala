@@ -83,7 +83,15 @@ object JsonSerializer {
           "id" -> d.id,
           "client" -> d.client,
           "periods" -> d.periods.toSeq,
-          "requiredWorkers" -> d.requiredWorkers
+          "requiredWorkers" -> d.requiredWorkers,
+          "requiredSkills" -> d.requiredSkills.map {
+            skills => skills.map(
+              skill => Json.obj(
+                "name" -> skill.name,
+                "type" -> skill.parameterType.toString
+              )
+            )
+          }
         )
       }
 

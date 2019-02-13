@@ -9,6 +9,7 @@
 thesis/**/*.pdf
 code/**/**/target
 code/village1/results
+code/village1/data/instances/generated
 
 notes
 

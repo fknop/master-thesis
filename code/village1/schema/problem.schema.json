@@ -16,7 +16,7 @@
 
     "parameterType": {
       "type": "string",
-      "enum": ["MIN", "MAX", "NONE"]
+      "enum": ["Min", "Max", "None"]
     },
 
     "skill": {
