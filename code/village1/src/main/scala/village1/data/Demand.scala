@@ -8,19 +8,19 @@ case class Demand(
    requiredWorkers: Int,
    machineNeeds: Array[Machine] = Array(),
    possibleLocations: Set[Int] = Set(),
-   requiredSkills: IndexedSeq[IndexedSeq[Skill]] = IndexedSeq(),
-   additionalSkills: IndexedSeq[Skill] = IndexedSeq()
+   requiredSkills: Array[Array[Skill]] = Array(),
+   additionalSkills: Array[Skill] = Array()
 ) {
 
 
   val workers: Int = requiredWorkers
 
-  val requirements: IndexedSeq[WorkerRequirement] = (0 until workers).map(i => {
+  val requirements: Array[WorkerRequirement] = Array.tabulate(workers)(i => {
     if (i < requiredSkills.length) {
       WorkerRequirement(skills = requiredSkills(i))
     }
     else {
-      WorkerRequirement(skills = IndexedSeq[Skill]())
+      WorkerRequirement(skills = Array[Skill]())
     }
   })
 

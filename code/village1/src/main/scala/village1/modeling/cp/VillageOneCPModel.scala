@@ -2,7 +2,6 @@ package village1.modeling.cp
 
 import oscar.cp._
 import oscar.cp.constraints.AtMostNValue
-import oscar.cp.core.CPPropagStrength
 import village1.modeling.{Problem, UnsolvableException}
 import village1.util.Utilities
 
@@ -58,8 +57,7 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
       val demand = demands(d)
 
       if (demand.hasPeriod(t)) {
-        val possibleWorkers: Set[Int] = availableWorkers(d)(t)
-        Array.tabulate(demand.requiredWorkers)(_ => CPIntVar(possibleWorkers))
+        Array.tabulate(demand.requiredWorkers)(i => CPIntVar(possibleWorkersForDemands(d)(t)(i)))
       }
       else {
         EMPTY_INT_VAR_ARRAY
@@ -191,6 +189,13 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
     }
   }
 
+  /**
+    * Apply a constraint on additional skills that any workers in the team
+    * can have, the same worker can have multiple additional skills, as long as one
+    * worker in the team have the skill, the constraint is satisfied
+    *
+    * For now, a gcc constraint is used. But a custom constraint could also be used.
+    */
   def applyAdditionalSkills (): Unit = {
     for (d <- Demands) {
       val demand = demands(d)
@@ -198,10 +203,12 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
         val workersForDemand = workerVariables(t)(d)
 
         var valueOccurrences = Array[(Int, CPIntVar)]()
+
+
         for (skill <- demand.additionalSkills) {
           val name = skill.name
 
-          // TODO: remove values with precomputed values from possible workers for a demand
+          // Take only all the possible workers for that demand
           val possibleWorkers = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b))
 
           if (possibleWorkers.isEmpty) {
@@ -211,11 +218,10 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
           val valuesOccurrencesForSkill = possibleWorkers.map(w => (w, CPBoolVar()))
           val occurrences = valuesOccurrencesForSkill.map(_._2)
 
-          add(
-            sum(occurrences) >= 1
-          )
+          // At least one worker has the skill
+          add(sum(occurrences) >= 1)
 
-          valueOccurrences = valueOccurrences ++ valuesOccurrencesForSkill
+          valueOccurrences ++= valuesOccurrencesForSkill
         }
 
         if (valueOccurrences.nonEmpty) {

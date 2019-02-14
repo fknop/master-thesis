@@ -8,7 +8,7 @@ object JsonSerializer {
 
   def serialize (solution: Solution): String => Unit = {
 
-    val plannings = solution.plannings.reverse
+    val plannings = solution.plannings
     val json = Json.toJson(plannings.map { p =>
 
       var demand = Json.obj(
@@ -17,7 +17,7 @@ object JsonSerializer {
 
           Json.obj(
             "t" -> w.timeslot,
-            "workers" -> w.workers.reverse
+            "workers" -> w.workers
           )
         })
       )
@@ -58,7 +58,6 @@ object JsonSerializer {
       ),
       "workers" -> problem.workers.map(w =>
         Json.obj(
-          "id" -> w.id,
           "name" -> w.name,
           "availabilities" -> w.availabilities,
           "skills" -> w.skills.foldLeft(List[JsObject]()) {
@@ -80,7 +79,6 @@ object JsonSerializer {
       },
       "demands" -> problem.demands.map { d =>
         Json.obj(
-          "id" -> d.id,
           "client" -> d.client,
           "periods" -> d.periods.toSeq,
           "requiredWorkers" -> d.requiredWorkers,

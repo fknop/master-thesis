@@ -31,12 +31,12 @@ object InstanceGenerator extends App {
 
     for (i <- 0 until n) {
       val requiredWorkers = rand(1, maxWorkers)
-      var requiredSkills = IndexedSeq[IndexedSeq[Skill]]()
+      var requiredSkills = Array[Array[Skill]]()
 
       for (_ <- 0 until requiredWorkers) {
         if (isTrue(skillProbability)) {
           val skill = takeSkill(skills)
-          requiredSkills :+= IndexedSeq(skill)
+          requiredSkills :+= Array(skill)
         }
       }
 

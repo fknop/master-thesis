@@ -59,21 +59,21 @@ object JsonParser {
     }
   }
 
-  private def parseDemandSkills(array: JsArray): IndexedSeq[Skill] = {
-    array.value.map(parseSkill)
+  private def parseDemandSkills(array: JsArray): Array[Skill] = {
+    array.value.map(parseSkill).toArray
   }
 
-  private def parseDemand(value: JsValue): Demand = {
+  private def parseDemand(value: JsValue, index: Int): Demand = {
 
     val skillsJson = (value \ "requiredSkills").toOption
 
     val skills = skillsJson match {
-      case Some(jsValue) => jsValue.as[IndexedSeq[JsArray]].map(parseDemandSkills)
-      case None => IndexedSeq[IndexedSeq[Skill]]()
+      case Some(jsValue) => jsValue.as[Array[JsArray]].map(parseDemandSkills)
+      case None => Array[Array[Skill]]()
     }
 
     Demand(
-      id = value("id").as[Int],
+      id = index,
       client = value("client").as[Int],
       periods = Set(value("periods").as[Array[Int]]: _*),
       requiredWorkers = value("requiredWorkers").as[Int],
@@ -83,7 +83,7 @@ object JsonParser {
 
   private def parseDemands(json: JsValue): Array[Demand] = {
     val demands = json("demands").as[Array[JsValue]]
-    demands.map(parseDemand)
+    demands.zipWithIndex.map { case(v, i) => parseDemand(v, i) }
   }
 
 
@@ -109,9 +109,9 @@ object JsonParser {
     }
   }
 
-  private def parseWorker(value: JsValue): Worker = {
+  private def parseWorker(value: JsValue, index: Int): Worker = {
     Worker(
-      id = value("id").as[Int],
+      id = index,
       name = (value \ "name").getOrElse(JsString("Anonymous")).as[String],
       availabilities = Set(value("availabilities").as[Array[Int]]: _*),
       skills = parseWorkersSkills(value)
@@ -120,7 +120,7 @@ object JsonParser {
 
   private def parseWorkers(json: JsValue): Array[Worker] = {
     val workers = json("workers").as[Array[JsValue]]
-    workers.map(parseWorker)
+    workers.zipWithIndex.map { case(v, i) => parseWorker(v, i) }
   }
 
   private def parseT(json: JsValue)= json("T").as[Int]

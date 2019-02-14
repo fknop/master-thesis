@@ -150,9 +150,6 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "name": {
             "type": "string"
           },
@@ -163,7 +160,7 @@
             "$ref": "#/definitions/periods"
           }
         },
-        "required": ["id", "availabilities", "name"],
+        "required": ["availabilities", "name"],
         "additionalProperties": false
       }
     },
@@ -208,10 +205,6 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
-          },
-
           "client": {
             "type": "integer",
             "description": "The client index from the clients list declared in the root object"
@@ -263,7 +256,7 @@
             "description": "List of required skills that at least one worker in the team need to have"
           }
         },
-        "required": ["id", "client", "periods", "requiredWorkers"],
+        "required": ["client", "periods", "requiredWorkers"],
         "additionalProperties": false
       }
     }

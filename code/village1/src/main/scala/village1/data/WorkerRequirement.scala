@@ -1,6 +1,6 @@
 package village1.data
 
 case class WorkerRequirement(
-  skills: IndexedSeq[Skill] = IndexedSeq(),
-  restrictions: IndexedSeq[Restriction] = IndexedSeq()
+  skills: Array[Skill] = Array(),
+  restrictions: Array[Restriction] = Array()
 )

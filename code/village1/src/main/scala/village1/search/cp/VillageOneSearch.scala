@@ -36,7 +36,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
 
       println("Solution found")
 
-      var demandAssignments: List[DemandAssignment] = List()
+      var demandAssignments: Array[DemandAssignment] = Array()
 
       for (d <- Demands) {
         val demand = demands(d)
@@ -55,7 +55,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
           if (locationValue != null) Some(locationValue.value)
           else None
 
-        var workerAssignments: List[WorkerAssignment] = List()
+        var workerAssignments: Array[WorkerAssignment] = Array()
 
         for (t <- slots) {
           val workerValues = workerVariables(t)(d)
@@ -63,11 +63,11 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
           if (workerValues.nonEmpty) {
             val workers: Array[Int] = workerValues.map(_.value)
             val assignment = WorkerAssignment(workers, t)
-            workerAssignments = assignment :: workerAssignments
+            workerAssignments :+= assignment
           }
         }
 
-        demandAssignments = DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment) :: demandAssignments
+        demandAssignments :+= DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment)
       }
 
       emitSolution(Solution(problem, demandAssignments))
@@ -93,5 +93,7 @@ object Main extends App {
   search.solve()
   if (search.lastSolution != null) {
     JsonSerializer.serialize(search.lastSolution)("results/results3.json")
+    println(search.lastSolution.valid())
   }
+
 }
