@@ -1,6 +1,7 @@
 package village1.modeling.mip
 
 import gurobi._
+import village1.data.{DemandAssignment, Worker, WorkerAssignment}
 import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 
@@ -74,10 +75,33 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
   // Only call this once model is optimized
   def createSolution (variables: WorkerVariables): Unit = {
-    for (t <- 0 until T; d <- Demands; w <- Workers) {
-      val variable = variables(t)(d)(w)
-      println(variable.get(GRB.StringAttr.VarName) + " = " + variable.get(GRB.DoubleAttr.X))
+
+    var demandAssignments: Array[DemandAssignment] = Array()
+
+    for (d <- Demands) {
+      val demand = demands(d)
+      var workerAssignments: Array[WorkerAssignment] = Array()
+
+      for (t <- demand.periods) {
+        var workers = Array[Int]()
+
+        for (w <- Workers) {
+          val variable = variables(t)(d)(w)
+          val value = variable.get(GRB.DoubleAttr.X)
+          if (value == 1.0) {
+            workers :+= w
+          }
+        }
+
+        workerAssignments :+= WorkerAssignment(workers.toArray, t)
+      }
+
+      demandAssignments :+= DemandAssignment(d, workerAssignments, None, None)
     }
+
+
+    Solution(problem, demandAssignments)
+
   }
 
 
