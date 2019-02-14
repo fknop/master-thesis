@@ -150,6 +150,9 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer"
+          },
           "name": {
             "type": "string"
           },
@@ -205,6 +208,10 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer"
+          },
+
           "client": {
             "type": "integer",
             "description": "The client index from the clients list declared in the root object"

@@ -4,25 +4,21 @@
   "locations": [],
   "workers": [
     {
-      "id": 0,
       "name": "Worker 0",
       "availabilities": [0, 1, 2],
       "skills": []
     },
     {
-      "id": 1,
       "name": "Worker 1",
       "availabilities": [0, 1, 2],
       "skills": []
     },
     {
-      "id": 2,
       "name": "Worker 2",
       "availabilities": [1, 2, 3],
       "skills": []
     },
     {
-      "id": 3,
       "name": "Worker 3",
       "availabilities": [3, 4, 0],
       "skills": []
@@ -44,19 +40,16 @@
   ],
   "demands": [
     {
-      "id": 0,
       "client": 1,
       "periods": [0, 1, 2],
       "requiredWorkers": 2
     },
     {
-      "id": 1,
       "client": 2,
       "periods": [1, 2, 3],
       "requiredWorkers": 1
     },
     {
-      "id": 2,
       "client": 2,
       "periods": [0, 3, 4],
       "requiredWorkers": 1

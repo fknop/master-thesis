@@ -63,6 +63,14 @@ object JsonParser {
     array.value.map(parseSkill).toArray
   }
 
+  private def parseAdditionalSkills(value: JsValue): Array[Skill] = {
+    val skills = (value \ "additionalSkills").toOption
+    skills match {
+      case Some(s) => s.as[Array[JsValue]].map(parseSkill)
+      case None => Array()
+    }
+  }
+
   private def parseDemand(value: JsValue, index: Int): Demand = {
 
     val skillsJson = (value \ "requiredSkills").toOption
@@ -77,7 +85,8 @@ object JsonParser {
       client = value("client").as[Int],
       periods = Set(value("periods").as[Array[Int]]: _*),
       requiredWorkers = value("requiredWorkers").as[Int],
-      requiredSkills = skills
+      requiredSkills = skills,
+      additionalSkills = parseAdditionalSkills(value)
     )
   }
 

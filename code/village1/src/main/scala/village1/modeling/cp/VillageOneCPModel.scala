@@ -2,11 +2,11 @@ package village1.modeling.cp
 
 import oscar.cp._
 import oscar.cp.constraints.AtMostNValue
-import village1.modeling.{Problem, UnsolvableException}
+import village1.modeling.{Problem, VillageOneModel}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem) with CPModel {
+class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) with CPModel {
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
 
@@ -202,34 +202,23 @@ class VillageOneCPModel(val problem: Problem) extends CPPrecomputedData(problem)
       for (t <- demand.periods) {
         val workersForDemand = workerVariables(t)(d)
 
-        var valueOccurrences = Array[(Int, CPIntVar)]()
-
-
         for (skill <- demand.additionalSkills) {
           val name = skill.name
 
           // Take only all the possible workers for that demand
-          val possibleWorkers = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b))
+          val possibleWorkers = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b)).intersect(workersWithSkills(name))
 
           if (possibleWorkers.isEmpty) {
-            throw UnsolvableException(s"No workers with skill $name")
+            throw new NoSolutionException(s"No workers with skill $name")
           }
 
-          val valuesOccurrencesForSkill = possibleWorkers.map(w => (w, CPBoolVar()))
-          val occurrences = valuesOccurrencesForSkill.map(_._2)
+          val valueOccurrences = possibleWorkers.map(w => (w, CPBoolVar()))
+          val occurrences = valueOccurrences.map(_._2)
 
           // At least one worker has the skill
           add(sum(occurrences) >= 1)
-
-          valueOccurrences ++= valuesOccurrencesForSkill
+          add(gcc(workersForDemand, valueOccurrences))
         }
-
-        if (valueOccurrences.nonEmpty) {
-          add(
-            gcc(workersForDemand, valueOccurrences)
-          )
-        }
-
       }
     }
   }

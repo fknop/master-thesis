@@ -14,5 +14,5 @@ trait Search {
   }
 
   def lastSolution: Solution = solution
-  def solve(): SearchStatistics
+  def solve(nSols: Int = Int.MaxValue): SearchStatistics
 }

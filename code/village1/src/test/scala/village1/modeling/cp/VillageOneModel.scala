@@ -2,15 +2,16 @@ package village1.modeling.cp
 
 import org.scalatest._
 import village1.format.json.JsonParser
+import village1.modeling
 
-class CPPrecomputedDataSpec extends FunSpec with Matchers {
+class VillageOneModel extends FunSpec with Matchers {
 
 
   describe("Precomputed data (availabilities) should be correct") {
 
     val problem = JsonParser.parse("data/test/precompute.json")
 
-    val precomputed = new CPPrecomputedData(problem)
+    val precomputed = new modeling.VillageOneModel(problem)
 
     it("Should have correct availabilities precomputed") {
       val availabilities = precomputed.workersAvailabilities
@@ -97,7 +98,7 @@ class CPPrecomputedDataSpec extends FunSpec with Matchers {
 
   describe("Precomputed data (skills) should be correct") {
     val problem = JsonParser.parse("data/test/precompute-skills.json")
-    val precomputed = new CPPrecomputedData(problem)
+    val precomputed = new modeling.VillageOneModel(problem)
 
     it("Should have the correct skills assigned to workers") {
       val skills = precomputed.workersWithSkills
@@ -121,7 +122,7 @@ class CPPrecomputedDataSpec extends FunSpec with Matchers {
 
   describe("Precomputed data (possible workers for demand) should be correct") {
     val problem = JsonParser.parse("data/test/precompute-skills-demands-simple.json")
-    val precomputed = new CPPrecomputedData(problem)
+    val precomputed = new modeling.VillageOneModel(problem)
 
 
     it("Should have the correct workers assigned to each demand at each timeslot") {

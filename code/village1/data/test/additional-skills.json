@@ -1,0 +1,42 @@
+{
+  "T": 1,
+  "machines": [],
+  "locations": [],
+  "workers": [
+    {
+      "name": "Worker 0",
+      "availabilities": [0],
+      "skills": ["Driver License"]
+    },
+    {
+      "name": "Worker 1",
+      "availabilities": [0]
+    },
+    {
+      "name": "Worker 2",
+      "availabilities": [0]
+    }
+  ],
+  "clients": [
+    {
+      "name": "Client 0"
+    }
+  ],
+  "demands": [
+    {
+      "client": 0,
+      "periods": [0],
+      "requiredWorkers": 2,
+      "additionalSkills": [
+        "Driver License"
+      ]
+    },
+    {
+      "client": 0,
+      "periods": [0],
+      "requiredWorkers": 1
+    }
+  ]
+}
+
+

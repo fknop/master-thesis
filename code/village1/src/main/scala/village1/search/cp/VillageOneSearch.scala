@@ -10,7 +10,7 @@ import village1.modeling.cp.VillageOneCPModel
 
 class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(path)) with Search {
 
-  def solve(): SearchStatistics = {
+  def solve(nSols: Int = Int.MaxValue): SearchStatistics = {
 
     search {
       val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
@@ -74,7 +74,7 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
     }
 
     // use restarts to break heavy tails phenomena
-    start(nSols = 1, failureLimit = 50000)
+    start(nSols = nSols, failureLimit = 50000)
   }
 }
 
@@ -90,7 +90,7 @@ object Main extends App {
 
 
   val search = new VillageOneSearch(generatedInstances(1))
-  search.solve()
+  search.solve(nSols = 1)
   if (search.lastSolution != null) {
     JsonSerializer.serialize(search.lastSolution)("results/results3.json")
     println(search.lastSolution.valid())

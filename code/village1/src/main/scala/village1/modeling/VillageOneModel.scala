@@ -1,13 +1,12 @@
-package village1.modeling.cp
+package village1.modeling
 
 import village1.data.{Demand, Worker}
-import village1.modeling.Problem
 
 /**
-  * Common precomputed data for CP model(s)
+  * Common precomputed data for CP/MIP model(s)
   * @param problem the problem
   */
-class CPPrecomputedData(problem: Problem) {
+class VillageOneModel(problem: Problem) {
 
   val T: Int = problem.T
   val demands: Array[Demand] = problem.demands
@@ -27,7 +26,7 @@ class CPPrecomputedData(problem: Problem) {
   val availableWorkers: Map[Int, Map[Int, Set[Int]]] = precomputeAvailableWorkers()
   val workersWithSkills: Map[String, Set[Int]] = precomputeWorkersWithSkills()
 
-  val possibleWorkersForDemands = precomputePossibleWorkersForDemand()
+  val possibleWorkersForDemands: Map[Int, Map[Int, Array[Set[Int]]]] = precomputePossibleWorkersForDemand()
 
   val possibleMachines: Map[String, Set[Int]] = precomputeMachineNeeds()
 
@@ -82,11 +81,14 @@ class CPPrecomputedData(problem: Problem) {
     *     key: time period
     *     value: array of Set[Int] (array of sets of workers)
     */
+  // TODO: Clean this up
   private[this] def precomputePossibleWorkersForDemand (): Map[Int, Map[Int, Array[Set[Int]]]] = {
     Demands.foldLeft(Map[Int, Map[Int, Array[Set[Int]]]]()) { (precomputed, d) =>
 
       val demand = demands(d)
 
+      // Initial workers that have the skills required to work at that position
+      // Does not yet take into account the availability of the workers
       val initialPossibleWorkers = Array.tabulate(demand.requiredWorkers) { position =>
         val requirements = demand.worker(position)
         val skills = requirements.skills
@@ -95,7 +97,9 @@ class CPPrecomputedData(problem: Problem) {
           // Possible workers that fit the skills of worker w
           skills.foldLeft(allWorkers) {
             (acc, skill) => acc.intersect(workersWithSkills(skill.name))
-          }.filter(w => workers(w).satisfySkills(skills))
+          }.filter {
+            w => workers(w).satisfySkills(skills)
+          }
         }
         else {
           null
@@ -108,13 +112,10 @@ class CPPrecomputedData(problem: Problem) {
         demand.periods.foldLeft(Map[Int, Array[Set[Int]]]()) {
           (acc, t) => {
             val positions = Array.tabulate(demand.requiredWorkers) { i =>
-              val possibleWorkers =
-                if (initialPossibleWorkers(i) == null)
-                  availableWorkers(d)(t)
-                else
-                  initialPossibleWorkers(i).intersect(availableWorkers(d)(t))
-
-              possibleWorkers
+              if (initialPossibleWorkers(i) == null)
+                availableWorkers(d)(t)
+              else
+                initialPossibleWorkers(i).intersect(availableWorkers(d)(t))
             }
 
             acc.updated(t, positions)

@@ -24,13 +24,13 @@ object JsonSerializer {
 
       p.machineAssignments match {
         case Some(machines) =>
-          demand = demand + ("machineAssignments", Json.toJson(machines))
+          demand += ("machineAssignments", Json.toJson(machines))
         case None =>
       }
 
       p.locationAssignment match {
         case Some(location) =>
-          demand = demand + ("locationAssignment", JsNumber(location))
+          demand += ("locationAssignment", JsNumber(location))
         case None =>
       }
 
