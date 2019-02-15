@@ -87,7 +87,7 @@ object InstanceGenerator extends App {
 
       // Add all availabilities to random workers (might be workers who already are available)
       var done = 0
-      var i = rand(0, workers.length)
+      var i = rand(0, workers.length - 1)
       while (done < demands(d).requiredWorkers) {
         workers(i) = workers(i).copy(availabilities = workers(i).availabilities ++ demands(d).periods)
         done += 1
@@ -125,6 +125,7 @@ object InstanceGenerator extends App {
       )
       .map(d => generatePeriodForDemand(d, t, prob = prob.getOrElse("period", 0.5)))
 
+
     val workforce = generateWorkforce(w)
     val workers = generateWorkersAvailabilities(workforce, demands, t, skills)
 
@@ -144,7 +145,7 @@ object InstanceGenerator extends App {
 
 
   generate(
-    t = 7,
+    t = 5,
     c = 4,
     d = 5,
     w = 20,

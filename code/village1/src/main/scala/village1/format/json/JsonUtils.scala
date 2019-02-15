@@ -4,6 +4,7 @@ import java.io.PrintWriter
 
 import play.api.libs.json.{JsResult, JsValue, Json}
 import com.eclipsesource.schema._
+import village1.util.FileUtils.{writeFile, readFile}
 
 import scala.io.Source
 
@@ -18,18 +19,12 @@ object JsonUtils {
   }
 
   def parseJsonFile (path: String): JsValue = {
-
-    val file = Source.fromFile(path)
-    val content = file.getLines().mkString("\n")
-    file.close()
-
+    val content = readFile(path)
     Json.parse(content)
   }
 
-  def writeJsonFile (path: String, content: JsValue): Unit = {
-    new PrintWriter(path) {
-      write(Json.prettyPrint(content))
-      close()
-    }
+  def writeJsonFile (path: String, json: JsValue): Unit = {
+    val content = Json.prettyPrint(json)
+    writeFile(path, content)
   }
 }
