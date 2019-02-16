@@ -85,12 +85,16 @@ object Main extends App {
   val generatedFolder = s"$folder/generated/"
   val generatedInstances: Array[String] = Array(
     "instance-t=10-d=30-w=400-350.json",
-    "instance-t=7-d=5-w=20-985.json"
+    "instance-t=7-d=5-w=20-985.json",
+    "instance-t=7-d=5-w=20-442.json",
+    "instance-t=100-d=40-w=300-140.json",
+
   ).map(f => s"$generatedFolder/$f")
 
 
-  val search = new VillageOneSearch(generatedInstances(1))
-  search.solve(nSols = 1)
+  val search = new VillageOneSearch(generatedInstances(3))
+  val stats = search.solve(nSols = 1)
+  println(stats)
   if (search.lastSolution != null) {
     JsonSerializer.serialize(search.lastSolution)("results/results3.json")
     println(search.lastSolution.valid())

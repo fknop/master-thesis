@@ -144,10 +144,10 @@ object InstanceGenerator extends App {
 
 
   generate(
-    t = 7,
-    c = 4,
-    d = 5,
-    w = 20,
+    t = 100,
+    c = 40,
+    d = 40,
+    w = 300,
     s = 10,
     prob = Map("skill" -> 0.2, "period" -> 0.6)
   )

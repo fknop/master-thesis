@@ -20,23 +20,25 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
   def createWorkersVariables (model: GRBModel): WorkerVariables = {
 
     Array.tabulate(T, D, W) { (t, d, w) =>
-      val variable = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, s"w[$t][$d][$w]")
-      if (!availableWorkers(t).contains(w)) {
-        variable.set(GRB.DoubleAttr.X, 0.0)
-      }
+      val variable = model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$w]")
+//      if (!availableWorkers(t).contains(w)) {
+//        variable.set(GRB.DoubleAttr.X, 0.0)
+//      }
 
       variable
     }
   }
 
-  def removeImpossibleValues (variables: WorkerVariables): Unit = {
+  // TODO: move set to init
+  def removeImpossibleValues (model: GRBModel, variables: WorkerVariables): Unit = {
     for (t <- 0 until T; d <- Demands; w <- Workers) {
 
-      if (!demands(d).periods.contains(t)) {
-        variables(t)(d)(w).set(GRB.DoubleAttr.X, 0.0)
-      }
-      else if (!availableWorkers(t).contains(w)) {
-        variables(t)(d)(w).set(GRB.DoubleAttr.X, 0.0)
+      val impossible = (!demands(d).periods.contains(t)) ||
+                       (!availableWorkers(d).contains(t)) ||
+                       (!availableWorkers(d)(t).contains(w))
+
+      if (impossible) {
+        model.addConstr(variables(t)(d)(w), GRB.EQUAL, 0, s"imp[$t][$d][$w]")
       }
     }
   }
@@ -47,18 +49,18 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
     for (t <- 0 until T; w <- Workers) {
       val expression = new GRBLinExpr()
       for (d <- Demands) {
-        expression.addTerm(1.0, variables(t)(d)(w))
+        expression.addTerm(1, variables(t)(d)(w))
       }
 
-      model.addConstr(expression, GRB.LESS_EQUAL, 1.0, s"c1[$t][$w]")
+      model.addConstr(expression, GRB.LESS_EQUAL, 1, s"c1[$t][$w]")
     }
   }
 
   def workerNumberSatisfied (model: GRBModel, variables: WorkerVariables): Unit = {
-    for (t <- 0 until T; d <- Demands) {
+    for (d <- Demands; t <- demands(d).periods) {
       val expression = new GRBLinExpr()
       for (w <- Workers) {
-        expression.addTerm(1.0, variables(t)(d)(w))
+        expression.addTerm(1, variables(t)(d)(w))
       }
 
       model.addConstr(expression, GRB.EQUAL, demands(d).requiredWorkers, s"c2[$t][$d]")
@@ -68,13 +70,13 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
 
   def applyConstraints (model: GRBModel, variables: WorkerVariables): Unit = {
-    removeImpossibleValues(variables)
+    removeImpossibleValues(model, variables)
     allDifferentWorkers(model, variables)
     workerNumberSatisfied(model, variables)
   }
 
   // Only call this once model is optimized
-  def createSolution (variables: WorkerVariables): Unit = {
+  def createSolution (variables: WorkerVariables): Solution = {
 
     var demandAssignments: Array[DemandAssignment] = Array()
 
@@ -101,7 +103,6 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
 
     Solution(problem, demandAssignments)
-
   }
 
 
@@ -112,9 +113,11 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
     val variables = createWorkersVariables(model)
     applyConstraints(model, variables)
 
+
     model.optimize()
 
-    createSolution(variables)
+    val solution = createSolution(variables)
+    JsonSerializer.serialize(solution)("results/mip.json")
 
     () => {
       model.dispose()
@@ -127,16 +130,15 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
 object MipMain extends App {
 
-  val folder = "data/instances"
-  val instance = s"$folder/problem.json"
-  val generatedFolder = s"$folder/generated/"
-  val generatedInstances: Array[String] = Array(
-    "instance-t=10-d=30-w=400-350.json",
-    "instance-t=7-d=5-w=20-985.json"
-  ).map(f => s"$generatedFolder/$f")
-
 
 
   val model = new VillageOneMIPModel(JsonParser.parse("data/instances/problem.json"))
-  model.solve()()
+
+  try {
+
+    model.solve()()
+  }
+  catch {
+    case exception: GRBException => exception.printStackTrace
+  }
 }

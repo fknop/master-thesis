@@ -64,7 +64,7 @@ class VillageOneModel(problem: Problem) {
     for (d <- Demands) {
       val periods = demands(d).periods
 
-      val workers= periods.foldLeft(Map[Int, Set[Int]]()) { (acc, t) =>
+      val workers = periods.foldLeft(Map[Int, Set[Int]]()) { (acc, t) =>
         acc.updated(t, workersAvailabilities(t))
       }
 
