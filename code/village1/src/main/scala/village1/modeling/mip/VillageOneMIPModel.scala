@@ -1,15 +1,13 @@
 package village1.modeling.mip
 
 import gurobi._
-import village1.data.{DemandAssignment, Worker, WorkerAssignment}
-import village1.format.json.{JsonParser, JsonSerializer}
+import village1.data.{DemandAssignment, WorkerAssignment}
+import village1.format.json.{JsonParser}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 
 class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
   type WorkerVariables = Array[Array[Array[GRBVar]]]
-
-
 
 
 
