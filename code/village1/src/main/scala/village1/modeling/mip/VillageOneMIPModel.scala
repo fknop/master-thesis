@@ -2,14 +2,12 @@ package village1.modeling.mip
 
 import gurobi._
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.format.json.{JsonParser}
+import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 
 class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
   type WorkerVariables = Array[Array[Array[GRBVar]]]
-
-
 
   // TODO: log file path
   def createEnvironment() = new GRBEnv("mip.log")
@@ -18,18 +16,13 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
   def createWorkersVariables (model: GRBModel): WorkerVariables = {
 
     Array.tabulate(T, D, W) { (t, d, w) =>
-      val variable = model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$w]")
-//      if (!availableWorkers(t).contains(w)) {
-//        variable.set(GRB.DoubleAttr.X, 0.0)
-//      }
-
-      variable
+      model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$w]")
     }
   }
 
-  // TODO: move set to init
+  // TODO: remove constraints and add to initialization
   def removeImpossibleValues (model: GRBModel, variables: WorkerVariables): Unit = {
-    for (t <- 0 until T; d <- Demands; w <- Workers) {
+    for (t <- Periods; d <- Demands; w <- Workers) {
 
       val impossible = (!demands(d).periods.contains(t)) ||
                        (!availableWorkers(d).contains(t)) ||
@@ -44,7 +37,7 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
 
 
   def allDifferentWorkers (model: GRBModel, variables: WorkerVariables): Unit = {
-    for (t <- 0 until T; w <- Workers) {
+    for (t <- Periods; w <- Workers) {
       val expression = new GRBLinExpr()
       for (d <- Demands) {
         expression.addTerm(1, variables(t)(d)(w))
@@ -65,12 +58,58 @@ class VillageOneMIPModel(problem: Problem) extends VillageOneModel(problem) {
     }
   }
 
+  def workerWorkerIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
+    val incompatibilities = problem.workerWorkerIncompatibilities
+    for (incompatibility <- incompatibilities) {
+      val w0 = incompatibility(0)
+      val w1 = incompatibility(1)
+
+      for (t <- Periods; d <- Demands if demands(d).periods.contains(t)) {
+        val expression = new GRBLinExpr()
+        expression.addTerm(1.0, variables(t)(d)(w0))
+        expression.addTerm(1.0, variables(t)(d)(w1))
+        model.addConstr(expression, GRB.LESS_EQUAL, 1, s"Iww[$w0][$w1]")
+      }
+
+    }
+  }
+
+
+  def workerClientIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
+    throw new NotImplementedError()
+  }
+
+  def applySkills (model: GRBModel, variables: WorkerVariables): Unit = {
+    for (d <- Demands) {
+      val demand = demands(d)
+      val requiredSkills = demand.requiredSkills
+
+      if (requiredSkills.nonEmpty) {
+        for (t <- demand.periods) {
+          val expression = new GRBLinExpr()
+          for (s <- requiredSkills.indices) {
+            val workers = possibleWorkersForDemands(d)(t)(s)
+            for (w <- workers) {
+              expression.addTerm(1, variables(t)(d)(w))
+            }
+
+            model.addConstr(expression, GRB.GREATER_EQUAL, 1, s"skill[t][d][s]")
+          }
+
+          // TODO: ensure all different workers
+        }
+      }
+
+
+    }
+  }
 
 
   def applyConstraints (model: GRBModel, variables: WorkerVariables): Unit = {
     removeImpossibleValues(model, variables)
     allDifferentWorkers(model, variables)
     workerNumberSatisfied(model, variables)
+    workerWorkerIncompatibilities(model, variables)
   }
 
   // Only call this once model is optimized

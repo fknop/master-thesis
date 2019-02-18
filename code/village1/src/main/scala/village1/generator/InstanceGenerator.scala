@@ -138,7 +138,7 @@ object InstanceGenerator extends App {
       clients = clients
     )
 
-    val fileName = s"instance-t=$t-d=$d-w=$w-${rand(0, 1000)}"
+    val fileName = s"t${t}d${d}w${w}-${rand(0, 1000)}"
 
     JsonSerializer.serialize(problem)(s"data/instances/generated/$fileName.json")
   }

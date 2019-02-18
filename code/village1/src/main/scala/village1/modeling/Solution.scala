@@ -8,7 +8,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
   // TODO: implement additional skills logic
   // - Check if all workers for at each time period are different
   // - Check if all workers satisfy demand requirements
-  def valid(): Boolean = {
+  def valid(): (Boolean, String) = {
 
     val workers = problem.workers
     val demands = problem.demands
@@ -19,7 +19,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
       val demand = demands(planning.demand)
 
       if (planning.workerAssignments.size != demand.periods.size) {
-        return false
+        return (false, "workerAssignments size != demand.periods.size")
       }
 
 
@@ -28,15 +28,15 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
         val w = assignment.workers
 
         if (w.length != demand.requiredWorkers) {
-          return false
+          return (false, "w.length != demand.requiredWorkers")
         }
 
         if (!demand.periods.contains(t)) {
-          return false
+          return (false, "!demand.periods.contains(t)")
         }
 
         if (!allDifferent(w)) {
-          return false
+          return (false, "!allDifferent(w)")
         }
 
         workersAtTime(t) ++= w
@@ -51,7 +51,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
             val worker = workers(w(r))
 
             if (!worker.satisfySkills(skills)) {
-              return false
+              return (false, "!worker.satisfySkills(skills")
             }
           }
         }
@@ -62,12 +62,12 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
 
     for (t <- 0 until problem.T) {
       if (!allDifferent(workersAtTime(t))) {
-        return false
+        return (false, "!allDifferent(workersAtTime(t))")
       }
     }
 
 
-    true
+    (true, "OK")
   }
 
   private[this] def allDifferent(array: Array[Int]): Boolean = {

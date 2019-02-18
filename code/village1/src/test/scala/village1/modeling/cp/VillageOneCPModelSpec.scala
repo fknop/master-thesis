@@ -10,7 +10,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = new VillageOneSearch("data/test/additional-skills.json")
 
       search.onSolutionFound { solution =>
-        solution.valid() should be (true)
+        solution.valid() should be (true, "OK")
         val plannings = solution.plannings
         plannings should have size 2
 

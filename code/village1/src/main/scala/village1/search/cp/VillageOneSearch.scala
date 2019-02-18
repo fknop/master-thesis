@@ -84,15 +84,11 @@ object Main extends App {
   val instance = s"$folder/problem.json"
   val generatedFolder = s"$folder/generated/"
   val generatedInstances: Array[String] = Array(
-    "instance-t=10-d=30-w=400-350.json",
-    "instance-t=7-d=5-w=20-985.json",
-    "instance-t=7-d=5-w=20-442.json",
-    "instance-t=100-d=40-w=300-140.json",
-
+    "t5d5w20-491.json"
   ).map(f => s"$generatedFolder/$f")
 
 
-  val search = new VillageOneSearch(generatedInstances(3))
+  val search = new VillageOneSearch(generatedInstances(0))
   val stats = search.solve(nSols = 1)
   println(stats)
   if (search.lastSolution != null) {
