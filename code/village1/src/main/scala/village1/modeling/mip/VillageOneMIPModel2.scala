@@ -113,22 +113,45 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
     }
   }
 
-  // TODO: this works for now for simple models
-  def addObjective (model: GRBModel, variables: WorkerVariables): Unit = {
-    var i = 0
-    for (d <- Demands; p <- demands(d).positions; w <- Workers) {
-      val expression = new GRBLinExpr()
-      for (t <- demands(d).periods) {
-        expression.addTerm(1, variables(t)(d)(p)(w))
-      }
 
-      model.setObjectiveN(expression, i, i, 1, 0, 0, s"obj$i")
-      i += 1
+  // TODO: this works for now for simple models - check for larger ones
+  /**
+    * Minimize shift change between workers at one position
+    */
+  def minimizeShiftChange (model: GRBModel, variables: WorkerVariables): Unit = {
+    val expressions = new GRBLinExpr()
+    for (d <- Demands; p <- demands(d).positions) {
+
+      for (w <- Workers) {
+        val expression = new GRBLinExpr()
+        val sum = model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, s"sum[$d][$p][$w]")
+
+        expression.addTerm(-1, sum)
+        for (t <- demands(d).periods) {
+          expression.addTerm(1, variables(t)(d)(p)(w))
+        }
+
+        // -sum + w_0jkl + w_1jkl + ... w_ijkl = 0
+        // w_0jkl + w_1jkl + ... w_ijkl = sum
+        model.addConstr(expression, GRB.EQUAL, 0, s"sameShifts[$d][$p][$w]")
+
+        // min(sum, 1)
+        // min(w_0jkl + w_1jkl + ... w_ijkl, 1)
+        val min = model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, s"objMin[$d][$p][$w]")
+        model.addGenConstrMin(min, Array(sum), 1, s"constrMin[$d][$p][$w]")
+
+        // The sum of each min variable for each worker represent the number of different workers
+        // for a position, we need to minimize the number of different workers for that demand.
+        expressions.addTerm(1, min)
+      }
     }
 
-    model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE)
+    model.setObjective(expressions, GRB.MINIMIZE)
   }
 
+  def applyObjectives (model: GRBModel, variables: WorkerVariables): Unit = {
+    minimizeShiftChange(model, variables)
+  }
 
   def applyConstraints (model: GRBModel, variables: WorkerVariables): Unit = {
     removeImpossibleValues(model, variables)
@@ -137,7 +160,6 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
     workerWorkerIncompatibilities(model, variables)
     workerClientIncompatibilities(model, variables)
     applySkills(model, variables)
-    addObjective(model, variables)
   }
 
   // Only call this once model is optimized
@@ -177,6 +199,7 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
     val model = createModel(env)
     val variables = createWorkersVariables(model)
     applyConstraints(model, variables)
+    applyObjectives(model, variables)
 
     model.write("mip.lp")
 
@@ -198,8 +221,8 @@ object MipMain2 extends App {
 
 
 
-//  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t5d5w20-491.json"))
-  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/problem2.json"))
+  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t5d5w20-491.json"))
+//  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/problem2.json"))
 
   try {
 
