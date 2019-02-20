@@ -3,6 +3,8 @@ package village1.util
 import village1.data.Demand
 
 object Utilities {
+  private val random = new scala.util.Random
+
   def generatePermutationsOfTwo (size: Int): IndexedSeq[(Int, Int)] = {
     for (i <- 0 until size; j <- i + 1 until size) yield (i, j)
   }
@@ -26,4 +28,6 @@ object Utilities {
 
     sets
   }
+
+  def rand(start: Int, end: Int): Int = start + random.nextInt((end - start) + 1)
 }

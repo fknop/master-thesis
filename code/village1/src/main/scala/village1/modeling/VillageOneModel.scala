@@ -8,6 +8,8 @@ import village1.data.{Demand, Worker}
   */
 class VillageOneModel(problem: Problem) {
 
+  private[this] val t0 = System.currentTimeMillis()
+
   val T: Int = problem.T
   val demands: Array[Demand] = problem.demands
   val workers: Array[Worker] = problem.workers
@@ -21,15 +23,16 @@ class VillageOneModel(problem: Problem) {
   val Machines: Range = 0 until M
   val Locations: Range = 0 until L
 
+
   val allWorkers: Set[Int] = workers.indices.toSet
   val workersAvailabilities: Map[Int, Set[Int]] = precomputeWorkersAvailabilities()
   val availableWorkers: Map[Int, Map[Int, Set[Int]]] = precomputeAvailableWorkers()
   val workersWithSkills: Map[String, Set[Int]] = precomputeWorkersWithSkills()
-
   val possibleWorkersForDemands: Map[Int, Map[Int, Array[Set[Int]]]] = precomputePossibleWorkersForDemand()
-
   val possibleMachines: Map[String, Set[Int]] = precomputeMachineNeeds()
 
+
+  val precomputeTime: Long = System.currentTimeMillis - t0
 
 
   /**

@@ -2,15 +2,16 @@ package village1.modeling.cp
 
 import org.scalatest._
 import oscar.cp.core.NoSolutionException
+import village1.format.json.JsonParser
 import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends FunSpec with Matchers {
   describe("Additional skills for demands") {
     it("Should return the correct workers assigned with additional skills") {
-      val search = new VillageOneSearch("data/test/additional-skills.json")
+      val search = new VillageOneSearch(JsonParser.parse("data/test/additional-skills.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid() should be (true, "OK")
+        solution.valid should be (true, "OK")
         val plannings = solution.plannings
         plannings should have size 2
 
@@ -30,7 +31,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
     it("Should be unsolvable") {
       an [NoSolutionException] should be thrownBy {
-        new VillageOneSearch("data/test/additional-skills-impossible.json")
+        new VillageOneSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
       }
     }
   }

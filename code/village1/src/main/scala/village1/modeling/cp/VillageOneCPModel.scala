@@ -2,7 +2,8 @@ package village1.modeling.cp
 
 import oscar.cp._
 import oscar.cp.constraints.AtMostNValue
-import village1.modeling.{Problem, VillageOneModel}
+import village1.data.{DemandAssignment, WorkerAssignment}
+import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.util.Utilities
 
 
@@ -30,29 +31,32 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
 
 
+  initialize()
+
+
+
   // Workers constraints
 
-  applyAllDifferentWorkers()
-  applyWorkerWorkerIncompatibilities()
-  applyWorkerClientIncompatibilities()
-  //applyRequiredSkills()
-  applyAdditionalSkills()
 
-  //applyNameTODO()
+  def initialize (): Unit = {
+    applyAllDifferentWorkers()
+    applyWorkerWorkerIncompatibilities()
+    applyWorkerClientIncompatibilities()
+    applyAdditionalSkills()
 
+    // Locations constraints
+    applyAllDifferentLocations()
 
-  // Locations constraints
-  applyAllDifferentLocations()
-
-  // Machine constraints
-  applyAllDifferentMachines()
+    // Machine constraints
+    applyAllDifferentMachines()
+  }
 
 
 
   // Methods definitions
 
 
-  def generateWorkerVariables (): WorkerVariables = {
+  private def generateWorkerVariables (): WorkerVariables = {
     Array.tabulate(T, D)((t, d) => {
       val demand = demands(d)
 
@@ -65,7 +69,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     })
   }
 
-  def generateLocationVariables (): LocationVariables = {
+  private def generateLocationVariables (): LocationVariables = {
     Array.tabulate(D)(d => {
       if (demands(d).possibleLocations.isEmpty) null
       // Filter locations that might be out of range
@@ -74,7 +78,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     })
   }
 
-  def generateMachineVariables (): MachineVariables = {
+  private def generateMachineVariables (): MachineVariables = {
     Array.tabulate(D)(d => {
       val demand = demands(d)
       Array.tabulate(demand.machineNeeds.length)(m => {
@@ -85,7 +89,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   }
 
   // All workers for a given time must be different
-  def applyAllDifferentWorkers (): Unit = {
+  private def applyAllDifferentWorkers (): Unit = {
     for (period <- Periods) {
       val workersForPeriod = workerVariables(period).flatten
 
@@ -96,7 +100,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   }
 
   // All zones for a given time must be different
-  def applyAllDifferentLocations(): Unit = {
+  private def applyAllDifferentLocations(): Unit = {
     for (d <- Demands if locationVariables(d) != null) {
       val overlappingDemands = overlappingSets(d)
       val locations = (overlappingDemands + d).map(locationVariables(_)).filter(_ != null)
@@ -115,7 +119,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   }
 
 
-  def applyAllDifferentMachines(): Unit = {
+  private def applyAllDifferentMachines(): Unit = {
     for (d <- Demands) {
       val overlappingDemands = overlappingSets(d)
       val machines = (overlappingDemands + d).flatMap(machineVariables(_))
@@ -126,7 +130,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   }
 
 
-  def applyWorkerWorkerIncompatibilities(): Unit = {
+  private def applyWorkerWorkerIncompatibilities(): Unit = {
     val wwIncompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
 
     // Workers with incompatibilities cannot work together
@@ -141,7 +145,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     }
   }
 
-  def applyWorkerClientIncompatibilities (): Unit = {
+  private def applyWorkerClientIncompatibilities (): Unit = {
     val wcIncompatibilities = problem.workerClientIncompatibilities
 
     // For each incompatibility between a client and a worker
@@ -164,7 +168,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
   }
 
   // Demands should have workers with required skills
-  def applyRequiredSkills (): Unit = {
+  private def applyRequiredSkills (): Unit = {
 
     for (d <- Demands) {
       val demand = demands(d)
@@ -196,7 +200,7 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     *
     * For now, a gcc constraint is used. But a custom constraint could also be used.
     */
-  def applyAdditionalSkills (): Unit = {
+  private def applyAdditionalSkills (): Unit = {
     for (d <- Demands) {
       val demand = demands(d)
       for (t <- demand.periods) {
@@ -229,7 +233,9 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     *
     * TODO: implementation (check if this is the best way to do this)
     */
-  def applyNameTODO (): Unit = {
+  private def applyNameTODO (): Unit = {
+
+    countEq()
 
 //    maximize(sum(sameWorkerViolations))
     minimize(sum(sameWorkerViolations))
@@ -244,6 +250,46 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
         }
       }
     }
+  }
+
+
+
+  def createSolution(): Solution = {
+    var demandAssignments: Array[DemandAssignment] = Array()
+
+    for (d <- Demands) {
+      val demand = demands(d)
+      val slots = demand.periods
+
+      val machineValues = machineVariables(d)
+      val locationValue = locationVariables(d)
+
+      val machineAssignments: Option[Array[Int]] =
+        if (machineValues.nonEmpty)
+          Some(machineValues.map(_.value))
+        else
+          None
+
+      val locationAssignment =
+        if (locationValue != null) Some(locationValue.value)
+        else None
+
+      var workerAssignments: Array[WorkerAssignment] = Array()
+
+      for (t <- slots) {
+        val workerValues = workerVariables(t)(d)
+
+        if (workerValues.nonEmpty) {
+          val workers: Array[Int] = workerValues.map(_.value)
+          val assignment = WorkerAssignment(workers, t)
+          workerAssignments :+= assignment
+        }
+      }
+
+      demandAssignments :+= DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment)
+    }
+
+    Solution(problem, demandAssignments)
   }
 
 

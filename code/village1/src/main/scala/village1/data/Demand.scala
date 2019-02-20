@@ -12,7 +12,7 @@ case class Demand(
    additionalSkills: Array[Skill] = Array()
 ) {
 
-  val positions = Set[Int](0 until requiredWorkers: _*)
+  val positions = 0 until requiredWorkers
 
   val workers: Int = requiredWorkers
 

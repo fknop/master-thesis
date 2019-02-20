@@ -3,11 +3,9 @@ package village1.generator
 import village1.data.{Client, Demand, Skill, Worker}
 import village1.format.json.JsonSerializer
 import village1.modeling.Problem
+import village1.util.Utilities.{rand}
 
-object InstanceGenerator extends App {
-  private val random = new scala.util.Random
-
-  private def rand(start: Int, end: Int): Int = start + random.nextInt((end - start) + 1)
+object InstanceGenerator {
 
   private def isTrue(probability: Double = 0.5): Boolean = math.random() < probability
 
@@ -60,7 +58,6 @@ object InstanceGenerator extends App {
   }
 
 
-
   // TODO: make this more efficient and cleaner
   private def generateWorkersAvailabilities(workers: Array[Worker], demands: IndexedSeq[Demand], T: Int, skills: Array[Skill]): Array[Worker] = {
     for (d <- demands.indices) {
@@ -68,6 +65,13 @@ object InstanceGenerator extends App {
         var done = 0
         var i = rand(0, workers.length - 1)
         while (done < demands(d).requiredWorkers) {
+
+          // Trick to avoid infinite loop for now
+          val allAvailable = workers.forall(_.available(t))
+          if (allAvailable) {
+            done += 1
+          }
+
           // This assure to be solvable
           if (!workers(i).available(t)) {
             workers(i) = workers(i).copy(availabilities = workers(i).availabilities + t)
@@ -112,7 +116,7 @@ object InstanceGenerator extends App {
 
   private def generateClients(c: Int) = Array.tabulate(c)(i => Client(name = s"Client $i"))
 
-  def generate(t: Int, c: Int, d: Int, w: Int, s: Int, prob: Map[String, Double] = Map()): Unit = {
+  def generate(t: Int, c: Int, d: Int, w: Int, s: Int, prob: Map[String, Double] = Map()): Problem = {
 
     val clients = generateClients(c)
     val skills = generateSkills(s)
@@ -129,27 +133,35 @@ object InstanceGenerator extends App {
     val workforce = generateWorkforce(w)
     val workers = generateWorkersAvailabilities(workforce, demands, t, skills)
 
-    // Add a random number at the end of the file name to be able to create enough files with the same settings
 
-    val problem = Problem(
+    Problem(
       T = t,
       workers = workers,
       demands = demands,
       clients = clients
     )
-
-    val fileName = s"t${t}d${d}w${w}-${rand(0, 1000)}"
-
-    JsonSerializer.serialize(problem)(s"data/instances/generated/$fileName.json")
   }
+}
 
+object InstanceGeneratorApp extends App {
 
-  generate(
-    t = 5,
-    c = 4,
-    d = 5,
-    w = 20,
-    s = 10,
-    prob = Map("skill" -> 0.2, "period" -> 0.6)
+  val t = 10
+  val c = 30
+  val d = 50
+  val w = 300
+  val s = 20
+  val prob = Map("skill" -> 0.2, "period" -> 0.6)
+
+  val problem = InstanceGenerator.generate(
+    t = t,
+    c = c,
+    d = d,
+    w = w,
+    s = s,
+    prob = prob
   )
+
+  val fileName = s"t${t}d${d}w${w}-${rand(0, 1000)}"
+  val folder = "data/instances/generated/"
+  JsonSerializer.serialize(problem)(s"$folder/$fileName.json")
 }

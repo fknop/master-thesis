@@ -8,7 +8,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
   // TODO: implement additional skills logic
   // - Check if all workers for at each time period are different
   // - Check if all workers satisfy demand requirements
-  def valid(): (Boolean, String) = {
+  def valid: (Boolean, String) = {
 
     val workers = problem.workers
     val demands = problem.demands
@@ -19,7 +19,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
       val demand = demands(planning.demand)
 
       if (planning.workerAssignments.size != demand.periods.size) {
-        return (false, "workerAssignments size != demand.periods.size")
+        return (false, "The number of timeslots is not satisfied")
       }
 
 
@@ -28,15 +28,15 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
         val w = assignment.workers
 
         if (w.length != demand.requiredWorkers) {
-          return (false, "w.length != demand.requiredWorkers")
+          return (false, "The number of required workers is not satisfied")
         }
 
         if (!demand.periods.contains(t)) {
-          return (false, "!demand.periods.contains(t)")
+          return (false, s"The demand does not contain timeslot $t")
         }
 
         if (!allDifferent(w)) {
-          return (false, "!allDifferent(w)")
+          return (false, "The same worker works at two different positions")
         }
 
         workersAtTime(t) ++= w
@@ -51,10 +51,23 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
             val worker = workers(w(r))
 
             if (!worker.satisfySkills(skills)) {
-              return (false, "!worker.satisfySkills(skills")
+              return (false, s"Worker $worker does not satisfy requirements($r) for demand ${demand.id} at time ${t} not satisfied")
             }
           }
         }
+
+        val additional = demand.additionalSkills
+        for (skill <- additional) {
+          var satisfied = false
+          for (worker <- w) {
+            satisfied = satisfied || workers(worker).satisfySkill(skill)
+          }
+
+          if (!satisfied) {
+            (false, s"Additional skill: ${skill.name} not satisfied")
+          }
+        }
+
       }
     }
 

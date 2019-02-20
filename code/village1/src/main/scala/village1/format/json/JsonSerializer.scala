@@ -58,6 +58,7 @@ object JsonSerializer {
       ),
       "workers" -> problem.workers.map(w =>
         Json.obj(
+          "id" -> w.id,
           "name" -> w.name,
           "availabilities" -> w.availabilities,
           "skills" -> w.skills.foldLeft(List[JsObject]()) {
@@ -79,6 +80,7 @@ object JsonSerializer {
       },
       "demands" -> problem.demands.map { d =>
         Json.obj(
+          "id" -> d.id,
           "client" -> d.client,
           "periods" -> d.periods.toSeq,
           "requiredWorkers" -> d.requiredWorkers,

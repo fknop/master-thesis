@@ -5,12 +5,13 @@ import oscar.util.time
 import oscar.cp._
 import village1.data._
 import village1.format.json.{JsonParser, JsonSerializer}
-import village1.modeling.Solution
+import village1.modeling.{Problem, Solution}
 import village1.modeling.cp.VillageOneCPModel
 
-class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(path)) with Search {
+class VillageOneSearch(problem: Problem) extends VillageOneCPModel(problem) with Search {
 
-  def solve(nSols: Int = Int.MaxValue): SearchStatistics = {
+
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue): SearchStatistics = {
 
     search {
       val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
@@ -33,48 +34,11 @@ class VillageOneSearch(path: String) extends VillageOneCPModel(JsonParser.parse(
     }
 
     onSolution {
-
-      println("Solution found")
-
-      var demandAssignments: Array[DemandAssignment] = Array()
-
-      for (d <- Demands) {
-        val demand = demands(d)
-        val slots = demand.periods
-
-        val machineValues = machineVariables(d)
-        val locationValue = locationVariables(d)
-
-        val machineAssignments: Option[Array[Int]] =
-          if (machineValues.nonEmpty)
-            Some(machineValues.map(_.value))
-          else
-            None
-
-        val locationAssignment =
-          if (locationValue != null) Some(locationValue.value)
-          else None
-
-        var workerAssignments: Array[WorkerAssignment] = Array()
-
-        for (t <- slots) {
-          val workerValues = workerVariables(t)(d)
-
-          if (workerValues.nonEmpty) {
-            val workers: Array[Int] = workerValues.map(_.value)
-            val assignment = WorkerAssignment(workers, t)
-            workerAssignments :+= assignment
-          }
-        }
-
-        demandAssignments :+= DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment)
-      }
-
-      emitSolution(Solution(problem, demandAssignments))
+      emitSolution(createSolution())
     }
 
     // use restarts to break heavy tails phenomena
-    start(nSols = nSols, failureLimit = 50000)
+    start(nSols = nSols, failureLimit = 50000, timeLimit = timeLimit)
   }
 }
 
@@ -88,12 +52,14 @@ object Main extends App {
   ).map(f => s"$generatedFolder/$f")
 
 
-  val search = new VillageOneSearch(generatedInstances(0))
+  val problem = JsonParser.parse("data/instances/generated/t10d50w300-943.json")
+  val search = new VillageOneSearch(problem)
   val stats = search.solve(nSols = 1)
+
   println(stats)
   if (search.lastSolution != null) {
     JsonSerializer.serialize(search.lastSolution)("results/results3.json")
-    println(search.lastSolution.valid())
+    println(search.lastSolution.valid)
   }
 
 }

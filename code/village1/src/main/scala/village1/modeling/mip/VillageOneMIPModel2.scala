@@ -4,14 +4,21 @@ import gurobi._
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
+import village1.util.Benchmark.time
 
-trait SolveResult {
+trait SolverResult {
   def dispose(): Unit
-  def solution: Solution
+  val solution: Solution
+  val solveTime: Long
 }
 
 
 class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
+
+  private val env: GRBEnv = createEnvironment()
+  private val model: GRBModel = createModel(env)
+  private val variables: WorkerVariables = createWorkersVariables(model)
+
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
 
@@ -64,7 +71,7 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
         expression.addTerm(1, variables(t)(d)(p)(w))
       }
 
-      model.addConstr(expression, GRB.EQUAL, 1, s"c2[$t][$d]")
+      model.addConstr(expression, GRB.EQUAL, 1, s"c2[$t][$d][$p]")
     }
   }
 
@@ -164,7 +171,6 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
 
   // Only call this once model is optimized
   def createSolution (variables: WorkerVariables): Solution = {
-
     var demandAssignments: Array[DemandAssignment] = Array()
 
     for (d <- Demands) {
@@ -193,27 +199,34 @@ class VillageOneMIPModel2(problem: Problem) extends VillageOneModel(problem) {
   }
 
 
-  def solve(): SolveResult = {
 
-    val env = createEnvironment()
-    val model = createModel(env)
-    val variables = createWorkersVariables(model)
+  def initialize(withObjective: Boolean = false): Unit = {
     applyConstraints(model, variables)
-    applyObjectives(model, variables)
 
-    model.write("mip.lp")
+    if (withObjective) {
+      applyObjectives(model, variables)
+    }
+  }
 
-    model.optimize()
+  def solve(timeLimit: Int = -1): SolverResult = {
 
-    new SolveResult {
-      override def solution: Solution = createSolution(variables)
+    if (timeLimit > 0) {
+      model.set(GRB.DoubleParam.TimeLimit, timeLimit)
+    }
+
+    val t = time {
+      model.optimize()
+    }
+
+    new SolverResult {
+      lazy val solution: Solution = createSolution(variables)
+      val solveTime: Long = t
       override def dispose(): Unit = {
         model.dispose()
         env.dispose()
       }
     }
   }
-
 }
 
 
@@ -221,19 +234,25 @@ object MipMain2 extends App {
 
 
 
-  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t5d5w20-491.json"))
+  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t10d50w300-943.json"))
+//  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t5d5w20-491.json"))
 //  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/problem2.json"))
+  println(model.precomputeTime)
+
+  model.initialize()
+
 
   try {
 
-    val solver: SolveResult = model.solve()
+    val solver: SolverResult = model.solve()
     val solution = solver.solution
-    println(solution.valid())
+    println(solution.valid)
+    println(solver.solveTime)
     solver.dispose()
-    JsonSerializer.serialize(solution)("results/mip.json")
+    JsonSerializer.serialize(solution)("data/results/mip.json")
 
   }
   catch {
-    case exception: GRBException => exception.printStackTrace
+    case exception: GRBException => exception.printStackTrace()
   }
 }
