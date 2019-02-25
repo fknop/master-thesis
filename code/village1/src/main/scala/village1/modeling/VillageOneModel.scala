@@ -6,7 +6,7 @@ import village1.data.{Demand, Worker}
   * Common precomputed data for CP/MIP model(s)
   * @param problem the problem
   */
-class VillageOneModel(problem: Problem) {
+class VillageOneModel(val problem: Problem, model: Option[VillageOneModel] = None) {
 
   private[this] val t0 = System.currentTimeMillis()
 
@@ -25,15 +25,33 @@ class VillageOneModel(problem: Problem) {
 
 
   val allWorkers: Set[Int] = workers.indices.toSet
-  val workersAvailabilities: Map[Int, Set[Int]] = precomputeWorkersAvailabilities()
-  val availableWorkers: Map[Int, Map[Int, Set[Int]]] = precomputeAvailableWorkers()
-  val workersWithSkills: Map[String, Set[Int]] = precomputeWorkersWithSkills()
-  val possibleWorkersForDemands: Map[Int, Map[Int, Array[Set[Int]]]] = precomputePossibleWorkersForDemand()
-  val possibleMachines: Map[String, Set[Int]] = precomputeMachineNeeds()
 
+  val workersAvailabilities: Map[Int, Set[Int]] = model match {
+    case Some(m) => m.workersAvailabilities
+    case None => precomputeWorkersAvailabilities()
+  }
+
+  val availableWorkers: Map[Int, Map[Int, Set[Int]]] = model match {
+    case Some(m) => m.availableWorkers
+    case None => precomputeAvailableWorkers()
+  }
+
+  val workersWithSkills: Map[String, Set[Int]] = model match {
+    case Some(m) => m.workersWithSkills
+    case None => precomputeWorkersWithSkills()
+  }
+
+  val possibleWorkersForDemands: Map[Int, Map[Int, Array[Set[Int]]]] = model match {
+    case Some(m) => m.possibleWorkersForDemands
+    case None => precomputePossibleWorkersForDemand()
+  }
+
+  val possibleMachines: Map[String, Set[Int]] = model match {
+    case Some(m) => m.possibleMachines
+    case None => precomputeMachineNeeds()
+  }
 
   val precomputeTime: Long = System.currentTimeMillis - t0
-
 
   /**
     * Returns a map:

@@ -7,7 +7,9 @@ import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) with CPModel {
+class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None) extends VillageOneModel(problem, model) with CPModel {
+
+  def this(model: VillageOneModel) = this(model.problem, Some(model))
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
 
@@ -235,7 +237,6 @@ class VillageOneCPModel(val problem: Problem) extends VillageOneModel(problem) w
     */
   private def applyNameTODO (): Unit = {
 
-    countEq()
 
 //    maximize(sum(sameWorkerViolations))
     minimize(sum(sameWorkerViolations))
