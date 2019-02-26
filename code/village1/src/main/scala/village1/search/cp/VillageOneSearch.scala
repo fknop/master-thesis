@@ -12,13 +12,13 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
 
   def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
 
-
   def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue): SearchStatistics = {
 
+    val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
+    val flatMachines: Array[CPIntVar] = machineVariables.flatten
+    val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
+
     search {
-      val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
-      val flatMachines: Array[CPIntVar] = machineVariables.flatten
-      val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
       var branching = binaryFirstFail(flatWorkers)
 
@@ -30,7 +30,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
         branching = branching ++ binaryFirstFail(flatLocations)
       }
 
-      /*binarySplit(sameWorkerViolations) ++ */
+      branching ++= binarySplit(shiftDifferences)
 
       branching
     }
@@ -40,7 +40,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
     }
 
     // use restarts to break heavy tails phenomena
-    start(nSols = nSols, failureLimit = 50000, timeLimit = timeLimit)
+    start(nSols = nSols, timeLimit = timeLimit)
   }
 }
 
@@ -50,13 +50,14 @@ object Main extends App {
   val instance = s"$folder/problem.json"
   val generatedFolder = s"$folder/generated/"
   val generatedInstances: Array[String] = Array(
-    "t5d5w20-491.json"
+    "t5d5w20-491.json",
+    "t10d50w300-638.json"
   ).map(f => s"$generatedFolder/$f")
 
 
-  val problem = JsonParser.parse("data/instances/generated/t10d50w300-943.json")
+  val problem = JsonParser.parse(generatedInstances(1))
   val search = new VillageOneSearch(problem)
-  val stats = search.solve(nSols = 1)
+  val stats = search.solve(nSols = 10)
 
   println(stats)
   if (search.lastSolution != null) {

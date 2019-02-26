@@ -29,8 +29,8 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
 
-  //val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(0 until demands(d).periods.size))
-  val sameWorkerViolations = Array.tabulate(D)(d => CPIntVar(1 to demands(d).periods.size))
+  val shiftDifferences = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(w => CPIntVar(1 to demands(d).periods.size)))
+  val objective = sum(shiftDifferences.flatten)
 
 
   initialize()
@@ -51,6 +51,8 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
     // Machine constraints
     applyAllDifferentMachines()
+
+    minimizeShiftDifferences()
   }
 
 
@@ -235,22 +237,18 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
     *
     * TODO: implementation (check if this is the best way to do this)
     */
-  private def applyNameTODO (): Unit = {
-
-
-//    maximize(sum(sameWorkerViolations))
-    minimize(sum(sameWorkerViolations))
-
+  private def minimizeShiftDifferences (): Unit = {
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
         if (workersForDemand.length > 1) {
-          //add(softAllDifferent(workersForDemand, sameWorkerViolations(d)), CPPropagStrength.Strong)
-          add(new AtMostNValue(workersForDemand, sameWorkerViolations(d)))
+          add(new AtMostNValue(workersForDemand, shiftDifferences(d)(w)))
         }
       }
     }
+
+    minimize(objective)
   }
 
 
