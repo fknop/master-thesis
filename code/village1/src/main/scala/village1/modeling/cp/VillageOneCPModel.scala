@@ -1,7 +1,8 @@
 package village1.modeling.cp
 
 import oscar.cp._
-import oscar.cp.constraints.AtMostNValue
+import oscar.cp.constraints.{AtLeastNValue, AtMostNValue}
+import oscar.cp.core.CPPropagStrength
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.util.Utilities
@@ -19,7 +20,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
   type LocationVariables = Array[CPIntVar]
 
 
-  val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
+  private [this] val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
   private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
 
@@ -29,8 +30,8 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
 
-  val shiftDifferences = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(w => CPIntVar(1 to demands(d).periods.size)))
-  val objective = sum(shiftDifferences.flatten)
+  val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
+  val objective: CPIntVar = sum(shiftNWorkers.flatten)
 
 
   initialize()
@@ -52,7 +53,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
     // Machine constraints
     applyAllDifferentMachines()
 
-    minimizeShiftDifferences()
+    computeShiftNWorkers()
   }
 
 
@@ -176,7 +177,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
     for (d <- Demands) {
       val demand = demands(d)
-      for (w <- 0 until demand.workers) {
+      for (w <- 0 until demand.nWorkers) {
         val requirements = demand.worker(w)
         val skills = requirements.skills
 
@@ -233,22 +234,19 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
   /**
     * A worker should work on the same demand as time goes on
-    * This is a soft constraint, it can be violated but need to be maximized.
-    *
+    * Count the number of different workers assigned to a shift
     * TODO: implementation (check if this is the best way to do this)
     */
-  private def minimizeShiftDifferences (): Unit = {
+  private def computeShiftNWorkers (): Unit = {
     for (d <- Demands) {
       val demand = demands(d)
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
         if (workersForDemand.length > 1) {
-          add(new AtMostNValue(workersForDemand, shiftDifferences(d)(w)))
+          add(new AtLeastNValue(workersForDemand, shiftNWorkers(d)(w)), CPPropagStrength.Weak)
         }
       }
     }
-
-    minimize(objective)
   }
 
 

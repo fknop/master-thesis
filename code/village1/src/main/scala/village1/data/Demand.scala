@@ -12,11 +12,11 @@ case class Demand(
    additionalSkills: Array[Skill] = Array()
 ) {
 
-  val positions = 0 until requiredWorkers
+  val positions: Range = 0 until requiredWorkers
 
-  val workers: Int = requiredWorkers
+  val nWorkers: Int = requiredWorkers
 
-  val requirements: Array[WorkerRequirement] = Array.tabulate(workers)(i => {
+  val requirements: Array[WorkerRequirement] = Array.tabulate(nWorkers)(i => {
     if (i < requiredSkills.length) {
       WorkerRequirement(skills = requiredSkills(i))
     }

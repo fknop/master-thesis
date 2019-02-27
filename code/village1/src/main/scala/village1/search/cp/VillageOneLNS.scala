@@ -1,8 +1,6 @@
 package village1.search.cp
 
-import oscar.algo.search.SearchStatistics
 import oscar.cp._
-import oscar.cp.core.CPSol
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.format.json.{JsonParser, JsonSerializer}
@@ -26,20 +24,23 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     }
   }
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, repeat: Int = 10): Long = {
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Long = Long.MaxValue, repeat: Int = Int.MaxValue): Long = {
 
     val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
     val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
-    val shifts: Array[CPIntVar] = shiftDifferences.flatten
 
     solver.addDecisionVariables(flatWorkers)
     solver.addDecisionVariables(flatMachines)
     solver.addDecisionVariables(flatLocations)
-    
+
+    val heuristic = new MostAvailableValueHeuristic(this, flatWorkers)
+
+
+    minimize(objective)
     search {
 
-      var branching = binaryFirstFail(flatWorkers)
+      var branching = binaryIdx(flatWorkers, i => i, heuristic.valueHeuristic)
 
       if (flatMachines.nonEmpty) {
         branching = branching ++ binaryFirstFail(flatMachines)
@@ -49,15 +50,12 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
         branching = branching ++ binaryFirstFail(flatLocations)
       }
 
-      branching = branching ++ binaryFirstFail(shifts)
-
-      /*binarySplit(sameWorkerViolations) ++ */
-
       branching
     }
 
     var currentSolution: CPIntSol = null
     var workerSolution: Array[Array[Array[Int]]] = null
+    var best = Int.MaxValue
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
 
@@ -67,37 +65,63 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
         )
       }
 
-      println(objective.value)
+      best = objective.value
+
       // TODO avoid creating solutions if not necessary
       // - Save the values of variable and create solution from those when required
       emitSolution(createSolution())
     }
 
     time {
-      var limit = 10
+      var limit = 1000
       var totalTime = 0L
       var totalSol = 0
-      val rand = new scala.util.Random(0)
 
-      val stat = start(nSols = 1)
+      val stat = start(nSols = 1, (timeLimit / 1000).toInt)
+
+      if (best == objective.min) {
+        println("OPTIMAL")
+      }
 
       totalSol = stat.nSols
       totalTime += stat.time
 
       var r = 0
 
-      while (r < repeat && totalTime < timeLimit && totalSol < nSols) {
-        val stat = startSubjectTo(failureLimit = limit) {
+      var found = true
+
+      println(stat)
+
+      while (best > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
+        val remainingTime = timeLimit - totalTime
+        val stat = startSubjectTo(failureLimit = limit, timeLimit = (remainingTime / 1000).toInt) {
           val percentage = 50
 
-          relaxShifts(percentage, workerSolution)
-
-         //RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / (100 / percentage))
+         // relaxShifts(percentage, workerSolution)
+          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / (100 / percentage))
         }
 
         totalSol += stat.nSols
         totalTime += stat.time
-        limit = if (stat.completed) limit / 2 else limit * 2
+
+        if (timeLimit - totalTime < 1000) {
+          totalTime = timeLimit
+        }
+
+        found = stat.nSols > 0
+        limit =
+          if (stat.completed || found)
+            limit / 2
+          else
+            if (limit * 2 < 0)
+              Int.MaxValue
+            else
+              limit * 2
+
+
+
+        println("New limit is: " + limit)
+        println("Total Time: " + totalTime)
 
         r += 1
       }
@@ -122,13 +146,14 @@ object MainLNS extends App {
   val search = new VillageOneLNS(problem)
   var nSolution = 0
   search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(repeat = 50, timeLimit = 60 * 1000)
+  val stats = search.solve(timeLimit = 30 * 1000)
 
 
   println("nsolution " + nSolution)
   if (search.lastSolution != null) {
-    JsonSerializer.serialize(search.lastSolution)("results/results3.json")
+    JsonSerializer.serialize(search.lastSolution)("results/results4.json")
     println(search.lastSolution.valid)
   }
 
 }
+
