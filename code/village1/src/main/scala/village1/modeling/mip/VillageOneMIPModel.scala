@@ -4,7 +4,10 @@ import gurobi._
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
+import village1.search.cp.{VillageOneLNS, VillageOneSearch}
 import village1.util.Benchmark.time
+
+import scala.util.Random
 
 trait SolverResult {
   def dispose(): Unit
@@ -21,6 +24,14 @@ object VillageOneMIPModel {
   }
 }
 
+class Callback(model: VillageOneMIPModel) extends GRBCallback {
+  override def callback(): Unit = {
+    if (where == GRB.CB_MIPSOL) {
+      val solution = model.createSolution()
+      println("New solution found: " + solution.objective)
+    }
+  }
+}
 
 class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
 
@@ -28,9 +39,10 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
 
+
   private val env = VillageOneMIPModel.env
   private val model: GRBModel = new GRBModel(env)
-  private val variables: WorkerVariables = createWorkersVariables(model)
+  val variables: WorkerVariables = createWorkersVariables(model)
 
 
   def createWorkersVariables (model: GRBModel): WorkerVariables = {
@@ -53,8 +65,8 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
       if (impossible) {
         for (p <- demands(d).positions) {
-          variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0.0)
-//          expression.addTerm(1, variables(t)(d)(p)(w))
+         // variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0.0)
+          expression.addTerm(1, variables(t)(d)(p)(w))
 //          model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"imp[$t][$d][$p][$w]")
         }
       }
@@ -63,13 +75,13 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
       val workers = possibleWorkersForDemands(d)(t)(p)
       for (w <- allWorkers.diff(workers)) {
-        variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
-//        expression.addTerm(1, variables(t)(d)(p)(w))
+//        variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
+        expression.addTerm(1, variables(t)(d)(p)(w))
 //        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
       }
     }
 
-//    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
+    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
   }
 
 
@@ -166,6 +178,23 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     model.setObjective(expression, GRB.MINIMIZE)
   }
 
+  def setInitialSolution(solution: Solution): Unit = {
+          val rand = new Random(0)
+    for (demandAssignment <- solution.plannings) {
+      val d = demandAssignment.demand
+      val workerAssignments = demandAssignment.workerAssignments
+      for (assignment <- workerAssignments) {
+        val t = assignment.timeslot
+        val workers = assignment.workers
+        for (i <- workers.indices) {
+          if (rand.nextInt(100) < 50) {
+            variables(t)(d)(i)(workers(i)).set(GRB.DoubleAttr.Start, 1.0)
+          }
+        }
+      }
+    }
+  }
+
   def applyObjectives (model: GRBModel, variables: WorkerVariables): Unit = {
     minimizeShiftChange(model, variables)
   }
@@ -179,7 +208,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
   }
 
   // Only call this once model is optimized
-  def createSolution (variables: WorkerVariables): Solution = {
+  def createSolution (): Solution = {
     var demandAssignments: Array[DemandAssignment] = Array()
 
     for (d <- Demands) {
@@ -204,7 +233,8 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     }
 
 
-    Solution(problem, demandAssignments)
+    val objective = model.get(GRB.DoubleAttr.ObjVal)
+    Solution(problem, demandAssignments, objective.toInt)
   }
 
 
@@ -217,7 +247,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     }
   }
 
-  def solve(timeLimit: Int = -1, consoleLog: Boolean = true): SolverResult = {
+  def solve(timeLimit: Int = -1, consoleLog: Boolean = true, MIPFocus: Int = 0): SolverResult = {
 
     if (timeLimit > 0) {
       model.set(GRB.DoubleParam.TimeLimit, timeLimit)
@@ -227,12 +257,16 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
       model.set(GRB.IntParam.LogToConsole, 0)
     }
 
+    model.set(GRB.IntParam.MIPFocus, MIPFocus)
+
+    model.setCallback(new Callback(this))
+
     val t = time {
       model.optimize()
     }
 
     new SolverResult {
-      lazy val solution: Solution = createSolution(variables)
+      lazy val solution: Solution = createSolution()
       val solveTime: Long = t
       override def dispose(): Unit = {
         model.dispose()
@@ -246,12 +280,21 @@ object MipMain2 extends App {
 
 
 
-  val model = new VillageOneMIPModel(JsonParser.parse("data/instances/generated/t10d50w300-943.json"))
-//  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/generated/t5d5w20-491.json"))
-//  val model = new VillageOneMIPModel2(JsonParser.parse("data/instances/problem2.json"))
-  println(model.precomputeTime)
 
-  model.initialize()
+  val name = "t10d50w300-638"
+  val path = s"data/instances/generated/${name}.json"
+  val problem = JsonParser.parse(path)
+  val cpSearch = new VillageOneSearch(problem)
+
+  val stat = cpSearch.solve(nSols = 1)
+
+  println(stat)
+  val model = new VillageOneMIPModel(problem)
+  model.initialize(withObjective = true)
+
+  if (cpSearch.lastSolution != null) {
+    model.setInitialSolution(cpSearch.lastSolution)
+  }
 
 
   try {
@@ -261,7 +304,7 @@ object MipMain2 extends App {
     println(solution.valid)
     println(solver.solveTime)
     solver.dispose()
-    JsonSerializer.serialize(solution)("data/results/mip.json")
+    JsonSerializer.serialize(solution)(s"data/results/mip-${name}-o=${solution.objective}.json")
 
   }
   catch {

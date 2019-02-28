@@ -1,18 +1,14 @@
 package village1.benchmark
 
-import java.awt.Font
-import java.util.Comparator
-
-import org.jfree.chart.renderer.category.{StackedAreaRenderer, StackedBarRenderer, StatisticalLineAndShapeRenderer}
-import village1.generator.InstanceGenerator
-import village1.modeling.{Problem, VillageOneModel}
-import village1.modeling.mip.{SolverResult, VillageOneMIPModel}
-import village1.search.cp.VillageOneSearch
-import org.jfree.chart.{ChartFactory, ChartFrame, ChartPanel, JFreeChart}
 import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.plot.CategoryPlot
-import org.jfree.chart.ui.RectangleInsets
+import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer
+import org.jfree.chart.{ChartFrame, JFreeChart}
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset
+import village1.generator.InstanceGenerator
+import village1.modeling.VillageOneModel
+import village1.modeling.mip.{SolverResult, VillageOneMIPModel}
+import village1.search.cp.VillageOneSearch
 import village1.util.Benchmark._
 
 

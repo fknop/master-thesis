@@ -10,7 +10,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
 
   def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Long = Long.MaxValue): SearchStatistics = {
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue): SearchStatistics = {
 
     val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
@@ -21,7 +21,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
     minimize(objective)
     search {
 
-      var branching = binaryIdx(flatWorkers, i => i, heuristic.valueHeuristic)
+      var branching = binaryIdx(flatWorkers, heuristic.varHeuristic, heuristic.valueHeuristic)
 
       if (flatMachines.nonEmpty) {
         branching = branching ++ binaryFirstFail(flatMachines)
@@ -38,8 +38,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
       emitSolution(createSolution())
     }
 
-    // use restarts to break heavy tails phenomena
-    start(nSols = nSols, timeLimit = (timeLimit / 1000).toInt)
+    start(nSols = nSols, timeLimit = timeLimit / 1000)
   }
 }
 

@@ -28,7 +28,7 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     }
   }
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Long = Long.MaxValue, repeat: Int = Int.MaxValue, silent: Boolean = false): Long = {
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, repeat: Int = Int.MaxValue, silent: Boolean = false): Long = {
 
     solver.silent = silent
 
@@ -81,8 +81,9 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
       var totalTime = 0L
       var totalSol = 0
 
-      val stat = start(nSols = 1, (timeLimit / 1000).toInt)
+      val stat = start(nSols = 1, timeLimit / 1000)
 
+      println(stat)
       totalSol = stat.nSols
       totalTime += stat.time
 
@@ -143,12 +144,12 @@ object MainLNS extends App {
   val problem = JsonParser.parse(path)
 
   val search = new VillageOneLNS(problem)
-  var nSolution = 0
-  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 60 * 1000)
+//  var nSolution = 0
+//  search.onSolutionFound( _ => nSolution += 1)
+  val stats = search.solve(/*timeLimit = 60 * 1000*/)
 
 
-  println("nsolution " + nSolution)
+//  println("nsolution " + nSolution)
   val solution = search.lastSolution
   if (solution != null) {
     JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
