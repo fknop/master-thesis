@@ -172,31 +172,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
     }
   }
 
-  // Demands should have workers with required skills
-  private def applyRequiredSkills (): Unit = {
 
-    for (d <- Demands) {
-      val demand = demands(d)
-      for (w <- 0 until demand.nWorkers) {
-        val requirements = demand.worker(w)
-        val skills = requirements.skills
-
-        if (skills.nonEmpty) {
-
-          // Workers that possess all the skills required
-          // TODO: add this as precompute step
-          val possibleWorkers: Set[Int] = skills.foldLeft(Set[Int]()) {
-            (acc, skill) => acc.intersect(workersWithSkills(skill.name))
-          }.filter(w => workers(w).satisfySkills(skills))
-
-          val impossibleWorkers = allWorkers.diff(possibleWorkers)
-          for (worker <- impossibleWorkers; t <- demand.periods) {
-            add(workerVariables(t)(d)(w) !== worker)
-          }
-        }
-      }
-    }
-  }
 
   /**
     * Apply a constraint on additional skills that any workers in the team
@@ -252,9 +228,10 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
 
   def createSolution(): Solution = {
-    var demandAssignments: Array[DemandAssignment] = Array()
+    val demandAssignments: Array[DemandAssignment] = Array.fill(D)(null)
 
-    for (d <- Demands) {
+    var d = 0
+    while (d < D) {
       val demand = demands(d)
       val slots = demand.periods
 
@@ -271,22 +248,29 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
         if (locationValue != null) Some(locationValue.value)
         else None
 
-      var workerAssignments: Array[WorkerAssignment] = Array()
+      val workerAssignments: Array[WorkerAssignment] = Array.fill(slots.size)(null)
+
+      var i = 0
 
       for (t <- slots) {
         val workerValues = workerVariables(t)(d)
-
-        if (workerValues.nonEmpty) {
-          val workers: Array[Int] = workerValues.map(_.value)
-          val assignment = WorkerAssignment(workers, t)
-          workerAssignments :+= assignment
+        val workers = Array.fill(workerValues.length)(0)
+        var w = 0
+        while (w < workers.length) {
+          workers(w) = workerValues(w).value
+          w += 1
         }
+
+        workerAssignments(i) = WorkerAssignment(workers, t)
+        i += 1
       }
 
-      demandAssignments :+= DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment)
+      demandAssignments(d) = DemandAssignment(d, workerAssignments, machineAssignments, locationAssignment)
+      d += 1
     }
 
-    Solution(problem, demandAssignments)
+
+    Solution(problem, demandAssignments, objective.value)
   }
 
 

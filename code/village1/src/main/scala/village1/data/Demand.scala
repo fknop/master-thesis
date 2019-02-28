@@ -1,6 +1,7 @@
 package village1.data
 
 
+// TODO: change periods with an array for better iterations
 case class Demand(
    id: Int,
    client: Int,

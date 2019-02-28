@@ -131,15 +131,15 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
       }
     }
   }
-
-  def applySkills (model: GRBModel, variables: WorkerVariables): Unit = {
-    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
-      val workers = possibleWorkersForDemands(d)(t)(p)
-      for (w <- allWorkers.diff(workers)) {
-        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
-      }
-    }
-  }
+//
+//  def applySkills (model: GRBModel, variables: WorkerVariables): Unit = {
+//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
+//      val workers = possibleWorkersForDemands(d)(t)(p)
+//      for (w <- allWorkers.diff(workers)) {
+//        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
+//      }
+//    }
+//  }
 
 
   // TODO: this works for now for simple models - check for larger ones
@@ -147,34 +147,23 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     * Minimize shift change between workers at one position
     */
   def minimizeShiftChange (model: GRBModel, variables: WorkerVariables): Unit = {
-    val expressions = new GRBLinExpr()
+    val expression = new GRBLinExpr()
     for (d <- Demands; p <- demands(d).positions) {
 
       for (w <- Workers) {
-        val expression = new GRBLinExpr()
-        val sum = model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, s"sum[$d][$p][$w]")
+        // All the variables for this worker at demand d and position p
+        val vars = demands(d).periods.map(variables(_)(d)(p)(w)).toArray
 
-        expression.addTerm(-1, sum)
-        for (t <- demands(d).periods) {
-          expression.addTerm(1, variables(t)(d)(p)(w))
-        }
+        // Binary variable: is the worker working for that shift at at least one time period ?
+        val isWorking = model.addVar(0, 1.0, 0, GRB.BINARY, s"isWorker[$d][$p][$w]")
+        model.addGenConstrOr(isWorking, vars, s"isWorkingConstr[$d][$p][$w]")
 
-        // -sum + w_0jkl + w_1jkl + ... w_ijkl = 0
-        // w_0jkl + w_1jkl + ... w_ijkl = sum
-        model.addConstr(expression, GRB.EQUAL, 0, s"sameShifts[$d][$p][$w]")
-
-        // min(sum, 1)
-        // min(w_0jkl + w_1jkl + ... w_ijkl, 1)
-        val min = model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, s"objMin[$d][$p][$w]")
-        model.addGenConstrMin(min, Array(sum), 1, s"constrMin[$d][$p][$w]")
-
-        // The sum of each min variable for each worker represent the number of different workers
-        // for a position, we need to minimize the number of different workers for that demand.
-        expressions.addTerm(1, min)
+        expression.addTerm(1, isWorking)
       }
     }
 
-    model.setObjective(expressions, GRB.MINIMIZE)
+    // Minimize the number of working workers at each position
+    model.setObjective(expression, GRB.MINIMIZE)
   }
 
   def applyObjectives (model: GRBModel, variables: WorkerVariables): Unit = {
@@ -187,7 +176,6 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     workerNumberSatisfied(model, variables)
     workerWorkerIncompatibilities(model, variables)
     workerClientIncompatibilities(model, variables)
-//    applySkills(model, variables)
   }
 
   // Only call this once model is optimized

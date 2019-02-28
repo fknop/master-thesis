@@ -1,6 +1,10 @@
 package village1.search.cp
 
+import oscar.algo.branchings.BinaryBranching
+import oscar.algo.search.Branching
+import oscar.algo.vars.IntVarLike
 import oscar.cp._
+import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.format.json.{JsonParser, JsonSerializer}
@@ -24,7 +28,9 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     }
   }
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Long = Long.MaxValue, repeat: Int = Int.MaxValue): Long = {
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Long = Long.MaxValue, repeat: Int = Int.MaxValue, silent: Boolean = false): Long = {
+
+    solver.silent = silent
 
     val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
@@ -34,13 +40,12 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     solver.addDecisionVariables(flatMachines)
     solver.addDecisionVariables(flatLocations)
 
-    val heuristic = new MostAvailableValueHeuristic(this, flatWorkers)
+    val heuristic = new MostAvailableHeuristic(this, flatWorkers)
 
 
     minimize(objective)
     search {
-
-      var branching = binaryIdx(flatWorkers, i => i, heuristic.valueHeuristic)
+      var branching = binaryIdx(flatWorkers, heuristic.varHeuristic, heuristic.valueHeuristic)
 
       if (flatMachines.nonEmpty) {
         branching = branching ++ binaryFirstFail(flatMachines)
@@ -54,21 +59,20 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     }
 
     var currentSolution: CPIntSol = null
-    var workerSolution: Array[Array[Array[Int]]] = null
+    //var workerSolution: Array[Array[Array[Int]]] = null
     var best = Int.MaxValue
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-
+/**
       workerSolution = workerVariables.map {
         _.map(
           _.map(_.value)
         )
       }
+  **/
 
       best = objective.value
 
-      // TODO avoid creating solutions if not necessary
-      // - Save the values of variable and create solution from those when required
       emitSolution(createSolution())
     }
 
@@ -79,18 +83,12 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
 
       val stat = start(nSols = 1, (timeLimit / 1000).toInt)
 
-      if (best == objective.min) {
-        println("OPTIMAL")
-      }
-
       totalSol = stat.nSols
       totalTime += stat.time
 
       var r = 0
 
       var found = true
-
-      println(stat)
 
       while (best > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
         val remainingTime = timeLimit - totalTime
@@ -118,11 +116,6 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
             else
               limit * 2
 
-
-
-        println("New limit is: " + limit)
-        println("Total Time: " + totalTime)
-
         r += 1
       }
 
@@ -138,21 +131,28 @@ object MainLNS extends App {
   val generatedInstances: Array[String] = Array(
     "t5d5w20-491.json",
     "t10d50w300-638.json"
-  ).map(f => s"$generatedFolder/$f")
+  )
+
+  val generatedInstancesPath = generatedInstances.map(f => s"$generatedFolder/$f")
+
+  val id = 1
+  val path = generatedInstancesPath(id)
+  val name = generatedInstances(id)
 
 
-  val problem = JsonParser.parse(generatedInstances(1))
+  val problem = JsonParser.parse(path)
 
   val search = new VillageOneLNS(problem)
   var nSolution = 0
   search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 30 * 1000)
+  val stats = search.solve(timeLimit = 60 * 1000)
 
 
   println("nsolution " + nSolution)
-  if (search.lastSolution != null) {
-    JsonSerializer.serialize(search.lastSolution)("results/results4.json")
-    println(search.lastSolution.valid)
+  val solution = search.lastSolution
+  if (solution != null) {
+    JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
+    println(solution.valid)
   }
 
 }

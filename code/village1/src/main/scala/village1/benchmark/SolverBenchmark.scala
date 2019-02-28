@@ -15,53 +15,29 @@ import org.jfree.chart.ui.RectangleInsets
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset
 import village1.util.Benchmark._
 
-case class BenchmarkMeasurement(mean: Double, stdev: Double)
-
-case class ProblemSize(D: Int, W: Int) extends Comparable[ProblemSize] {
-
-  override def compareTo(o: ProblemSize): Int = {
-    if (D > o.D) 1
-    else if (D < o.D) -1
-    else if (W > o.W) 1
-    else if (W < o.W) -1
-    else 0
-  }
-
-  override def toString: String = s"D=$D\nW=$W"
-}
-
-case class BenchmarkResult(T: Int, values: Array[(ProblemSize, BenchmarkMeasurement)])
 
 
 object SolverBenchmark extends App {
 
-  val results = run(repeat = 1, startRun = 0)
+  val results = run(repeat = 1, dryRun = 0)
 
   val dataset = MyChartApp.createDataset(results(0))
   val plot = MyChartApp.createPlot(dataset)
   MyChartApp.show(plot)
 
-  def run (repeat: Int = 10, startRun: Int = 1, timeLimit: Int = 60): Array[(BenchmarkResult, BenchmarkResult)] = {
+  def run (repeat: Int = 10, dryRun: Int = 1, timeLimit: Int = 60): Array[(BenchmarkResult, BenchmarkResult)] = {
     val T = Array(5) //, 10, 15)
     val D = Array(5, 10, 20, 30, 40, 50)
     val W = Array(50, 100, 150, 200, 250, 300)
 
 
     val cp = new {
-      val min = Array.fill(T.length, D.length, W.length)(Long.MaxValue)
-      val max = Array.fill(T.length, D.length, W.length)(0L)
       val measurements = Array.fill(T.length, D.length, W.length)(Array.fill(repeat)(0L))
-      val avg = Array.fill(T.length, D.length, W.length)(0.0)
-      val stdev = Array.fill(T.length, D.length, W.length)(0.0)
       val results = Array.fill(T.length)(null)
     }
 
     val mip = new {
-      val min = Array.fill(T.length, D.length, W.length)(Long.MaxValue)
-      val max = Array.fill(T.length, D.length, W.length)(0L)
       val measurements = Array.fill(T.length, D.length, W.length)(Array.fill(repeat)(0L))
-      val avg = Array.fill(T.length, D.length, W.length)(0.0)
-      val stdev = Array.fill(T.length, D.length, W.length)(0.0)
       val results = Array.fill(T.length)(null)
     }
 
@@ -79,7 +55,7 @@ object SolverBenchmark extends App {
     }
 
 
-    for (r <- -startRun until repeat) {
+    for (r <- -dryRun until repeat) {
       val measure = r >= 0
       for (i <- T.indices) {
         val t = T(i)
@@ -100,50 +76,33 @@ object SolverBenchmark extends App {
       }
     }
 
-    var results = Array[(BenchmarkResult, BenchmarkResult)]()
+    val results = Array.fill[(BenchmarkResult, BenchmarkResult)](T.length)(null)
     for (i <- T.indices) {
-      var cpValues = Array[(ProblemSize, BenchmarkMeasurement)]()
-      var mipValues = Array[(ProblemSize, BenchmarkMeasurement)]()
+      val cpValues = Array.fill[(ProblemSize, BenchmarkMeasurement)](D.length * W.length)(null)
+      val mipValues = Array.fill[(ProblemSize, BenchmarkMeasurement)](D.length * W.length)(null)
       for (j <- D.indices) {
         for (k <- W.indices) {
-
-
-          val cpMeasurements = cp.measurements(i)(j)(k)
-          val mipMeasurements = mip.measurements(i)(j)(k)
-
-          cp.avg(i)(j)(k) = mean(cpMeasurements)
-          cp.min(i)(j)(k) = cpMeasurements.min
-          cp.max(i)(j)(k) = cpMeasurements.max
-          cp.stdev(i)(j)(k) = stdDev(cpMeasurements)
-
-          mip.avg(i)(j)(k) = mean(mipMeasurements)
-          mip.min(i)(j)(k) = mipMeasurements.min
-          mip.max(i)(j)(k) = mipMeasurements.max
-          mip.stdev(i)(j)(k) = stdDev(mipMeasurements)
-
-
-          val cpMin = cp.min(i)(j)(k)
-          val mipMin = mip.min(i)(j)(k)
-          val cpAvg = cp.avg(i)(j)(k)
-          val mipAvg = mip.avg(i)(j)(k)
-          val cpMax = cp.max(i)(j)(k)
-          val mipMax = mip.max(i)(j)(k)
-
           val problemSize = ProblemSize(D(j), W(k))
-          val cpMeasurement = BenchmarkMeasurement(cp.avg(i)(j)(k), cp.stdev(i)(j)(k))
-          val mipMeasurement = BenchmarkMeasurement(mip.avg(i)(j)(k), mip.stdev(i)(j)(k))
-          cpValues :+= (problemSize, cpMeasurement)
-          mipValues :+= (problemSize, mipMeasurement)
-
-          println(s"cp.min: $cpMin, cp.avg: $cpAvg, cp.max: $cpMax")
-          println(s"mip.min: $mipMin, mip.avg: $mipAvg, mip.max: $mipMax")
+          val cpMeasurement = getMeasurements(cp.measurements(i)(j)(k))
+          val mipMeasurement = getMeasurements(mip.measurements(i)(j)(k))
+          cpValues(j) = (problemSize, cpMeasurement)
+          mipValues(j) = (problemSize, mipMeasurement)
         }
       }
 
-      results :+= (BenchmarkResult(T(i), cpValues), BenchmarkResult(T(i), mipValues))
+      results(i) = (BenchmarkResult(T(i), cpValues), BenchmarkResult(T(i), mipValues))
     }
 
     results
+  }
+
+  private def getMeasurements(measurements: Array[Long]): BenchmarkMeasurement = {
+    BenchmarkMeasurement(
+      measurements.min,
+      measurements.max,
+      mean(measurements),
+      stdDev(measurements)
+    )
   }
 
   private def solveMIP (base: VillageOneModel, timeLimit: Int): Long = {

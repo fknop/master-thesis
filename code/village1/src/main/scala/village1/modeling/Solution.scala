@@ -2,7 +2,7 @@ package village1.modeling
 
 import village1.data.{DemandAssignment}
 
-case class Solution(problem: Problem, plannings: Array[DemandAssignment]) {
+case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
 
   // TODO: implement machines / locations logic
   // TODO: implement additional skills logic

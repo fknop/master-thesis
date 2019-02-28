@@ -16,7 +16,7 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
     val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
-    val heuristic = new MostAvailableValueHeuristic(this, flatWorkers)
+    val heuristic = new MostAvailableHeuristic(this, flatWorkers)
 
     minimize(objective)
     search {

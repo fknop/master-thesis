@@ -3,7 +3,7 @@ package village1.search.cp
 import oscar.cp.core.variables.CPIntVar
 import village1.modeling.VillageOneModel
 
-class MostAvailableValueHeuristic(model: VillageOneModel, x: Array[CPIntVar]) {
+class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) {
 
   // d -> (p -> (w0, w1, w2))
   private val mostAvailable: Array[Array[Array[Int]]] = generateMostAvailableWorkers()
@@ -47,14 +47,21 @@ class MostAvailableValueHeuristic(model: VillageOneModel, x: Array[CPIntVar]) {
     mostAvailable
   }
 
+  def varHeuristic(i: Int): Int = {
+    i
+  }
+
   def valueHeuristic(i: Int): Int = {
     val (_, d, p) = reverseMap(i)
     val mostAvailableWorkers = mostAvailable(d)(p)
 
-    for (j <- mostAvailableWorkers.indices) {
+    // Hot code, use while loop instead of for
+    var j = 0
+    while (j < mostAvailableWorkers.length) {
       if (x(i).hasValue(mostAvailableWorkers(j))) {
         return mostAvailableWorkers(j)
       }
+      j += 1
     }
 
     // Should not happen
