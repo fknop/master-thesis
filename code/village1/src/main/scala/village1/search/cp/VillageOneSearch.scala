@@ -10,7 +10,9 @@ class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = No
 
   def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue): SearchStatistics = {
+  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, silent: Boolean = false): SearchStatistics = {
+
+    solver.silent = silent
 
     val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
     val flatMachines: Array[CPIntVar] = machineVariables.flatten

@@ -12,10 +12,16 @@ import village1.modeling.{Problem, VillageOneModel}
 import village1.modeling.cp.VillageOneCPModel
 import village1.util.Benchmark.time
 
+object SearchHeuristic extends Enumeration {
+  val MostAvailable, Default = Value
+}
+
 
 class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, baseModel) with Search {
 
   def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
+
+
 
   private def relaxShifts(percentage: Int, solution: Array[Array[Array[Int]]]) {
     val rand = new scala.util.Random(0)
@@ -28,7 +34,13 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     }
   }
 
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, repeat: Int = Int.MaxValue, silent: Boolean = false): Long = {
+  def solve(
+     nSols: Int = Int.MaxValue,
+     timeLimit: Int = Int.MaxValue,
+     repeat: Int = Int.MaxValue,
+     silent: Boolean = false,
+     heuristic: SearchHeuristic.Value = SearchHeuristic.MostAvailable
+   ): Long = {
 
     solver.silent = silent
 
@@ -40,12 +52,16 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     solver.addDecisionVariables(flatMachines)
     solver.addDecisionVariables(flatLocations)
 
-    val heuristic = new MostAvailableHeuristic(this, flatWorkers)
-
 
     minimize(objective)
     search {
-      var branching = binaryIdx(flatWorkers, heuristic.varHeuristic, heuristic.valueHeuristic)
+      var branching = heuristic match {
+        case SearchHeuristic.Default => binaryFirstFail(flatWorkers)
+        case SearchHeuristic.MostAvailable =>
+          val h = new MostAvailableHeuristic(this, flatWorkers)
+          binaryIdx(flatWorkers, h.varHeuristic, h.valueHeuristic)
+      }
+
 
       if (flatMachines.nonEmpty) {
         branching = branching ++ binaryFirstFail(flatMachines)
@@ -83,7 +99,6 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
 
       val stat = start(nSols = 1, timeLimit / 1000)
 
-      println(stat)
       totalSol = stat.nSols
       totalTime += stat.time
 

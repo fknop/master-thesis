@@ -247,17 +247,18 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     }
   }
 
-  def solve(timeLimit: Int = -1, consoleLog: Boolean = true, MIPFocus: Int = 0): SolverResult = {
+  def solve(timeLimit: Int = -1, nSols: Int = Int.MaxValue, silent: Boolean = false, MIPFocus: Int = 0): SolverResult = {
 
     if (timeLimit > 0) {
       model.set(GRB.DoubleParam.TimeLimit, timeLimit)
     }
 
-    if (!consoleLog) {
+    if (silent) {
       model.set(GRB.IntParam.LogToConsole, 0)
     }
 
     model.set(GRB.IntParam.MIPFocus, MIPFocus)
+    model.set(GRB.IntParam.SolutionLimit, nSols)
 
     model.setCallback(new Callback(this))
 

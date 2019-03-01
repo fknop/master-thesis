@@ -15,4 +15,5 @@ case class ProblemSize(D: Int, W: Int) extends Comparable[ProblemSize] {
   override def toString: String = s"D=$D\nW=$W"
 }
 
-case class BenchmarkResult(T: Int, values: Array[(ProblemSize, BenchmarkMeasurement)])
+case class BenchmarkResult(size: ProblemSize, time: BenchmarkMeasurement, objective: BenchmarkMeasurement)
+case class BenchmarkInstance(T: Int, results: Array[BenchmarkResult])
