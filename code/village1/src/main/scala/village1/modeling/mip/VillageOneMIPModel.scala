@@ -24,11 +24,60 @@ object VillageOneMIPModel {
   }
 }
 
-class Callback(model: VillageOneMIPModel) extends GRBCallback {
+class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
+
+  type WorkerVariablesSolution = Array[Array[Array[Array[Double]]]]
+
+  private var _solution: Solution = null
+
+  def solution: Solution = _solution
+
+  private def getValues(): WorkerVariablesSolution = {
+    val variables = model.variables
+    variables.map(
+      _.map(
+        _.map(
+          _.map(
+            getSolution
+          )
+        )
+      )
+    )
+  }
+
+  // Only call this once model is optimized
+  private def createSolution (values: WorkerVariablesSolution): Solution = {
+    var demandAssignments: Array[DemandAssignment] = Array()
+
+    for (d <- model.Demands) {
+      val demand = model.demands(d)
+      var workerAssignments: Array[WorkerAssignment] = Array()
+
+      for (t <- demand.periods) {
+        var workers = Array[Int]()
+
+        for (p <- demand.positions; w <- model.Workers) {
+          val value = values(t)(d)(p)(w)
+          if (value == 1.0) {
+            workers :+= w
+          }
+        }
+
+        workerAssignments :+= WorkerAssignment(workers, t)
+      }
+
+      demandAssignments :+= DemandAssignment(d, workerAssignments, None, None)
+    }
+
+
+    val objective = this.getDoubleInfo(GRB.CB_MIPSOL_OBJ)
+    Solution(model.problem, demandAssignments, objective.toInt)
+  }
+
+
   override def callback(): Unit = {
     if (where == GRB.CB_MIPSOL) {
-      val solution = model.createSolution()
-      println("New solution found: " + solution.objective)
+      _solution = createSolution(getValues())
     }
   }
 }
@@ -41,7 +90,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 
   private val env = VillageOneMIPModel.env
-  private val model: GRBModel = new GRBModel(env)
+  val model: GRBModel = new GRBModel(env)
   val variables: WorkerVariables = createWorkersVariables(model)
 
 
@@ -207,35 +256,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     workerClientIncompatibilities(model, variables)
   }
 
-  // Only call this once model is optimized
-  def createSolution (): Solution = {
-    var demandAssignments: Array[DemandAssignment] = Array()
 
-    for (d <- Demands) {
-      val demand = demands(d)
-      var workerAssignments: Array[WorkerAssignment] = Array()
-
-      for (t <- demand.periods) {
-        var workers = Array[Int]()
-
-        for (p <- demand.positions; w <- Workers) {
-          val variable = variables(t)(d)(p)(w)
-          val value = variable.get(GRB.DoubleAttr.X)
-          if (value == 1.0) {
-            workers :+= w
-          }
-        }
-
-        workerAssignments :+= WorkerAssignment(workers, t)
-      }
-
-      demandAssignments :+= DemandAssignment(d, workerAssignments, None, None)
-    }
-
-
-    val objective = model.get(GRB.DoubleAttr.ObjVal)
-    Solution(problem, demandAssignments, objective.toInt)
-  }
 
 
 
@@ -260,14 +281,16 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     model.set(GRB.IntParam.MIPFocus, MIPFocus)
     model.set(GRB.IntParam.SolutionLimit, nSols)
 
-    model.setCallback(new Callback(this))
+
+    val solutionListener = new SolutionListener(this)
+    model.setCallback(solutionListener)
 
     val t = time {
       model.optimize()
     }
 
     new SolverResult {
-      lazy val solution: Solution = createSolution()
+      lazy val solution: Solution = solutionListener.solution
       val solveTime: Long = t
       override def dispose(): Unit = {
         model.dispose()

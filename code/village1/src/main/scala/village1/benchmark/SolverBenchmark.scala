@@ -22,7 +22,7 @@ object SolverBenchmark extends App {
   val W = Array(100, 150, 200, 250, 300)
 
   val SolutionLimit: Int = 1
-  val TimeLimit = 5 // seconds
+  val TimeLimit = 60 // seconds
 
   val baseModels = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
     val problem = InstanceGenerator.generate(
@@ -38,14 +38,20 @@ object SolverBenchmark extends App {
   }
 
 
+
   val results = run(repeat = 2, dryRun = 1, solve = solveCP)
   println("solveCP done")
-  val results2 = run(repeat = 2, dryRun = 1, solve = solveCPDefaultHeuristic)
+  //  val results2 = run(repeat = 2, dryRun = 1, solve = solveCPDefaultHeuristic)
+  val results2 = run(repeat = 2, dryRun = 1, solve = solveMIP)
 
-  val tdataset = BenchmarkChart.createRuntimeDataset(("CP", results(0)), ("CP-2", results2(0)))
+
+  val results3 = run(repeat = 2, dryRun = 1, solve = solveCPThenMIP)
+
+
+  val tdataset = BenchmarkChart.createRuntimeDataset(("CP", results(0)), ("MIP", results2(0)), ("CP+MIP", results3(0)))
   val tplot = BenchmarkChart.createRuntimePlot(tdataset)
 
-  val odataset = BenchmarkChart.createObjectiveDataset(("CP", results(0)), ("CP-2", results2(0)))
+  val odataset = BenchmarkChart.createObjectiveDataset(("CP", results(0)), ("MIP", results2(0)), ("CP+MIP", results3(0)))
   val oplot = BenchmarkChart.createObjectivePlot(odataset)
 
   val plot = BenchmarkChart.combinePlot(tplot, oplot)
@@ -102,9 +108,28 @@ object SolverBenchmark extends App {
     )
   }
 
+  private def solveCPThenMIP (base: VillageOneModel): (Long, Int) = {
+    val cp = new VillageOneSearch(base)
+    val stat = cp.solve(nSols = 1, timeLimit = TimeLimit * 1000, silent = true)
+
+    val remaining = TimeLimit - (stat.time / 1000).toInt
+
+
+    val model = new VillageOneMIPModel(base)
+    model.initialize(withObjective = true)
+
+    if (cp.lastSolution != null) {
+      model.setInitialSolution(cp.lastSolution)
+    }
+
+    val solver: SolverResult = model.solve(silent = true, timeLimit = remaining, nSols = SolutionLimit)
+    solver.dispose()
+    (solver.solveTime + stat.time, solver.solution.objective)
+  }
+
   private def solveMIP (base: VillageOneModel): (Long, Int) = {
     val model = new VillageOneMIPModel(base)
-    model.initialize()
+    model.initialize(withObjective = true)
     val solver: SolverResult = model.solve(silent = true, timeLimit = TimeLimit, nSols = SolutionLimit)
     solver.dispose()
 
