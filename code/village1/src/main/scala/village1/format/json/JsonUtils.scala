@@ -1,12 +1,8 @@
 package village1.format.json
 
-import java.io.PrintWriter
-
-import play.api.libs.json.{JsResult, JsValue, Json}
 import com.eclipsesource.schema._
-import village1.util.FileUtils.{writeFile, readFile}
-
-import scala.io.Source
+import play.api.libs.json.{JsResult, JsValue, Json}
+import village1.util.FileUtils.{readFile, writeFile}
 
 object JsonUtils {
   def errorsToString (result: JsResult[JsValue]): String = {

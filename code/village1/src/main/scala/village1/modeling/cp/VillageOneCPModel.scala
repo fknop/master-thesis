@@ -1,7 +1,7 @@
 package village1.modeling.cp
 
 import oscar.cp._
-import oscar.cp.constraints.{AtLeastNValue, AtMostNValue}
+import oscar.cp.constraints.AtLeastNValue
 import oscar.cp.core.CPPropagStrength
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.{Problem, Solution, VillageOneModel}
@@ -42,6 +42,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
 
   def initialize (): Unit = {
+    removeWorkerSymmetries()
     applyAllDifferentWorkers()
     applyWorkerWorkerIncompatibilities()
     applyWorkerClientIncompatibilities()
@@ -74,6 +75,7 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
     })
   }
 
+
   private def generateLocationVariables (): LocationVariables = {
     Array.tabulate(D)(d => {
       if (demands(d).possibleLocations.isEmpty) null
@@ -93,6 +95,24 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
     })
   }
 
+  private def removeWorkerSymmetries (): Unit = {
+    for (d <- Demands) {
+      for (t <- demands(d).periods) {
+        val symmetries = Utilities.groupByEquality(possibleWorkersForDemands(d)(t))
+        if (symmetries.nonEmpty) {
+          val possibleWithoutSymmetries = Utilities.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
+          for (symmetry <- symmetries) {
+            for (p <- symmetry) {
+              val possible = possibleWithoutSymmetries(p)
+              for (value <- possible) {
+                workerVariables(t)(d)(p).removeValue(value)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   // All workers for a given time must be different
   private def applyAllDifferentWorkers (): Unit = {
     for (period <- Periods) {

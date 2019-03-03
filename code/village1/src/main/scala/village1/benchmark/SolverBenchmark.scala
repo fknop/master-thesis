@@ -1,10 +1,8 @@
 package village1.benchmark
 
-import java.io.{FileOutputStream, ObjectOutputStream, OutputStream}
-
 import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.plot.{CategoryPlot, CombinedDomainCategoryPlot}
-import org.jfree.chart.renderer.category.{StatisticalBarRenderer, StatisticalLineAndShapeRenderer}
+import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer
 import org.jfree.chart.{ChartFrame, JFreeChart}
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset
 import village1.generator.InstanceGenerator
@@ -18,11 +16,11 @@ object SolverBenchmark extends App {
   // Benchmark Parameters
   val T = Array(5) //, 10, 15)
   //  val D = Array(5, 10, 20, 30, 40, 50)
-  val D = Array(30, 50)
-  val W = Array(100, 150, 200, 250, 300)
+  val D = Array(20, 50)
+  val W = Array(100, 200, 300)
 
-  val SolutionLimit: Int = 1
-  val TimeLimit = 60 // seconds
+  val SolutionLimit: Int = Int.MaxValue
+  val TimeLimit = 20 // seconds
   val Repeat = 2
   val DryRun = 1
 
@@ -40,9 +38,7 @@ object SolverBenchmark extends App {
   }
 
 
-
   val results = run(repeat = Repeat, dryRun = DryRun, solve = solveCP)
-  println("solveCP done")
   //  val results2 = run(repeat = 2, dryRun = 1, solve = solveCPDefaultHeuristic)
   val results2 = run(repeat = Repeat, dryRun = DryRun, solve = solveMIP)
   val results3 = run(repeat = Repeat, dryRun = DryRun, solve = solveCPThenMIP)
@@ -110,7 +106,7 @@ object SolverBenchmark extends App {
 
   private def solveCPThenMIP (base: VillageOneModel): (Long, Int) = {
     val cp = new VillageOneSearch(base)
-    val stat = cp.solve(nSols = 1, timeLimit = TimeLimit * 1000, silent = true)
+    val stat = cp.solve(nSols = math.max(SolutionLimit / 2, 1), timeLimit = (TimeLimit * 1000) / 2, silent = true)
 
     val remaining = TimeLimit - (stat.time / 1000).toInt
 
@@ -122,7 +118,7 @@ object SolverBenchmark extends App {
       model.setInitialSolution(cp.lastSolution)
     }
 
-    val solver: SolverResult = model.solve(silent = true, timeLimit = remaining, nSols = SolutionLimit)
+    val solver: SolverResult = model.solve(silent = true, timeLimit = remaining / 2, nSols = math.max(SolutionLimit / 2, 1))
     solver.dispose()
     (solver.solveTime + stat.time, solver.solution.objective)
   }

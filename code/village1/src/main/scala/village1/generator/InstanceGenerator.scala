@@ -3,7 +3,7 @@ package village1.generator
 import village1.data.{Client, Demand, Skill, Worker}
 import village1.format.json.JsonSerializer
 import village1.modeling.Problem
-import village1.util.Utilities.{rand}
+import village1.util.Utilities.rand
 
 object InstanceGenerator {
 

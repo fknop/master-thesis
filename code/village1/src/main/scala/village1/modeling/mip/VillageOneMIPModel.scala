@@ -6,6 +6,7 @@ import village1.format.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
 import village1.util.Benchmark.time
+import village1.util.Utilities
 
 import scala.util.Random
 
@@ -99,6 +100,25 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     Array.tabulate(T, D) { (t, d) =>
       Array.tabulate(demands(d).requiredWorkers, W)  {(p, w) =>
         model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$p][$w]")
+      }
+    }
+  }
+
+  private def removeWorkerSymmetries (): Unit = {
+    for (d <- Demands) {
+      for (t <- demands(d).periods) {
+        val symmetries = Utilities.groupByEquality(possibleWorkersForDemands(d)(t))
+        if (symmetries.nonEmpty) {
+          val possibleWithoutSymmetries = Utilities.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
+          for (symmetry <- symmetries) {
+            for (p <- symmetry) {
+              val possible = possibleWithoutSymmetries(p)
+              for (value <- possible) {
+                variables(t)(d)(p)(value).set(GRB.DoubleAttr.UB, 0)
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -261,6 +281,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 
   def initialize(withObjective: Boolean = false): Unit = {
+    removeWorkerSymmetries()
     applyConstraints(model, variables)
 
     if (withObjective) {
@@ -308,11 +329,10 @@ object MipMain2 extends App {
   val name = "t10d50w300-638"
   val path = s"data/instances/generated/${name}.json"
   val problem = JsonParser.parse(path)
-  val cpSearch = new VillageOneSearch(problem)
+  val cpSearch = new VillageOneLNS(problem)
 
-  val stat = cpSearch.solve(nSols = 1)
+  val stat = cpSearch.solve(timeLimit = 10 * 1000)
 
-  println(stat)
   val model = new VillageOneMIPModel(problem)
   model.initialize(withObjective = true)
 
@@ -323,7 +343,7 @@ object MipMain2 extends App {
 
   try {
 
-    val solver: SolverResult = model.solve()
+    val solver: SolverResult = model.solve(timeLimit = 15)
     val solution = solver.solution
     println(solution.valid)
     println(solver.solveTime)

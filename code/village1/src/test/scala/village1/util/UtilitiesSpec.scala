@@ -63,4 +63,79 @@ class UtilitiesSpec extends FunSpec with Matchers {
       )
     }
   }
+
+  describe("groupByEquality") {
+    it("Should group set correctly by their equality") {
+      val a = Set(1, 2, 3) // with f and e
+      val b = Set(1, 2, 3, 4) // with g
+      val c = Set(1, 2, 5) // alone
+      val d = Set(1, 2, 3) // with a and f
+      val e = Set(1, 2, 4) // alone
+      val f = Set(3, 2, 1) // with a and d
+      val g = Set(1, 2, 3, 4) // with b
+
+      val groups = Utilities.groupByEquality(Array(a, b, c, d, e, f, g))
+      groups should have size 2
+      groups(0) should have size 2
+      groups(1) should have size 3
+
+      groups(0) should contain only(1, 6)
+      groups(1) should contain only (0, 3, 5)
+    }
+  }
+
+  describe("removeSymmetries") {
+
+    val a = Set(1, 2, 3, 4)
+    val b = Set(4, 3, 1, 2)
+
+    val c = Set(1, 2, 3, 4, 5)
+    val d = Set(5, 4, 3, 2, 1)
+
+    it("Should split symmetries (even sets)") {
+      val sets = Utilities.removeSymmetries(Array(a, b))
+      sets(0) should have size 2
+      sets(1) should have size 2
+
+      sets(0) should contain only (1, 2)
+      sets(1) should contain only (3, 4)
+    }
+
+    it("Should split symmetries (odd sets)") {
+      val sets = Utilities.removeSymmetries(Array(c, d))
+      sets(0) should have size 2
+      sets(1) should have size 3
+
+      sets(0) should contain only (1, 2)
+      sets(1) should contain only (3, 4, 5)
+    }
+
+    it("Should split symmetries (both even and odd sets)") {
+      val sets = Utilities.removeSymmetries(Array(a, b, c, d))
+      sets(0) should have size 2
+      sets(1) should have size 2
+
+      sets(2) should have size 2
+      sets(3) should have size 3
+
+      sets(0) should contain only (1, 2)
+      sets(1) should contain only (3, 4)
+
+      sets(2) should contain only (1, 2)
+      sets(3) should contain only (3, 4, 5)
+    }
+
+    it("Should split symmetries (unused sets)") {
+      val sets = Utilities.removeSymmetries(Array(a, c, b))
+      sets(0) should have size 2
+      sets(1) should have size 5
+      sets(2) should have size 2
+
+      sets(0) should contain only (1, 2)
+      sets(2) should contain only (3, 4)
+
+      sets(1) should contain only (1, 2, 3, 4, 5)
+
+    }
+  }
 }

@@ -1,6 +1,5 @@
 package village1.search.cp
 
-import oscar.algo.search.SearchStatistics
 import village1.modeling.Solution
 
 trait Search {
