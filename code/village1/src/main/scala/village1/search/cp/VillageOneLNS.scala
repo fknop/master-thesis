@@ -6,7 +6,7 @@ import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.format.json.{JsonParser, JsonSerializer}
-import village1.modeling.cp.VillageOneCPModel
+import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.Benchmark.time
 import village1.util.Utilities
@@ -16,9 +16,10 @@ object SearchHeuristic extends Enumeration {
 }
 
 
-class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, baseModel) with Search {
+class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, options, base) with Search {
 
-  def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
+  def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
+  def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
 
   private def relaxShifts(percentage: Int, solution: Array[Array[Array[Int]]]) {
     val rand = new scala.util.Random(0)

@@ -8,9 +8,13 @@ import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.util.Utilities
 
 
-class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None) extends VillageOneModel(problem, model) with CPModel {
+case class CPModelOptions(symmetryBreaking: Boolean = true)
 
-  def this(model: VillageOneModel) = this(model.problem, Some(model))
+
+class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneModel(problem, base) with CPModel {
+
+  def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
+  def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
 
   type WorkerVariables = Array[Array[Array[CPIntVar]]]
 
@@ -24,8 +28,6 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
 
   private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
 
-
-
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
@@ -33,16 +35,13 @@ class VillageOneCPModel(problem: Problem, model: Option[VillageOneModel] = None)
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
   val objective: CPIntVar = sum(shiftNWorkers.flatten)
 
-
   initialize()
 
-
-
-  // Workers constraints
-
-
   def initialize (): Unit = {
-    removeWorkerSymmetries()
+    if (options.symmetryBreaking) {
+      removeWorkerSymmetries()
+    }
+
     applyAllDifferentWorkers()
     applyWorkerWorkerIncompatibilities()
     applyWorkerClientIncompatibilities()
