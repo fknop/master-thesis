@@ -23,6 +23,8 @@ object SolverBenchmark extends App {
 
   val SolutionLimit: Int = 1
   val TimeLimit = 60 // seconds
+  val Repeat = 2
+  val DryRun = 1
 
   val baseModels = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
     val problem = InstanceGenerator.generate(
@@ -39,13 +41,11 @@ object SolverBenchmark extends App {
 
 
 
-  val results = run(repeat = 2, dryRun = 1, solve = solveCP)
+  val results = run(repeat = Repeat, dryRun = DryRun, solve = solveCP)
   println("solveCP done")
   //  val results2 = run(repeat = 2, dryRun = 1, solve = solveCPDefaultHeuristic)
-  val results2 = run(repeat = 2, dryRun = 1, solve = solveMIP)
-
-
-  val results3 = run(repeat = 2, dryRun = 1, solve = solveCPThenMIP)
+  val results2 = run(repeat = Repeat, dryRun = DryRun, solve = solveMIP)
+  val results3 = run(repeat = Repeat, dryRun = DryRun, solve = solveCPThenMIP)
 
 
   val tdataset = BenchmarkChart.createRuntimeDataset(("CP", results(0)), ("MIP", results2(0)), ("CP+MIP", results3(0)))
