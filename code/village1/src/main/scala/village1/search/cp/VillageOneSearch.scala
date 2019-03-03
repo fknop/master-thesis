@@ -3,12 +3,13 @@ package village1.search.cp
 import oscar.algo.search.SearchStatistics
 import oscar.cp._
 import village1.format.json.{JsonParser, JsonSerializer}
-import village1.modeling.cp.VillageOneCPModel
+import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 
-class VillageOneSearch(problem: Problem, baseModel: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, baseModel) with Search {
+class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, options, base) with Search {
 
-  def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
+  def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
+
 
   def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, silent: Boolean = false): SearchStatistics = {
 
