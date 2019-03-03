@@ -83,9 +83,13 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
   }
 }
 
-class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
 
-  def this(v1model: VillageOneModel) = this(v1model.problem, Some(v1model))
+case class MipModelOptions(symmetryBreaking: Boolean = true, objective: Boolean = true)
+
+class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOptions(), v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
+
+  def this(v1model: VillageOneModel) = this(v1model.problem, v1model = Some(v1model))
+  def this(v1model: VillageOneModel, options: MipModelOptions) = this(v1model.problem, options, v1model = Some(v1model))
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
 
@@ -93,6 +97,8 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
   private val env = VillageOneMIPModel.env
   val model: GRBModel = new GRBModel(env)
   val variables: WorkerVariables = createWorkersVariables(model)
+
+  initialize()
 
 
   def createWorkersVariables (model: GRBModel): WorkerVariables = {
@@ -279,11 +285,15 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 
 
+  private def initialize(): Unit = {
 
-  def initialize(withObjective: Boolean = false): Unit = {
+    if (options.symmetryBreaking) {
+      removeWorkerSymmetries()
+    }
+
     applyConstraints(model, variables)
 
-    if (withObjective) {
+    if (options.objective) {
       applyObjectives(model, variables)
     }
   }
@@ -322,9 +332,6 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 object MipMain2 extends App {
 
-
-
-
   val name = "t10d50w300-638"
   val path = s"data/instances/generated/${name}.json"
   val problem = JsonParser.parse(path)
@@ -332,9 +339,7 @@ object MipMain2 extends App {
 
   val stat = cpSearch.solve(nSols = 1)
 
-  println(stat)
   val model = new VillageOneMIPModel(problem)
-  model.initialize(withObjective = true)
 
   if (cpSearch.lastSolution != null) {
     model.setInitialSolution(cpSearch.lastSolution)
