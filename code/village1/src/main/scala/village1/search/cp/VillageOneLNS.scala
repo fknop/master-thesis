@@ -1,16 +1,15 @@
 package village1.search.cp
 
-import oscar.algo.branchings.BinaryBranching
-import oscar.algo.search.Branching
-import oscar.algo.vars.IntVarLike
+
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.format.json.{JsonParser, JsonSerializer}
-import village1.modeling.{Problem, VillageOneModel}
 import village1.modeling.cp.VillageOneCPModel
+import village1.modeling.{Problem, VillageOneModel}
 import village1.util.Benchmark.time
+import village1.util.Utilities
 
 object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
@@ -20,8 +19,6 @@ object SearchHeuristic extends Enumeration {
 class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, baseModel) with Search {
 
   def this(baseModel: VillageOneModel) = this(baseModel.problem, Some(baseModel))
-
-
 
   private def relaxShifts(percentage: Int, solution: Array[Array[Array[Int]]]) {
     val rand = new scala.util.Random(0)
@@ -57,38 +54,25 @@ class VillageOneLNS(problem: Problem, baseModel: Option[VillageOneModel] = None)
     search {
       var branching = heuristic match {
         case SearchHeuristic.Default => binaryFirstFail(flatWorkers)
-        case SearchHeuristic.MostAvailable =>
-          val h = new MostAvailableHeuristic(this, flatWorkers)
-          binaryIdx(flatWorkers, h.varHeuristic, h.valueHeuristic)
+        case SearchHeuristic.MostAvailable => new MostAvailableHeuristic(this, flatWorkers).branching
       }
 
-
       if (flatMachines.nonEmpty) {
-        branching = branching ++ binaryFirstFail(flatMachines)
+        branching ++= binaryFirstFail(flatMachines)
       }
 
       if (flatLocations.nonEmpty) {
-        branching = branching ++ binaryFirstFail(flatLocations)
+        branching ++= binaryFirstFail(flatLocations)
       }
 
       branching
     }
 
     var currentSolution: CPIntSol = null
-    //var workerSolution: Array[Array[Array[Int]]] = null
     var best = Int.MaxValue
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-/**
-      workerSolution = workerVariables.map {
-        _.map(
-          _.map(_.value)
-        )
-      }
-  **/
-
       best = objective.value
-
       emitSolution(createSolution())
     }
 
@@ -161,7 +145,7 @@ object MainLNS extends App {
   val search = new VillageOneLNS(problem)
 //  var nSolution = 0
 //  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(/*timeLimit = 60 * 1000*/)
+  val stats = search.solve(timeLimit = 10 * 1000)
 
 
 //  println("nsolution " + nSolution)

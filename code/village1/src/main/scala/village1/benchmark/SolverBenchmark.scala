@@ -1,10 +1,8 @@
 package village1.benchmark
 
-import java.io.{FileOutputStream, ObjectOutputStream, OutputStream}
-
 import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.plot.{CategoryPlot, CombinedDomainCategoryPlot}
-import org.jfree.chart.renderer.category.{StatisticalBarRenderer, StatisticalLineAndShapeRenderer}
+import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer
 import org.jfree.chart.{ChartFrame, JFreeChart}
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset
 import village1.generator.InstanceGenerator
@@ -38,9 +36,7 @@ object SolverBenchmark extends App {
   }
 
 
-
   val results = run(repeat = 2, dryRun = 1, solve = solveCP)
-  println("solveCP done")
   //  val results2 = run(repeat = 2, dryRun = 1, solve = solveCPDefaultHeuristic)
   val results2 = run(repeat = 2, dryRun = 1, solve = solveMIP)
 

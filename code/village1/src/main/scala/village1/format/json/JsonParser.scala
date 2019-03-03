@@ -1,11 +1,11 @@
 package village1.format.json
 
-import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import com.eclipsesource.schema.drafts._
+import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import play.api.libs.json._
 import village1.data._
+import village1.format.json.JsonUtils.parseJsonFile
 import village1.modeling.Problem
-import JsonUtils.parseJsonFile
 
 object JsonParser {
 

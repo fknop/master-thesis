@@ -1,9 +1,11 @@
 package village1.search.cp
 
+import oscar.algo.search.Branching
 import oscar.cp.core.variables.CPIntVar
+import oscar.cp.modeling.Branchings
 import village1.modeling.VillageOneModel
 
-class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) {
+class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
 
   // d -> (p -> (w0, w1, w2))
   private val mostAvailable: Array[Array[Array[Int]]] = generateMostAvailableWorkers()
@@ -67,4 +69,6 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) {
     // Should not happen
     x(i).min
   }
+
+  def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
 }

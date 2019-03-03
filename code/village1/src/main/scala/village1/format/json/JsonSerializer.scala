@@ -1,7 +1,6 @@
 package village1.format.json
 
-import play.api.libs.json.{JsArray, JsNumber, JsObject, Json}
-import village1.data.Skill
+import play.api.libs.json.{JsNumber, JsObject, Json}
 import village1.modeling.{Problem, Solution}
 
 object JsonSerializer {

@@ -1,6 +1,6 @@
 package village1.modeling
 
-import village1.data.{DemandAssignment}
+import village1.data.DemandAssignment
 
 case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
 
