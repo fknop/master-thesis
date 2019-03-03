@@ -2,14 +2,23 @@ package village1.benchmark
 
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
-import village1.modeling.mip.{SolverResult, VillageOneMIPModel}
+import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}
 import village1.search.cp.VillageOneLNS
 
 object BenchmarkSolverFunctions {
   def solveMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
      base: VillageOneModel => {
       val model = new VillageOneMIPModel(base)
-      model.initialize(withObjective = true)
+      val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
+      solver.dispose()
+
+      (solver.solveTime, solver.solution.objective)
+    }
+  }
+
+  def solveMIPWithSymmetries (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+    base: VillageOneModel => {
+      val model = new VillageOneMIPModel(base, MipModelOptions(symmetryBreaking = false))
       val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
       solver.dispose()
 

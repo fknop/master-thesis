@@ -38,8 +38,8 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
     variables.map(
       _.map(
         _.map(
-          _.map(
-            getSolution
+          _.map(v =>
+            if (v == null) 0 else getSolution(v)
           )
         )
       )
@@ -83,9 +83,13 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
   }
 }
 
-class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
 
-  def this(v1model: VillageOneModel) = this(v1model.problem, Some(v1model))
+case class MipModelOptions(symmetryBreaking: Boolean = true, objective: Boolean = true)
+
+class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOptions(), v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
+
+  def this(v1model: VillageOneModel) = this(v1model.problem, v1model = Some(v1model))
+  def this(v1model: VillageOneModel, options: MipModelOptions) = this(v1model.problem, options, v1model = Some(v1model))
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
 
@@ -94,17 +98,25 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
   val model: GRBModel = new GRBModel(env)
   val variables: WorkerVariables = createWorkersVariables(model)
 
+  initialize()
+
 
   def createWorkersVariables (model: GRBModel): WorkerVariables = {
 
     Array.tabulate(T, D) { (t, d) =>
       Array.tabulate(demands(d).requiredWorkers, W)  {(p, w) =>
-        model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$p][$w]")
+
+        val impossible = (!demands(d).periods.contains(t)) ||
+          (!possibleWorkersForDemands(d)(t)(p).contains(w))
+
+        if (impossible) null
+        else model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$p][$w]")
       }
     }
   }
 
   private def removeWorkerSymmetries (): Unit = {
+    val expression = new GRBLinExpr()
     for (d <- Demands) {
       for (t <- demands(d).periods) {
         val symmetries = Utilities.groupByEquality(possibleWorkersForDemands(d)(t))
@@ -114,13 +126,16 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
             for (p <- symmetry) {
               val possible = possibleWithoutSymmetries(p)
               for (value <- possible) {
-                variables(t)(d)(p)(value).set(GRB.DoubleAttr.UB, 0)
+                expression.addTerm(1, variables(t)(d)(p)(value))
+//                variables(t)(d)(p)(value).set(GRB.DoubleAttr.UB, 0)
               }
             }
           }
         }
       }
     }
+
+    model.addConstr(expression, GRB.EQUAL, 0, "symmetries")
   }
 
   // TODO: remove constraints and add to initialization
@@ -159,7 +174,9 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
     for (t <- Periods; w <- Workers) {
       val expression = new GRBLinExpr()
       for (d <- Demands if demands(d).periods.contains(t); p <- demands(d).positions) {
-        expression.addTerm(1, variables(t)(d)(p)(w))
+        if (variables(t)(d)(p)(w) != null) {
+          expression.addTerm(1, variables(t)(d)(p)(w))
+        }
       }
 
       model.addConstr(expression, GRB.LESS_EQUAL, 1, s"c1[$t][$w]")
@@ -233,7 +250,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
       for (w <- Workers) {
         // All the variables for this worker at demand d and position p
-        val vars = demands(d).periods.map(variables(_)(d)(p)(w)).toArray
+        val vars = demands(d).periods.map(variables(_)(d)(p)(w)).filterNot(_ == null).toArray
 
         // Binary variable: is the worker working for that shift at at least one time period ?
         val isWorking = model.addVar(0, 1.0, 0, GRB.BINARY, s"isWorker[$d][$p][$w]")
@@ -269,7 +286,7 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
   }
 
   def applyConstraints (model: GRBModel, variables: WorkerVariables): Unit = {
-    removeImpossibleValues(model, variables)
+//    removeImpossibleValues(model, variables)
     allDifferentWorkers(model, variables)
     workerNumberSatisfied(model, variables)
     workerWorkerIncompatibilities(model, variables)
@@ -279,12 +296,15 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 
 
+  private def initialize(): Unit = {
 
-  def initialize(withObjective: Boolean = false): Unit = {
-    removeWorkerSymmetries()
+    if (options.symmetryBreaking) {
+      removeWorkerSymmetries()
+    }
+
     applyConstraints(model, variables)
 
-    if (withObjective) {
+    if (options.objective) {
       applyObjectives(model, variables)
     }
   }
@@ -323,9 +343,6 @@ class VillageOneMIPModel(problem: Problem, v1model: Option[VillageOneModel] = No
 
 object MipMain2 extends App {
 
-
-
-
   val name = "t10d50w300-638"
   val path = s"data/instances/generated/${name}.json"
   val problem = JsonParser.parse(path)
@@ -334,7 +351,6 @@ object MipMain2 extends App {
   val stat = cpSearch.solve(timeLimit = 10 * 1000)
 
   val model = new VillageOneMIPModel(problem)
-  model.initialize(withObjective = true)
 
   if (cpSearch.lastSolution != null) {
     model.setInitialSolution(cpSearch.lastSolution)
@@ -343,7 +359,7 @@ object MipMain2 extends App {
 
   try {
 
-    val solver: SolverResult = model.solve(timeLimit = 15)
+    val solver: SolverResult = model.solve(timeLimit = 60)
     val solution = solver.solution
     println(solution.valid)
     println(solver.solveTime)
