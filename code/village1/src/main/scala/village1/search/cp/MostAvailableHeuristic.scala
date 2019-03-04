@@ -3,6 +3,7 @@ package village1.search.cp
 import oscar.algo.search.Branching
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.modeling.Branchings
+import oscar.cp.searches.WeightedDegreeHelper
 import village1.modeling.VillageOneModel
 
 class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
@@ -49,8 +50,14 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     mostAvailable
   }
 
-  def varHeuristic(i: Int): Int = {
-    i
+  def varHeuristic(i: Int): (Int) = {
+    val (_, d, p) = reverseMap(i)
+    if (model.demands(d).requiredSkills.length > p) {
+      maxDegree(x(i)) - model.demands(d).requiredSkills(p).length
+    }
+    else {
+      maxDegree(x(i))
+    }
   }
 
   def valueHeuristic(i: Int): Int = {
@@ -69,6 +76,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     // Should not happen
     x(i).min
   }
+
 
   def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
 }

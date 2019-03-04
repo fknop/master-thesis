@@ -1,5 +1,7 @@
 package village1.benchmark
 
+import oscar.cp.{CPIntVar, CPSolver}
+import oscar.cp.searches.lns.CPIntSol
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
 import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}

@@ -15,21 +15,44 @@ object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
 }
 
+trait Relaxation {
+  def apply(): Unit
+}
 
 class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, options, base) with Search {
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
   def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
+//
+//  private def relaxShifts(variables: Array[CPIntVar], sol: CPIntSol, percentage: Int/* solution: Array[Array[Array[Int]]])*/) {
+//    val rand = new scala.util.Random(0)
+//    for (d <- Demands) {
+//      for (s <- 0 until demands(d).requiredWorkers if rand.nextInt(100) < percentage) {
+//        for (t <- demands(d).periods) {
+//
+//          //t * d + s
+//          add(variables((t * d) + s) === sol.values((t * d) + s))
+////          add(workerVariables(t)(d)(s) === solution(t)(d)(s))
+//        }
+//      }
+//    }
+//  }
 
-  private def relaxShifts(percentage: Int, solution: Array[Array[Array[Int]]]) {
-    val rand = new scala.util.Random(0)
-    for (d <- Demands) {
-      for (s <- 0 until demands(d).requiredWorkers if rand.nextInt(100) < percentage) {
-        for (t <- demands(d).periods) {
-          add(workerVariables(t)(d)(s) === solution(t)(d)(s))
-        }
-      }
-    }
+  val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
+  val flatMachines: Array[CPIntVar] = machineVariables.flatten
+  val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
+
+  solver.addDecisionVariables(flatWorkers)
+  solver.addDecisionVariables(flatMachines)
+  solver.addDecisionVariables(flatLocations)
+
+  var currentSolution: CPIntSol = _
+  var bestObjective: Int = Int.MaxValue
+
+  private var relaxation: Relaxation = () => RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
+
+  def relax(relaxation: Relaxation): Unit = {
+    this.relaxation = relaxation
   }
 
   def solve(
@@ -41,15 +64,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
    ): Long = {
 
     solver.silent = silent
-
-    val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
-    val flatMachines: Array[CPIntVar] = machineVariables.flatten
-    val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
-
-    solver.addDecisionVariables(flatWorkers)
-    solver.addDecisionVariables(flatMachines)
-    solver.addDecisionVariables(flatLocations)
-
 
     minimize(objective)
     search {
@@ -69,11 +83,9 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       branching
     }
 
-    var currentSolution: CPIntSol = null
-    var best = Int.MaxValue
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-      best = objective.value
+      bestObjective = objective.value
       emitSolution(createSolution())
     }
 
@@ -91,13 +103,12 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
       var found = true
 
-      while (best > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
+      while (bestObjective > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
         val remainingTime = timeLimit - totalTime
         val stat = startSubjectTo(failureLimit = limit, timeLimit = (remainingTime / 1000).toInt) {
           val percentage = 50
-
-         // relaxShifts(percentage, workerSolution)
-          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / (100 / percentage))
+          relaxation()
+//          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
         }
 
         totalSol += stat.nSols
@@ -143,10 +154,15 @@ object MainLNS extends App {
 
   val problem = JsonParser.parse(path)
 
-  val search = new VillageOneLNS(problem)
+  val search = new VillageOneLNS(problem, CPModelOptions(symmetryBreaking = true))
+
+  search.relax {
+    () => RelaxationFunctions.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+  }
+
 //  var nSolution = 0
 //  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 10 * 1000)
+  val stats = search.solve(timeLimit = 60 * 1000)
 
 
 //  println("nsolution " + nSolution)
