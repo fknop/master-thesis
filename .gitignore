@@ -3,10 +3,10 @@
 **/*.synctex.gz
 **/*.fls
 **/*.fdb_latexmk
+thesis/**/*.toc
 
 **/*.idea
 
-thesis/**/*.pdf
 code/**/**/target
 code/village1/results
 code/village1/lib

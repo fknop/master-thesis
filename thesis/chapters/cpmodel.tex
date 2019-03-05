@@ -1,0 +1,42 @@
+% !TEX root = ../thesis.tex
+
+\documentclass[../thesis.tex]{subfiles}
+ 
+\begin{document}
+
+
+\section{Constraint Programming Model}
+
+The translation to the mathematical (MIP) model to the CP model is fairly
+straightforward. Binary variables are translated to integer variables, each value representing
+one resource (i.e. worker, zone or machines).
+
+
+
+\subsection{Variables}
+
+First, we need to express the set of workers for each demand at each time period in which that demand occurs.
+This is done by using a 3-dimensional array of variables. The first dimension being the indices of the 
+time periods, the second dimension is the indices of the demands while the last dimension is the list of worker variables. 
+This last dimension has the size of the number of required workers for that demand.
+
+\begin{equation}
+\begin{split}
+    w[i][j][k] \in W \label{cpworkervariable} \\
+\end{split}
+\end{equation}
+
+(\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at position $k$ with $t_i \in T$, $d_i \in D$ and $t_i \in d_j^T$.
+
+The same reasoning is used for zones and machines:
+
+\begin{align}
+    m[i][j] &\in M \label{cpmachinevariable} \\ 
+    z[i] &\in Z \label{cpzonevariable} 
+\end{align}
+
+(\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the zone used for demand $i$
+
+
+\end{document}
+

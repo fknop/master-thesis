@@ -1,47 +1,30 @@
 % EPL master thesis covers template
-\documentclass{EPL-master-thesis-covers-EN}
+\documentclass{template/EPL-master-thesis-covers-EN}
 
 % Please fill in the following boxes
 % Title of the thesis
-\title{Main title of the master thesis (possibly split on several lines)}
+\title{Optimization of production planning with resource allocation}
 
-% Subtitle - remove this line if not applicable
-\subtitle{Optional subtitle}
+% % Subtitle - remove this line if not applicable
+% \subtitle{Optional subtitle}
+
+\usepackage{subfiles}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+
+\graphicspath{{images/}{../images/}}
 
 % Name of the student author(s)
 \author{Florian \textsc{Knop}}
-%\thirdauthor{Firstname \textsc{Lastname}}			% remove if not applicable
 
-% Official title of the master degree (copy/paste from list below)
-% Master [120] in Biomedical Engineering
-% Master [120] in Chemical and Materials Engineering
-% Master [120] in Civil Engineering
-% Master [120] in Computer Science
-% Master [120] in Computer Science and Engineering
-% Master [120] in Cybersecurity
-% Master [120] in Data Sciences Engineering
-% Master [120] in Data Science: Information technology
-% Master [120] in Electrical Engineering
-% Master [120] in Electro-mechanical Engineering
-% Master [120] in Mathematical Engineering
-% Master [120] in Mechanical Engineering
-% Master [120] in Physical Engineering
-% Master [60] in Computer Science
-% Specialised master in nanotechnologies
-% Specialised master in nuclear engineering
 \degreetitle{Master [120] in Computer Science}
 
 % Name of the supervisor(s)
 \supervisor{Pierre \textsc{Schaus}}
-\secondsupervisor{Charles \textsc{Thomas}}		% remove if not applicable
-%\thirdsupervisor{Firstname \textsc{Lastname}}		% remove if not applicable
-
+\secondsupervisor{Charles \textsc{Thomas}}	
 % Name of the reader(s)
-\readerone{Firstname \textsc{Lastname}}
-\readertwo{Firstname \textsc{Lastname}}			% remove if not applicable
-\readerthree{Firstname \textsc{Lastname}}			% remove if not applicable
-%\readerfour{Firstname \textsc{Lastname}}			% remove if not applicable
-%\readerfive{Firstname \textsc{Lastname}}			% remove if not applicable
+\readerone{Hélène \textsc{Verhaeghe}}
 
 % Academic year (update if necessary)
 \years{2018--2019}
@@ -49,7 +32,32 @@
 % Document
 \begin{document}
   % Front cover page
+  
   \maketitle
+
+  \tableofcontents
+
+  \chapter{Introduction}
+  \subfile{chapters/introduction}
+
+  \chapter{The Village n\textsuperscript{o}1 problem}
+  \subfile{chapters/problem}
+
+
+  \chapter{Constraint Programming}
+
+  \chapter{Mixed Integer Programming}
+  
+  \chapter{Models for the Village n\textsuperscript{o}1 problem}
+
+  \subfile{chapters/mipmodel}
+  \subfile{chapters/cpmodel}
+
+  \chapter{Chapter about implementation}
+
+  \chapter{Experiments}
+
+  \chapter{Conclusion}
 
   % Back cover page
   \backcoverpage
