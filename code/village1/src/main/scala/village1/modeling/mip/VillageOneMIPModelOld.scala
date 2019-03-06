@@ -2,7 +2,7 @@ package village1.modeling.mip
 
 import gurobi._
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.format.json.{JsonParser, JsonSerializer}
+import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 
 class VillageOneMIPModelOld(problem: Problem) extends VillageOneModel(problem) {

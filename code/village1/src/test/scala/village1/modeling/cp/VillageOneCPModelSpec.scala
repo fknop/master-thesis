@@ -2,7 +2,7 @@ package village1.modeling.cp
 
 import org.scalatest._
 import oscar.cp.core.NoSolutionException
-import village1.format.json.JsonParser
+import village1.json.JsonParser
 import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends FunSpec with Matchers {

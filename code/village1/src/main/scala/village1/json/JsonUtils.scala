@@ -1,4 +1,4 @@
-package village1.format.json
+package village1.json
 
 import com.eclipsesource.schema._
 import play.api.libs.json.{JsResult, JsValue, Json}

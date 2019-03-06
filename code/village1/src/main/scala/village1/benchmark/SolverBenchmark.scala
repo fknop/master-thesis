@@ -30,7 +30,18 @@ class SolverBenchmark(
   }
 
 
-  def run (solve: VillageOneModel => (Long, Int)): Array[BenchmarkInstance] = {
+  def makeInstance(series: (String, Array[BenchmarkResult])*): BenchmarkInstance = {
+    BenchmarkInstance(
+      Repeat,
+      DryRun,
+      TimeLimit,
+      SolutionLimit,
+      series.map(s => BenchmarkSerie(s._1, s._2))
+    )
+  }
+
+
+  def run (solve: VillageOneModel => (Long, Int)): Array[BenchmarkResult] = {
     val timeMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
     val objectiveMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
 
@@ -50,21 +61,18 @@ class SolverBenchmark(
       }
     }
 
-    val results = Array.fill[BenchmarkInstance](T.length)(null)
+    val results = Array.fill[BenchmarkResult](T.length * D.length * W.length)(null)
+    var r = 0
     for (i <- T.indices) {
-      val values = Array.fill[BenchmarkResult](D.length * W.length)(null)
-      var v = 0
       for (j <- D.indices) {
         for (k <- W.indices) {
-          val problemSize = ProblemSize(D(j), W(k))
+          val problemSize = ProblemSize(T(i), D(j), W(k))
           val timeMeasurement = getMeasurements(timeMeasurements(i)(j)(k))
           val objectiveMeasurement = getMeasurements(objectiveMeasurements(i)(j)(k))
-          values(v) = BenchmarkResult(problemSize, timeMeasurement, objectiveMeasurement)
-          v += 1
+          results(r) = BenchmarkResult(problemSize, timeMeasurement, objectiveMeasurement)
+          r += 1
         }
       }
-
-      results(i) = BenchmarkInstance(T(i), values)
     }
 
     results

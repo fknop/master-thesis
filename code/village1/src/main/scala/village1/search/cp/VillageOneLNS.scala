@@ -5,7 +5,7 @@ import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
-import village1.format.json.{JsonParser, JsonSerializer}
+import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.Benchmark.time

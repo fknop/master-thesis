@@ -1,7 +1,7 @@
 package village1.modeling.cp
 
 import org.scalatest._
-import village1.format.json.JsonParser
+import village1.json.JsonParser
 import village1.modeling
 
 class VillageOneModel extends FunSpec with Matchers {

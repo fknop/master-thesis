@@ -1,7 +1,7 @@
-package village1.format.json
+package village1.json
 
 import play.api.libs.json.{JsResult, JsValue}
-import village1.format.json.JsonUtils.errorsToString
+import village1.json.JsonUtils.errorsToString
 
 class JsonSchemaValidationError(result: String) extends Error(result) {
 

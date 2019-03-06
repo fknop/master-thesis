@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <style>
+    #container, #container2 {
+      min-width: 310px;
+      max-width: 800px;
+      height: 400px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container"></div>
+    <div id="container2"></div>
+    
+
+  <script>
+    const data = { /** DATA **/ }
+
+    const series = data.series
+    const categories = data.series[0].results.map(r => r.size).map(s => `T=${s.T}\nD=${s.D}\nW=${s.W}`)
+
+    Highcharts.chart('container', {
+
+      title: {
+        text: 'Benchmark Title'
+      },
+
+      subtitle: {
+        text: 'Time (ms)'
+      },
+
+      yAxis: {
+        title: {
+          text: 'Runtime'
+        }
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+      },
+
+    plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true
+                },
+                enableMouseTracking: false
+            }
+        },
+      
+      xAxis: {
+            categories: categories
+        },
+
+      series: series.map(s => ({
+        name: s.name,
+        data: s.results.map(r => r.time).map(t => t.mean)
+      })),
+      credits: {
+          enabled: false
+      },
+
+      responsive: {
+        rules: [{
+          condition: {
+            maxWidth: 500
+          },
+          chartOptions: {
+            legend: {
+              layout: 'horizontal',
+              align: 'center',
+              verticalAlign: 'bottom'
+            }
+          }
+        }]
+      }
+
+    });
+
+    Highcharts.chart('container2', {
+
+      title: {
+        text: 'Benchmark Title'
+      },
+
+      subtitle: {
+        text: 'Objective (lower is better)'
+      },
+
+      yAxis: {
+        title: {
+          text: 'Objective'
+        }
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+      },
+
+        plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+          
+          xAxis: {
+                categories: categories
+            },
+
+          series: series.map(s => ({
+            name: s.name,
+            data: s.results.map(r => r.objective).map(t => t.mean)
+          })),
+          credits: {
+              enabled: false
+          },
+
+          responsive: {
+            rules: [{
+              condition: {
+                maxWidth: 500
+              },
+              chartOptions: {
+                legend: {
+                  layout: 'horizontal',
+                  align: 'center',
+                  verticalAlign: 'bottom'
+                }
+              }
+            }]
+          }
+
+        });
+  </script>
+</body>
+</html>
