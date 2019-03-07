@@ -26,7 +26,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
   private [this] val EMPTY_INT_VAR_ARRAY = Array.empty[CPIntVar]
 
-  private[this] val overlappingSets = Utilities.overlappingSets(problem.demands)
+
 
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
@@ -123,23 +123,13 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     }
   }
 
-  // All zones for a given time must be different
+
   private def applyAllDifferentLocations(): Unit = {
     for (d <- Demands if locationVariables(d) != null) {
       val overlappingDemands = overlappingSets(d)
       val locations = (overlappingDemands + d).map(locationVariables(_)).filter(_ != null)
       add(allDifferent(locations))
     }
-
-
-    /**
-    for (period <- Periods) {
-      val zonesForPeriod = locationVariables(period).filter(_ != null)
-      if (zonesForPeriod.length >= 2) {
-        add(allDifferent(zonesForPeriod))
-      }
-    }
-    **/
   }
 
 

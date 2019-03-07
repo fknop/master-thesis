@@ -34,7 +34,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
   def solution: Solution = _solution
 
   private def getValues(): WorkerVariablesSolution = {
-    val variables = model.variables
+    val variables = model.workerVariables
     variables.map(
       _.map(
         _.map(
@@ -92,16 +92,19 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   def this(v1model: VillageOneModel, options: MipModelOptions) = this(v1model.problem, options, v1model = Some(v1model))
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
-
+  type ZoneVariables = Array[Array[GRBVar]]
+  type MachineVariables = Array[Array[GRBVar]]
 
   private val env = VillageOneMIPModel.env
   val model: GRBModel = new GRBModel(env)
-  val variables: WorkerVariables = createWorkersVariables(model)
+  val workerVariables: WorkerVariables = createWorkerVariables(model)
+  val zoneVariables: ZoneVariables = createZoneVariables(model)
+  val machineVariables: MachineVariables = createMachineVariables(model)
 
   initialize()
 
 
-  def createWorkersVariables (model: GRBModel): WorkerVariables = {
+  private def createWorkerVariables (model: GRBModel): WorkerVariables = {
 
     Array.tabulate(T, D) { (t, d) =>
       Array.tabulate(demands(d).requiredWorkers, W)  {(p, w) =>
@@ -115,6 +118,19 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
+  private def createZoneVariables(model: GRBModel): ZoneVariables = {
+    Array.tabulate(L, D)((l, d) => {
+      model.addVar(0, 1, 0.0, GRB.BINARY, s"z[$l][$d]")
+    })
+  }
+
+  private def createMachineVariables(model: GRBModel): MachineVariables = {
+    Array.tabulate(M, D)((m, d) => {
+      model.addVar(0, 1, 0.0, GRB.BINARY, s"m[$m][$d]")
+    })
+  }
+
+
   private def removeWorkerSymmetries (): Unit = {
     val expression = new GRBLinExpr()
     for (d <- Demands) {
@@ -126,7 +142,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
             for (p <- symmetry) {
               val possible = possibleWithoutSymmetries(p)
               for (value <- possible) {
-                expression.addTerm(1, variables(t)(d)(p)(value))
+                expression.addTerm(1, workerVariables(t)(d)(p)(value))
 //                variables(t)(d)(p)(value).set(GRB.DoubleAttr.UB, 0)
               }
             }
@@ -137,36 +153,36 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
     model.addConstr(expression, GRB.EQUAL, 0, "symmetries")
   }
-
-  // TODO: remove constraints and add to initialization
-  def removeImpossibleValues (model: GRBModel, variables: WorkerVariables): Unit = {
-    val expression = new GRBLinExpr()
-    for (t <- Periods; d <- Demands; w <- Workers) {
-
-      val impossible = (!demands(d).periods.contains(t)) ||
-                       (!availableWorkers(d).contains(t)) ||
-                       (!availableWorkers(d)(t).contains(w))
-
-      if (impossible) {
-        for (p <- demands(d).positions) {
-         // variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0.0)
-          expression.addTerm(1, variables(t)(d)(p)(w))
-//          model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"imp[$t][$d][$p][$w]")
-        }
-      }
-    }
-
-    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
-      val workers = possibleWorkersForDemands(d)(t)(p)
-      for (w <- allWorkers.diff(workers)) {
-//        variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
-        expression.addTerm(1, variables(t)(d)(p)(w))
-//        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
-      }
-    }
-
-    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
-  }
+//
+//  // TODO: remove constraints and add to initialization
+//  def removeImpossibleValues (model: GRBModel, variables: WorkerVariables): Unit = {
+//    val expression = new GRBLinExpr()
+//    for (t <- Periods; d <- Demands; w <- Workers) {
+//
+//      val impossible = (!demands(d).periods.contains(t)) ||
+//                       (!availableWorkers(d).contains(t)) ||
+//                       (!availableWorkers(d)(t).contains(w))
+//
+//      if (impossible) {
+//        for (p <- demands(d).positions) {
+//         // variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0.0)
+//          expression.addTerm(1, variables(t)(d)(p)(w))
+////          model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"imp[$t][$d][$p][$w]")
+//        }
+//      }
+//    }
+//
+//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
+//      val workers = possibleWorkersForDemands(d)(t)(p)
+//      for (w <- allWorkers.diff(workers)) {
+////        variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
+//        expression.addTerm(1, variables(t)(d)(p)(w))
+////        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
+//      }
+//    }
+//
+//    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
+//  }
 
 
 
@@ -229,15 +245,94 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       }
     }
   }
-//
-//  def applySkills (model: GRBModel, variables: WorkerVariables): Unit = {
-//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
-//      val workers = possibleWorkersForDemands(d)(t)(p)
-//      for (w <- allWorkers.diff(workers)) {
-//        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
-//      }
-//    }
-//  }
+
+  private def removeImpossibleZones(model: GRBModel, variables: ZoneVariables): Unit = {
+    val expression = new GRBLinExpr()
+
+    for (l <- Locations; d <- Demands) {
+      if (!demands(d).possibleLocations.contains(l)) {
+        expression.addTerm(1, variables(l)(d))
+      }
+    }
+
+    model.addConstr(expression, GRB.EQUAL, 0, "z1")
+  }
+
+  private def applyAllDifferentLocations(model: GRBModel, variables: ZoneVariables): Unit = {
+    for (d <- Demands) {
+      val overlappingDemands = overlappingSets(d)
+      if (overlappingDemands.nonEmpty) {
+        val expression = new GRBLinExpr()
+        for (demand <- overlappingDemands + d) {
+          for (l <- Locations) {
+            expression.addTerm(1, variables(l)(demand))
+          }
+        }
+
+        model.addConstr(expression, GRB.LESS_EQUAL, 1, s"z2[$d]")
+      }
+    }
+  }
+
+  private def satisfyDemandLocation(model: GRBModel, variables: ZoneVariables): Unit = {
+    for (d <- Demands if demands(d).possibleLocations.nonEmpty) {
+      val expression = new GRBLinExpr()
+      for (l <- demands(d).possibleLocations) {
+        expression.addTerm(1.0, variables(l)(d))
+      }
+
+      model.addConstr(expression, GRB.EQUAL, 1, s"z3[$d]")
+    }
+  }
+
+  private def removeImpossibleMachines(model: GRBModel, variables: MachineVariables): Unit = {
+    val expression = new GRBLinExpr()
+
+    for (d <- Demands) {
+      val possible: Set[Int] = demands(d).machineNeeds.map(machine => possibleMachines(machine.name)).reduce(_.union(_))
+      for (m <- Machines) {
+        if (!possible.contains(m)) {
+          expression.addTerm(1, variables(m)(d))
+        }
+      }
+    }
+
+    model.addConstr(expression, GRB.EQUAL, 0, "m1")
+  }
+
+  private def applyAllDifferentMachines(model: GRBModel, variables: MachineVariables): Unit = {
+    for (d <- Demands) {
+      val overlappingDemands = overlappingSets(d)
+      if (overlappingDemands.nonEmpty) {
+        val expression = new GRBLinExpr()
+        for (demand <- overlappingDemands + d) {
+          for (m <- Machines) {
+            expression.addTerm(1, variables(m)(demand))
+          }
+        }
+
+        model.addConstr(expression, GRB.LESS_EQUAL, 1, s"m2[$d]")
+      }
+    }
+  }
+
+  private def satisfyMachinesDemand(model: GRBModel, variables: MachineVariables): Unit = {
+    for (d <- Demands if demands(d).machineNeeds.nonEmpty) {
+      var needs: Map[String, Int] = Map()
+      for (machine <- demands(d).machineNeeds) {
+        needs = needs.updated(machine.name, needs.getOrElse(machine.name, 0) + 1)
+      }
+
+      for ((name, occurrence) <- needs) {
+        val expression = new GRBLinExpr()
+        val possible = possibleMachines(name)
+        for (m <- possible) {
+          expression.addTerm(1.0, variables(m)(d))
+        }
+        model.addConstr(expression, GRB.EQUAL, occurrence, s"z3[$d]")
+      }
+    }
+  }
 
 
   // TODO: this works for now for simple models - check for larger ones
@@ -274,7 +369,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
         val workers = assignment.workers
         for (i <- workers.indices) {
           if (rand.nextInt(100) < 50) {
-            variables(t)(d)(i)(workers(i)).set(GRB.DoubleAttr.Start, 1.0)
+            workerVariables(t)(d)(i)(workers(i)).set(GRB.DoubleAttr.Start, 1.0)
           }
         }
       }
@@ -285,12 +380,19 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     minimizeShiftChange(model, variables)
   }
 
-  def applyConstraints (model: GRBModel, variables: WorkerVariables): Unit = {
-//    removeImpossibleValues(model, variables)
-    allDifferentWorkers(model, variables)
-    workerNumberSatisfied(model, variables)
-    workerWorkerIncompatibilities(model, variables)
-    workerClientIncompatibilities(model, variables)
+  def applyConstraints (): Unit = {
+    allDifferentWorkers(model, workerVariables)
+    workerNumberSatisfied(model, workerVariables)
+    workerWorkerIncompatibilities(model, workerVariables)
+    workerClientIncompatibilities(model, workerVariables)
+
+    removeImpossibleZones(model, zoneVariables)
+    applyAllDifferentLocations(model, zoneVariables)
+    satisfyDemandLocation(model, zoneVariables)
+
+    removeImpossibleMachines(model, machineVariables)
+    applyAllDifferentMachines(model, machineVariables)
+    satisfyMachinesDemand(model, machineVariables)
   }
 
 
@@ -302,10 +404,10 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       removeWorkerSymmetries()
     }
 
-    applyConstraints(model, variables)
+    applyConstraints()
 
     if (options.objective) {
-      applyObjectives(model, variables)
+      applyObjectives(model, workerVariables)
     }
   }
 
