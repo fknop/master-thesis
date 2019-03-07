@@ -1,7 +1,7 @@
 package village1.util
 
-import java.io.PrintWriter
-import java.nio.file.Path
+import java.io.{File, PrintWriter}
+import java.nio.file.{FileSystems, Path, Paths}
 
 import scala.io.Source
 
@@ -25,7 +25,8 @@ object FileUtils {
     * @param content the content
     */
   def writeFile (path: String, content: String): Unit = {
-    Path.of(path).toFile.getParentFile.mkdirs
+    new File(path).getParentFile.mkdirs()
+
     new PrintWriter(path) {
       write(content)
       close()

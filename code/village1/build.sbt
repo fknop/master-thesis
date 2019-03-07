@@ -15,6 +15,8 @@ libraryDependencies += "com.eclipsesource"  %% "play-json-schema-validator" % "0
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
+libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
+
 addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")
 
 assemblyMergeStrategy in assembly := {

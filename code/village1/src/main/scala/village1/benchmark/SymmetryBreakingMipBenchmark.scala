@@ -2,9 +2,11 @@ package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
 
-object SymmetryBreakingMipBenchmark extends App {
+object SymmetryBreakingMipBenchmark extends CommandLineBenchmark {
 
-  val benchmark = new SolverBenchmark(Repeat = 1, SolutionLimit = 1, TimeLimit = 30)
+  val options = parseArgs()
+
+  val benchmark = new SolverBenchmark(options = options)
   val cpResultsSB = benchmark.run(solveMIP(benchmark))
   val cpResultsNoSB = benchmark.run(solveMIPWithSymmetries(benchmark))
 

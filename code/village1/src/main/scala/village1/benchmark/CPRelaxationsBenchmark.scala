@@ -6,9 +6,11 @@ import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.benchmark.BenchmarkSolverFunctions._
 
-object CPRelaxationsBenchmark extends App {
+object CPRelaxationsBenchmark extends CommandLineBenchmark {
 
-  val benchmark = new SolverBenchmark(Repeat = 1, DryRun = 0, SolutionLimit = Int.MaxValue, TimeLimit = 5)
+  val options = parseArgs()
+
+  val benchmark = new SolverBenchmark(options = options)
   val cpResultsRandom = benchmark.run(solveCP(benchmark))
   val cpResultsProp = benchmark.run(solveCP(benchmark))
 //

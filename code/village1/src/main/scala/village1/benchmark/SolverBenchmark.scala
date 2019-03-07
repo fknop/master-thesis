@@ -10,23 +10,44 @@ class SolverBenchmark(
    val T: Array[Int] = Array(5),
    val D: Array[Int] = Array(30, 50),
    val W: Array[Int] = Array(100, 200, 300),
-   val SolutionLimit: Int = 1,
-   val TimeLimit: Int = 30,
-   val Repeat: Int = 5,
-   val DryRun: Int = 1
+   val options: BenchmarkOptions
  ) {
 
-  val baseModels: Array[Array[Array[VillageOneModel]]] = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
-    val problem = InstanceGenerator.generate(
-      t = T(t),
-      c = D(d), // This parameter doesn't really matter
-      d = D(d),
-      w = W(w),
-      s = 10,
-      prob = Map("skill" -> 0.2, "period" -> 0.6)
-    )
+  val Repeat: Int = options.repeat
+  val DryRun: Int = options.dryRun
+  val SolutionLimit: Int = options.solutionLimit
+  val TimeLimit: Int = options.timeLimit
 
-    new VillageOneModel(problem)
+  val baseModels: Array[Array[Array[Array[VillageOneModel]]]] = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
+
+    if (!options.noKeep) {
+      val problem = InstanceGenerator.generate(
+        t = T(t),
+        c = D(d), // This parameter doesn't really matter
+        d = D(d),
+        w = W(w),
+        s = 10,
+        prob = Map("skill" -> 0.2, "period" -> 0.6)
+      )
+
+      val model = new VillageOneModel(problem)
+      Array.fill[VillageOneModel](Repeat + DryRun)(model)
+    }
+    else {
+      Array.tabulate(Repeat + DryRun)(_ => {
+        val problem = InstanceGenerator.generate(
+          t = T(t),
+          c = D(d), // This parameter doesn't really matter
+          d = D(d),
+          w = W(w),
+          s = 10,
+          prob = Map("skill" -> 0.2, "period" -> 0.6)
+        )
+
+        new VillageOneModel(problem)
+      })
+    }
+
   }
 
 
@@ -50,7 +71,7 @@ class SolverBenchmark(
       for (i <- T.indices) {
         for (j <- D.indices) {
           for (k <- W.indices) {
-            val baseModel = baseModels(i)(j)(k)
+            val baseModel = baseModels(i)(j)(k)(r + DryRun)
             val (time, objective) = solve(baseModel)
             if (measure) {
               timeMeasurements(i)(j)(k)(r) = time
