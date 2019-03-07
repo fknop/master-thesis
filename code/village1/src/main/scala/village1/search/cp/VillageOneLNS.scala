@@ -154,7 +154,7 @@ object MainLNS extends App {
 
   val problem = JsonParser.parse(path)
 
-  val search = new VillageOneLNS(problem, CPModelOptions(symmetryBreaking = true))
+  val search = new VillageOneLNS(problem, CPModelOptions())
 
   search.relax {
     () => RelaxationFunctions.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
@@ -162,7 +162,7 @@ object MainLNS extends App {
 
 //  var nSolution = 0
 //  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 60 * 1000)
+  val stats = search.solve(timeLimit = 5 * 1000)
 
 
 //  println("nsolution " + nSolution)
