@@ -6,4 +6,9 @@ trait BenchmarkOptions {
   val repeat: Int = 1
   val dryRun: Int = 1
   val noKeep: Boolean = false
+
+
+  override def toString: String = {
+    s"Benchmark created with: \nSolutionLimit=$solutionLimit\nTimeLimit=$timeLimit\nRepeat=$repeat\nDryRun=$dryRun"
+  }
 }

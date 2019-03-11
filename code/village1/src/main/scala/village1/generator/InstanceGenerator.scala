@@ -1,16 +1,16 @@
 package village1.generator
 
-import village1.data.{Client, Demand, Skill, Worker}
+import village1.data._
 import village1.json.JsonSerializer
 import village1.modeling.Problem
-import village1.util.Utilities.rand
+import village1.util.Utilities.{rand, overlappingSets}
 
 object InstanceGenerator {
 
   private def isTrue(probability: Double = 0.5): Boolean = math.random() < probability
 
-  private def generateWorkforce(n: Int): Array[Worker] = {
-    Array.tabulate(n)(i => Worker(id = i, name = s"Worker $i", availabilities = Set()))
+  private def generateWorkforce(options: InstanceOptions): Array[Worker] = {
+    Array.tabulate(options.workers)(i => Worker(id = i, name = s"Worker $i", availabilities = Set()))
   }
 
   private def takeSkill(skills: Array[Skill]): Skill = {
@@ -18,12 +18,14 @@ object InstanceGenerator {
   }
 
   private def generateDemands(
-      n: Int,
+      options: InstanceOptions,
       maxWorkers: Int,
-      clients: Int,
       skills: Array[Skill] = Array(),
       skillProbability: Double = 0
   ): Array[Demand] = {
+
+    val n = options.demands
+    val clients = options.clients
 
     val demands = Array.fill[Demand](n)(null)
 
@@ -38,14 +40,10 @@ object InstanceGenerator {
         }
       }
 
-      demands(i) = Demand(id = i, client = rand(0, 9), periods = Set(), requiredWorkers = requiredWorkers, requiredSkills = requiredSkills)
+      demands(i) = Demand(id = i, client = rand(0, clients - 1), periods = Set(), requiredWorkers = requiredWorkers, requiredSkills = requiredSkills)
     }
 
     demands
-  }
-
-  private def updatePeriods(demand: Demand, periods: Set[Int]): Demand = {
-    demand.copy(periods = periods)
   }
 
   private def generatePeriodForDemand(demand: Demand, t: Int, prob: Double): Demand = {
@@ -54,7 +52,7 @@ object InstanceGenerator {
       (acc, i) => if (isTrue(prob) || (acc.isEmpty && i == t - 1)) acc + i else acc
     }
 
-    updatePeriods(demand, periods)
+    demand.copy(periods = periods)
   }
 
 
@@ -111,34 +109,86 @@ object InstanceGenerator {
     workers
   }
 
+  private def assignLocations(demands: Array[Demand], locations: Array[Location]): Unit = {
+    val overlapping = overlappingSets(demands)
+
+    val locationsIndices = locations.indices.toList
+
+    var i = demands.length - 1
+    while (i >= 0) {
+
+      if (isTrue(0.5)) {
+        val size = overlapping(i).size
+        if (size <= locations.length) {
+          val shuffled = util.Random.shuffle(locationsIndices)
+          val possibleLocations = shuffled.take(size).toSet
+          demands(i) = demands(i).copy(possibleLocations = possibleLocations)
+        }
+      }
+
+      i -= 1
+    }
+  }
+
+  private def assignMachines(demands: Array[Demand], machines: Array[Machine]): Unit = {
+    val overlapping = overlappingSets(demands)
+    val machineIndices = machines.indices.toList
+
+    var i = demands.length - 1
+    while (i >= 0) {
+
+      if (isTrue(0.3)) {
+        val names: Set[String] = overlapping(i).flatMap(demands(_).machineNeeds).map(_.name)
+        val needs = machines.filter(m => !names.contains(m.name) && isTrue(0.2))
+        if (needs.nonEmpty) {
+          demands(i) = demands(i).copy(machineNeeds = needs)
+        }
+      }
+
+      i -= 1
+    }
+
+  }
+
   // Only generate simple skills for now (does not change much in the solver)
-  private def generateSkills(s: Int) = Array.tabulate(s)(i => Skill(name = s"Skill $i"))
+  private def generateSkills(options: InstanceOptions) = Array.tabulate(options.skills)(i => Skill(name = s"Skill $i"))
+  private def generateClients(options: InstanceOptions) = Array.tabulate(options.clients)(i => Client(name = s"Client $i"))
 
-  private def generateClients(c: Int) = Array.tabulate(c)(i => Client(name = s"Client $i"))
+  private def generateLocations(options: InstanceOptions) = Array.tabulate(options.locations)(i => Location(s"Location $i"))
+  private def generateMachines(options: InstanceOptions) = {
+    val different = if (options.machines == 0) 0 else rand(options.machines / 2, options.machines - 1) // Allow to have some duplication (same machines)
+    Array.tabulate(options.machines)(i => Machine(s"Machine ${rand(0, different)}"))
+  }
 
-  def generate(t: Int, c: Int, d: Int, w: Int, s: Int, prob: Map[String, Double] = Map()): Problem = {
+  def generate(options: InstanceOptions, prob: Map[String, Double] = Map()): Problem = {
 
-    val clients = generateClients(c)
-    val skills = generateSkills(s)
+    val clients = generateClients(options)
+    val skills = generateSkills(options)
+    val locations = generateLocations(options)
+    val machines = generateMachines(options)
     val demands = generateDemands(
-        n = d,
-        maxWorkers = Math.min(d, Math.max(w / d, 1)),
-        clients = c,
+        options,
+        maxWorkers = Math.min(options.demands, Math.max(options.workers / options.demands, 1)),
         skills = skills,
         skillProbability = prob.getOrElse("skill", 0.2)
       )
-      .map(d => generatePeriodForDemand(d, t, prob = prob.getOrElse("period", 0.5)))
+      .map(d => generatePeriodForDemand(d, options.t, prob = prob.getOrElse("period", 0.5)))
 
 
-    val workforce = generateWorkforce(w)
-    val workers = generateWorkersAvailabilities(workforce, demands, t, skills)
+    assignLocations(demands, locations)
+    assignMachines(demands, machines)
+
+    val workforce = generateWorkforce(options)
+    val workers = generateWorkersAvailabilities(workforce, demands, options.t, skills)
 
 
     Problem(
-      T = t,
+      T = options.t,
       workers = workers,
       demands = demands,
-      clients = clients
+      clients = clients,
+      locations = locations,
+      machines = machines
     )
   }
 }
@@ -153,11 +203,15 @@ object InstanceGeneratorApp extends App {
   val prob = Map("skill" -> 0.2, "period" -> 0.6)
 
   val problem = InstanceGenerator.generate(
-    t = t,
-    c = c,
-    d = d,
-    w = w,
-    s = s,
+    InstanceOptions(
+      t = t,
+      clients = c,
+      demands = d,
+      workers = w,
+      skills = s,
+      machines = 10,
+      locations = 10
+    ),
     prob = prob
   )
 

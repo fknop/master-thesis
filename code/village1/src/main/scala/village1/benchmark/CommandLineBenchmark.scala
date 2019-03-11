@@ -9,7 +9,9 @@ case class BenchmarkArgs(
   override val repeat: Int = 1,
   override val dryRun: Int = 1,
   override val noKeep: Boolean = false,
-  out: String = "") extends BenchmarkOptions
+  out: String = "") extends BenchmarkOptions {
+  override def toString: String = super.toString
+}
 
 /**
   * Base class for benchmark that can be started from the CLI

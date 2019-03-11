@@ -1,35 +1,18 @@
 package village1.benchmark
 
-import oscar.cp.CPSolver
-import oscar.cp.core.variables.CPIntVar
-import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.RelaxationFunctions
-import village1.benchmark.BenchmarkSolverFunctions._
+import BenchmarkSolverFunctions._
+import village1.json.JsonSerializer
 
 object CPRelaxationsBenchmark extends CommandLineBenchmark {
 
-  val options = parseArgs()
+  val options = parseArgs(BenchmarkArgs(out = "data/benchmark/cp-relaxations.json"))
 
-  val benchmark = new SolverBenchmark(options = options)
-  val cpResultsRandom = benchmark.run(solveCP(benchmark))
-  val cpResultsProp = benchmark.run(solveCP(benchmark))
-//
-//  val tdataset = BenchmarkChart.createRuntimeDataset(("CP-Rand", cpResultsRandom(0)), ("CP-Prop", cpResultsProp(0)))
-//  val tplot = BenchmarkChart.createRuntimePlot(tdataset)
-//
-//  val odataset = BenchmarkChart.createObjectiveDataset(("CP-Rand", cpResultsRandom(0)), ("CP-Prop", cpResultsProp(0)))
-//  val oplot = BenchmarkChart.createObjectivePlot(odataset)
-//
-//  val plot = BenchmarkChart.combinePlot(tplot, oplot)
-//
-//  BenchmarkChart.show(plot, title = s"Benchmark: T=${cpResultsRandom(0).T}")
-//
-//
-//  def randomRelax: (CPSolver, Array[CPIntVar], CPIntSol) => Unit = {
-//    (solver: CPSolver, vars: Array[CPIntVar], sol: CPIntSol) => RelaxationFunctions.randomRelax(solver, vars, sol, vars.length / 2)
-//  }
-//
-//  def propagation: (CPSolver, Array[CPIntVar], CPIntSol) => Unit = {
-//    (solver: CPSolver, vars: Array[CPIntVar], sol: CPIntSol) => RelaxationFunctions.propagationGuidedRelax(solver, vars, sol,100)
-//  }
+  val benchmark = new SolverBenchmark(options = options, T = Array(10, 10), D = Array(50, 50), W = Array(300, 300))
+  val random = benchmark.run(solveCP(benchmark))
+  val prop = benchmark.run(solveCPPropagationRelax(benchmark))
+
+  val instance = benchmark.makeInstance(("CP-Random", random), ("CP-Prop", prop))
+
+  val writer = JsonSerializer.serialize(instance)
+  writer(options.out)
 }

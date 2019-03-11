@@ -3,8 +3,9 @@ package village1.benchmark
 import oscar.cp.{CPIntVar, CPSolver}
 import oscar.cp.searches.lns.CPIntSol
 import village1.modeling.VillageOneModel
-import village1.modeling.cp.CPModelOptions
+import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation}
 import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}
+import village1.search.cp.MainLNS.search
 import village1.search.cp.VillageOneLNS
 
 object BenchmarkSolverFunctions {
@@ -41,6 +42,21 @@ object BenchmarkSolverFunctions {
   def solveCP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
+      val stats = search.solve(nSols = b.SolutionLimit, timeLimit = b.TimeLimit * 1000, silent = true)
+      assert(search.lastSolution != null)
+      (stats, search.lastSolution.objective)
+    }
+  }
+
+  def solveCPPropagationRelax (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+    base: VillageOneModel => {
+      val search = new VillageOneLNS(base)
+
+      search.relax {
+        val relaxation = new PropagationGuidedRelaxation()
+        () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+      }
+
       val stats = search.solve(nSols = b.SolutionLimit, timeLimit = b.TimeLimit * 1000, silent = true)
       assert(search.lastSolution != null)
       (stats, search.lastSolution.objective)

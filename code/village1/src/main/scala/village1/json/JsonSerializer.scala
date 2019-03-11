@@ -91,7 +91,13 @@ object JsonSerializer {
                 "type" -> skill.parameterType.toString
               )
             )
-          }
+          },
+          "possibleLocations" -> d.possibleLocations,
+          "machineNeeds" -> d.machineNeeds.map(m =>
+            Json.obj(
+              "name" -> m.name
+            )
+          )
         )
       }
 

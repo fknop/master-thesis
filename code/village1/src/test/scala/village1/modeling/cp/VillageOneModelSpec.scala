@@ -4,7 +4,7 @@ import org.scalatest._
 import village1.json.JsonParser
 import village1.modeling
 
-class VillageOneModel extends FunSpec with Matchers {
+class VillageOneModelSpec extends FunSpec with Matchers {
 
 
   describe("Precomputed data (availabilities) should be correct") {

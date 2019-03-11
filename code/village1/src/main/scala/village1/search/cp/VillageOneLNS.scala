@@ -4,9 +4,9 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.RelaxationFunctions
+import oscar.cp.searches.lns.operators.{PropagationGuidedRelax, RelaxationFunctions}
 import village1.json.{JsonParser, JsonSerializer}
-import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
+import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.Benchmark.time
 import village1.util.Utilities
@@ -94,7 +94,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       var totalTime = 0L
       var totalSol = 0
 
-      val stat = start(nSols = 1, timeLimit / 1000)
+      val stat = start(nSols = 1, timeLimit = timeLimit / 1000)
 
       totalSol = stat.nSols
       totalTime += stat.time
@@ -154,15 +154,16 @@ object MainLNS extends App {
 
   val problem = JsonParser.parse(path)
 
-  val search = new VillageOneLNS(problem, CPModelOptions())
+  val search = new VillageOneLNS(problem)
 
   search.relax {
-    () => RelaxationFunctions.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+    val relaxation = new PropagationGuidedRelaxation()
+    () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
   }
 
 //  var nSolution = 0
 //  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 5 * 1000)
+  val stats = search.solve(timeLimit = 20 * 1000)
 
 
 //  println("nsolution " + nSolution)

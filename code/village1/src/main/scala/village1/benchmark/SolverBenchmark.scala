@@ -1,6 +1,6 @@
 package village1.benchmark
 
-import village1.generator.InstanceGenerator
+import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.VillageOneModel
 import village1.util.Benchmark._
 
@@ -13,6 +13,8 @@ class SolverBenchmark(
    val options: BenchmarkOptions
  ) {
 
+  println(options.toString)
+
   val Repeat: Int = options.repeat
   val DryRun: Int = options.dryRun
   val SolutionLimit: Int = options.solutionLimit
@@ -22,11 +24,15 @@ class SolverBenchmark(
 
     if (!options.noKeep) {
       val problem = InstanceGenerator.generate(
-        t = T(t),
-        c = D(d), // This parameter doesn't really matter
-        d = D(d),
-        w = W(w),
-        s = 10,
+        InstanceOptions(
+          t = T(t),
+          clients = D(d), // This parameter doesn't really matter
+          demands = D(d),
+          workers = W(w),
+          skills = 10,
+          machines = 20,
+          locations = 20
+        ),
         prob = Map("skill" -> 0.2, "period" -> 0.6)
       )
 
@@ -36,11 +42,15 @@ class SolverBenchmark(
     else {
       Array.tabulate(Repeat + DryRun)(_ => {
         val problem = InstanceGenerator.generate(
-          t = T(t),
-          c = D(d), // This parameter doesn't really matter
-          d = D(d),
-          w = W(w),
-          s = 10,
+          InstanceOptions(
+            t = T(t),
+            clients = D(d), // This parameter doesn't really matter
+            demands = D(d),
+            workers = W(w),
+            skills = 10,
+            machines = 20,
+            locations = 20
+          ),
           prob = Map("skill" -> 0.2, "period" -> 0.6)
         )
 

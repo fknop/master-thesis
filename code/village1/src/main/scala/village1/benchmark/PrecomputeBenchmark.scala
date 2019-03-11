@@ -1,6 +1,6 @@
 package village1.benchmark
 
-import village1.generator.InstanceGenerator
+import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.VillageOneModel
 
 object PrecomputeBenchmark extends App {
@@ -20,11 +20,13 @@ object PrecomputeBenchmark extends App {
         for (k <- W.indices) {
           val w = W(k)
           val problem = InstanceGenerator.generate(
-            t = t,
-            c = d, // This parameter doesn't really matter
-            d = d,
-            w = w,
-            s = 10,
+            InstanceOptions(
+              t = t,
+              clients = d,
+              demands = d,
+              workers = w,
+              skills = 10
+            ),
             prob = Map("skill" -> 0.2, "period" -> 0.6)
           )
 
