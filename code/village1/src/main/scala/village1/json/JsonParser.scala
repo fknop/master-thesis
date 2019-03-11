@@ -87,7 +87,8 @@ object JsonParser {
       periods = Set(value("periods").as[Array[Int]]: _*),
       requiredWorkers = value("requiredWorkers").as[Int],
       requiredSkills = skills,
-      additionalSkills = parseAdditionalSkills(value)
+      additionalSkills = parseAdditionalSkills(value),
+      machineNeeds = parseMachineNeeds(value)
     )
   }
 
@@ -144,6 +145,13 @@ object JsonParser {
 
   private def parseMachines (json: JsValue): Array[Machine] = {
     (json \ "machines").toOption match {
+      case Some(value) => value.as[Array[JsValue]].map(m => Machine(m("name").as[String]))
+      case None => Array[Machine]()
+    }
+  }
+
+  private def parseMachineNeeds (json: JsValue): Array[Machine] = {
+    (json \ "machineNeeds").toOption match {
       case Some(value) => value.as[Array[JsValue]].map(m => Machine(m("name").as[String]))
       case None => Array[Machine]()
     }

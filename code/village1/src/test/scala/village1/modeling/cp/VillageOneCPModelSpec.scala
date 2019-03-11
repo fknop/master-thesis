@@ -36,5 +36,36 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
     }
   }
 
+  describe("Machine assignments") {
+    it("Should return the correct machine assignments") {
+      val search = new VillageOneSearch(JsonParser.parse("data/test/machines-assignment.json"))
+
+      search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+
+        val plannings = solution.plannings
+        plannings should have size 2
+
+        val p0 = plannings(0)
+        val p1 = plannings(1)
+
+        p0.machineAssignments.get should contain (0)
+        p0.machineAssignments.get should contain oneOf (1, 2)
+
+        p1.machineAssignments.get should contain oneOf (1, 2)
+
+        if (p0.machineAssignments.get.contains(1)) {
+          p1.machineAssignments.get should contain (2)
+        }
+        else {
+          p0.machineAssignments.get should contain (2)
+          p1.machineAssignments.get should contain (1)
+        }
+      }
+
+      search.solve()
+    }
+  }
+
 
 }

@@ -125,7 +125,6 @@
       "items": {
         "$ref": "#/definitions/machine"
       },
-      "uniqueItems": true,
       "description": "All the machines"
     },
 
@@ -220,10 +219,7 @@
           "machineNeeds": {
             "type": "array",
             "items": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/machine"
-              }
+              "$ref": "#/definitions/machine"
             },
             "description": "List of machine needs, each sublist is the possible machines for that need. One of them need to be assigned for each need"
           },
