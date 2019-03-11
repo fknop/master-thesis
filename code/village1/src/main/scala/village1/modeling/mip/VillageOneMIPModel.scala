@@ -262,14 +262,12 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     for (d <- Demands) {
       val overlappingDemands = overlappingSets(d)
       if (overlappingDemands.nonEmpty) {
-        val expression = new GRBLinExpr()
-        for (demand <- overlappingDemands + d) {
-          for (l <- Locations) {
-            expression.addTerm(1, variables(l)(demand))
-          }
+        for (o <- overlappingDemands; l <- Locations) {
+          val expression = new GRBLinExpr()
+          expression.addTerm(1, variables(l)(o))
+          expression.addTerm(1, variables(l)(d))
+          model.addConstr(expression, GRB.LESS_EQUAL, 1, s"z2[$d][$o]")
         }
-
-        model.addConstr(expression, GRB.LESS_EQUAL, 1, s"z2[$d]")
       }
     }
   }
@@ -304,14 +302,12 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     for (d <- Demands) {
       val overlappingDemands = overlappingSets(d)
       if (overlappingDemands.nonEmpty) {
-        val expression = new GRBLinExpr()
-        for (demand <- overlappingDemands + d) {
-          for (m <- Machines) {
-            expression.addTerm(1, variables(m)(demand))
-          }
+        for (o <- overlappingDemands; m <- Machines) {
+          val expression = new GRBLinExpr()
+          expression.addTerm(1, variables(m)(o))
+          expression.addTerm(1, variables(m)(d))
+          model.addConstr(expression, GRB.LESS_EQUAL, 1, s"m2[$d][$o]")
         }
-
-        model.addConstr(expression, GRB.LESS_EQUAL, 1, s"m2[$d]")
       }
     }
   }
