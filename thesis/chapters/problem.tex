@@ -13,7 +13,32 @@ such as vehicles, machines, locations to these demands.
 Moreover, persons with disabilities have more constraints related to their working capabilities and
 availabilities. The workers need specific skills and may have some restrictions which
 prevent them to work for certain jobs (e.g. a worker can't lift more than five kilograms).
-They also have some incompatibilities with other workers or clients making them unable to work with or for those people.
+
+
+\subsection{Problem Description}
+
+\subsubsection{Demands}
+
+The problem consists of solving resource allocation to various demands. 
+Each demand has a set of required workers with specific skills, a list of required machines and eventual possible locations.
+A demand may be an external demand, which means an external company asked for workers for a given task.
+For this problem, demands are already assigned a given set of time periods that the workers need to be assigned to. It does not take into account the 
+start and end date of a demand.
+
+\subsubsection{Workers}
+
+Workers are the employees with disabilities that work for Village n\textsuperscript{o}1. They each have a set of availabilities which need to 
+be respected. Each worker has a set of skills that can be put to use for various demands. 
+Workers can also have some incompatibilities with other workers or clients making them unable to work with or for those people.
+
+\subsubsection{Machines}
+
+Machines also need to be assigned to demands. For this problem, we consider vehicles to also be machines.
+
+\subsubsection{Locations}
+
+Locations are working places that workers need to go to for their daily work. A demand may need to have a location assigned to it but it is not always the case 
+as some external demands might already have the locations decided by the client.
 
 
 \end{document}

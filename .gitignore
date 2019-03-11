@@ -4,6 +4,8 @@
 **/*.fls
 **/*.fdb_latexmk
 thesis/**/*.toc
+thesis/**/*.bbl
+thesis/**/*.blg
 
 **/*.idea
 
