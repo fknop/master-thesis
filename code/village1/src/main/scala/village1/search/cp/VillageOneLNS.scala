@@ -5,6 +5,7 @@ import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.{PropagationGuidedRelax, RelaxationFunctions}
+import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
@@ -152,26 +153,40 @@ object MainLNS extends App {
   val name = generatedInstances(id)
 
 
-  val problem = JsonParser.parse(path)
+    val problem = InstanceGenerator.generate(
+      InstanceOptions(
+        t = 10,
+        clients = 10,
+        demands = 50,
+        workers = 300,
+        skills = 10,
+        machines = 20,
+        locations = 10
+      ),
+      prob = Map("skill" -> 0.2, "period" -> 0.6)
+    )
 
-  val search = new VillageOneLNS(problem)
 
-  search.relax {
-    val relaxation = new PropagationGuidedRelaxation()
-    () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
-  }
+    //  val problem = JsonParser.parse(path)
 
-//  var nSolution = 0
-//  search.onSolutionFound( _ => nSolution += 1)
-  val stats = search.solve(timeLimit = 20 * 1000)
+    val search = new VillageOneLNS(problem)
+
+    search.relax {
+      val relaxation = new PropagationGuidedRelaxation()
+      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+    }
+
+    //  var nSolution = 0
+    //  search.onSolutionFound( _ => nSolution += 1)
+    val stats = search.solve(timeLimit = 5 * 1000)
 
 
-//  println("nsolution " + nSolution)
-  val solution = search.lastSolution
-  if (solution != null) {
-    JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
-    println(solution.valid)
-  }
+    //  println("nsolution " + nSolution)
+    val solution = search.lastSolution
+    if (solution != null) {
+      JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
+      println(solution.valid)
+    }
 
 }
 

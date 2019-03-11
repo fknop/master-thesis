@@ -127,17 +127,19 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   private def applyAllDifferentLocations(): Unit = {
     for (d <- Demands if locationVariables(d) != null) {
       val overlappingDemands = overlappingSets(d)
-      val locations = (overlappingDemands + d).map(locationVariables(_)).filter(_ != null)
-      add(allDifferent(locations))
+      for (o <- overlappingDemands if locationVariables(o) != null) {
+        add(locationVariables(d) !== locationVariables(o))
+      }
     }
   }
 
 
   private def applyAllDifferentMachines(): Unit = {
-    for (d <- Demands) {
+    for (d <- Demands if demands(d).machineNeeds.nonEmpty) {
       val overlappingDemands = overlappingSets(d)
-      val machines = (overlappingDemands + d).flatMap(machineVariables(_))
-      if (machines.nonEmpty) {
+
+      for (o <- overlappingDemands if demands(o).machineNeeds.nonEmpty) {
+        val machines = machineVariables(o) ++ machineVariables(d)
         add(allDifferent(machines))
       }
     }
