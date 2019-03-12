@@ -42,6 +42,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
       emitSolution(createSolution())
     }
 
+
     start(nSols = nSols, timeLimit = timeLimit / 1000)
   }
 }

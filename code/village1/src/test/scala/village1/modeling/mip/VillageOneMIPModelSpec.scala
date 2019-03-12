@@ -163,4 +163,76 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
   }
 
 
+  describe("Worker/worker incompatibilities") {
+
+    it("Should take worker/worker incompatibilities into account") {
+      val search = getSearch(JsonParser.parse("data/test/Iww.json"))
+
+      search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+
+        val plannings = solution.plannings
+        plannings should have size 2
+
+        val p0 = plannings(0)
+        val p1 = plannings(1)
+
+        val w1 = p0.workerAssignments.head.workers
+        val w2 = p1.workerAssignments.head.workers
+
+        if (w1.contains(0)) {
+          w1 should not contain 1
+          w1 should contain oneOf (2, 3)
+          w2 should contain(1)
+        }
+
+        if (w1.contains(1)) {
+          w1 should not contain 0
+          w1 should contain oneOf (2, 3)
+          w2 should contain(0)
+        }
+
+        if (w1.contains(2)) {
+          w1 should not contain 3
+          w1 should contain oneOf(0, 1)
+          w2 should contain(3)
+        }
+
+        if (w1.contains(3)) {
+          w1 should not contain 2
+          w1 should contain oneOf(0, 1)
+          w2 should contain(2)
+        }
+      }
+
+      search.solve().dispose()
+    }
+  }
+
+  describe("Worker/client incompatibilities") {
+
+    it("Should take worker/client incompatibilities into account") {
+      val search = getSearch(JsonParser.parse("data/test/Iwc.json"))
+
+      search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+
+        val plannings = solution.plannings
+        plannings should have size 2
+
+        val p0 = plannings(0)
+        val p1 = plannings(1)
+
+        val w1 = p0.workerAssignments.head.workers
+        val w2 = p1.workerAssignments.head.workers
+
+        w1 should contain only (1, 2)
+        w2 should contain only (0, 3)
+      }
+
+      search.solve().dispose()
+    }
+  }
+
+
 }
