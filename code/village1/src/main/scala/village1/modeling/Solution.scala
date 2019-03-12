@@ -4,10 +4,6 @@ import village1.data.DemandAssignment
 
 case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
 
-  // TODO: implement machines / locations logic
-  // TODO: implement additional skills logic
-  // - Check if all workers for at each time period are different
-  // - Check if all workers satisfy demand requirements
   def valid: (Boolean, String) = {
 
     val workers = problem.workers
@@ -43,15 +39,21 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           }
 
           var i = 0
+          var used = Set[Int]()
+          var satisfied = 0
           while (i < demand.machineNeeds.length) {
             val need = demand.machineNeeds(i)
-            val assignment = assignments(i)
-
-            if (need.name != problem.machines(assignment).name) {
-              return (false, "Machine assignment")
+            for (j <- assignments.indices if !used.contains(j)) {
+              if (need.name == problem.machines(assignments(j)).name) {
+                used += j
+                satisfied += 1
+              }
             }
-
             i += 1
+          }
+
+          if (satisfied != demand.machineNeeds.length) {
+            return (false, "Machine assignment")
           }
         case None =>
       }

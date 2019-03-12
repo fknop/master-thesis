@@ -67,11 +67,13 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
       search.solve().dispose()
     }
 
-//    it("Should be unsolvable") {
-//      an [NoSolutionException] should be thrownBy {
-//        getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
-//      }
-//    }
+    it("Should be unsolvable") {
+      val search = getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
+      val result = search.solve()
+      result.solution should equal(null)
+      search.lastSolution should equal(null)
+      result.dispose()
+    }
 
     it("Should be unsolvable - 2") {
       an [UnsolvableException] should be thrownBy {
@@ -116,6 +118,8 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/locations-assignment.json"))
 
       search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+
         val plannings = solution.plannings
         plannings should have size 2
 
@@ -133,6 +137,8 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/locations-assignment2.json"))
 
       search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+
         val plannings = solution.plannings
         plannings should have size 2
 

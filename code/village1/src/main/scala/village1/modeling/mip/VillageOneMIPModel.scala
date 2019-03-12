@@ -318,7 +318,12 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     val expression = new GRBLinExpr()
 
     for (d <- Demands) {
-      val possible: Set[Int] = demands(d).machineNeeds.map(machine => possibleMachines(machine.name)).reduce(_.union(_))
+      val possible: Set[Int] =
+        if (demands(d).machineNeeds.nonEmpty)
+          demands(d).machineNeeds.map(machine => possibleMachines(machine.name)).reduce(_.union(_))
+        else
+          Set()
+
       for (m <- Machines) {
         if (!possible.contains(m)) {
           expression.addTerm(1, variables(m)(d))
@@ -412,6 +417,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     workerNumberSatisfied(model, workerVariables)
     satisfyWorkerWorkerIncompatibilities(model, workerVariables)
     satisfyWorkerClientIncompatibilities(model, workerVariables)
+    satisfyAdditionalSkills(model, workerVariables)
 
     removeImpossibleZones(model, zoneVariables)
     applyAllDifferentLocations(model, zoneVariables)
