@@ -1,4 +1,4 @@
-package village1.modeling.cp
+package village1.modeling
 
 import org.scalatest._
 import village1.json.JsonParser
