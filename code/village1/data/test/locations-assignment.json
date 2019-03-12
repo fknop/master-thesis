@@ -1,0 +1,41 @@
+{
+  "T": 2,
+  "machines": [],
+  "locations": [
+    {"name": "Location 0"},
+    {"name": "Location 1"},
+    {"name": "Location 2"},
+    {"name": "Location 3"}
+  ],
+  "workers": [
+    {
+      "name": "Worker 0",
+      "availabilities": [0, 1]
+    },
+    {
+      "name": "Worker 1",
+      "availabilities": [0, 1]
+    }
+  ],
+  "clients": [
+    {
+      "name": "Client 0"
+    }
+  ],
+  "demands": [
+    {
+      "client": 0,
+      "periods": [0],
+      "requiredWorkers": 1,
+      "possibleLocations": [0]
+    },
+    {
+      "client": 0,
+      "periods": [1],
+      "requiredWorkers": 1,
+      "possibleLocations": [0]
+    }
+  ]
+}
+
+

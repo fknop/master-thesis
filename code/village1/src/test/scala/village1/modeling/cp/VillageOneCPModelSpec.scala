@@ -29,9 +29,45 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       search.solve()
     }
 
+    it("Should return the correct workers assigned with additional skills (with special Max value)") {
+      val search = new VillageOneSearch(JsonParser.parse("data/test/additional-skills-value.json"))
+
+      search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+        val plannings = solution.plannings
+        val p = plannings(0)
+
+        val workers = p.workerAssignments.head.workers
+        workers should have size 3
+      }
+
+      search.solve()
+    }
+
+    it("Should return the correct workers assigned with additional skills (with special Min value)") {
+      val search = new VillageOneSearch(JsonParser.parse("data/test/additional-skills-value-2.json"))
+
+      search.onSolutionFound { solution =>
+        solution.valid should be (true, "OK")
+        val plannings = solution.plannings
+        val p = plannings(0)
+
+        val workers = p.workerAssignments.head.workers
+        workers should have size 3
+      }
+
+      search.solve()
+    }
+
     it("Should be unsolvable") {
       an [NoSolutionException] should be thrownBy {
         new VillageOneSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
+      }
+    }
+
+    it("Should be unsolvable - 2") {
+      an [NoSolutionException] should be thrownBy {
+        new VillageOneSearch(JsonParser.parse("data/test/additional-skills-impossible2.json"))
       }
     }
   }
@@ -60,6 +96,51 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         else {
           p0.machineAssignments.get should contain (2)
           p1.machineAssignments.get should contain (1)
+        }
+      }
+
+      search.solve()
+    }
+  }
+
+  describe("Location assignments") {
+    it("Should have the same location assigned") {
+      val search = new VillageOneSearch(JsonParser.parse("data/test/locations-assignment.json"))
+
+      search.onSolutionFound { solution =>
+        val plannings = solution.plannings
+        plannings should have size 2
+
+        val p0 = plannings(0)
+        val p1 = plannings(1)
+
+        p0.locationAssignment.get should equal(0)
+        p1.locationAssignment.get should equal(0)
+      }
+
+      search.solve()
+    }
+
+    it("Should have different location assigned") {
+      val search = new VillageOneSearch(JsonParser.parse("data/test/locations-assignment2.json"))
+
+      search.onSolutionFound { solution =>
+        val plannings = solution.plannings
+        plannings should have size 2
+
+        val p0 = plannings(0)
+        val p1 = plannings(1)
+
+        val l0 = p0.locationAssignment.get
+        val l1 = p1.locationAssignment.get
+
+        if (l0 == 0) {
+          l0 should equal(0)
+          l1 should equal(1)
+        }
+        else {
+          l0 should equal(1)
+          l1 should equal(0)
         }
       }
 

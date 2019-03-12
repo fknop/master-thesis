@@ -1,0 +1,47 @@
+{
+  "T": 1,
+  "machines": [],
+  "locations": [],
+  "workers": [
+    {
+      "name": "Worker 0",
+      "availabilities": [0],
+      "skills": [
+        {
+          "name": "Supervisor",
+          "type": "Max",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "Worker 1",
+      "availabilities": [0]
+    },
+    {
+      "name": "Worker 2",
+      "availabilities": [0]
+    }
+  ],
+  "clients": [
+    {
+      "name": "Client 0"
+    }
+  ],
+  "demands": [
+    {
+      "client": 0,
+      "periods": [0],
+      "requiredWorkers": 3,
+      "additionalSkills": [
+        {
+          "name": "Supervisor",
+          "type": "Min",
+          "value": 2
+        }
+      ]
+    }
+  ]
+}
+
+

@@ -196,13 +196,17 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     for (d <- Demands) {
       val demand = demands(d)
       for (t <- demand.periods) {
+        val possibleWorkersForDemand = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b))
         val workersForDemand = workerVariables(t)(d)
 
         for (skill <- demand.additionalSkills) {
           val name = skill.name
 
           // Take only all the possible workers for that demand
-          val possibleWorkers = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b)).intersect(workersWithSkills(name))
+          val possibleWorkers = possibleWorkersForDemand.intersect(workersWithSkills(name))
+              .filter(workers(_).satisfySkill(skill))
+
+          println(possibleWorkers)
 
           if (possibleWorkers.isEmpty) {
             throw new NoSolutionException(s"No workers with skill $name")

@@ -88,6 +88,8 @@ class VillageOneModel(val problem: Problem, model: Option[VillageOneModel] = Non
       val periods = demands(d).periods
 
       val workers = periods.foldLeft(Map[Int, Set[Int]]()) { (acc, t) =>
+        // TODO: workersAvailabilities(t) throws error if no worker available
+        // => Unsolvable
         acc.updated(t, workersAvailabilities(t))
       }
 

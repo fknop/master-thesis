@@ -72,6 +72,14 @@ object JsonParser {
     }
   }
 
+  private def parsePossibleLocations(value: JsValue): Set[Int] = {
+
+    (value \ "possibleLocations").toOption match {
+      case Some(locations) => Set(locations.as[Array[Int]]: _*)
+      case None => Set()
+    }
+  }
+
   private def parseDemand(value: JsValue, index: Int): Demand = {
 
     val skillsJson = (value \ "requiredSkills").toOption
@@ -88,7 +96,8 @@ object JsonParser {
       requiredWorkers = value("requiredWorkers").as[Int],
       requiredSkills = skills,
       additionalSkills = parseAdditionalSkills(value),
-      machineNeeds = parseMachineNeeds(value)
+      machineNeeds = parseMachineNeeds(value),
+      possibleLocations = parsePossibleLocations(value)
     )
   }
 
@@ -137,7 +146,7 @@ object JsonParser {
   private def parseT(json: JsValue)= json("T").as[Int]
 
   private def parseLocations (json: JsValue): Array[Location] = {
-    (json \ "machines").toOption match {
+    (json \ "locations").toOption match {
       case Some(value) => value.as[Array[JsValue]].map(m => Location(m("name").as[String]))
       case None => Array[Location]()
     }

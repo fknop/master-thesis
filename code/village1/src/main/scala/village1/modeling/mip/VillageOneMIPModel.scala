@@ -175,18 +175,18 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 //    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
 //      val workers = possibleWorkersForDemands(d)(t)(p)
 //      for (w <- allWorkers.diff(workers)) {
-////        variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
-//        expression.addTerm(1, variables(t)(d)(p)(w))
-////        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
-//      }
-//    }
-//
-//    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
-//  }
+////      variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
+  //        expression.addTerm(1, variables(t)(d)(p)(w))
+  ////        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
+  //      }
+  //    }
+  //
+  //    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
+  //  }
 
 
 
-  def allDifferentWorkers (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def allDifferentWorkers (model: GRBModel, variables: WorkerVariables): Unit = {
     for (t <- Periods; w <- Workers) {
       val expression = new GRBLinExpr()
       for (d <- Demands if demands(d).periods.contains(t); p <- demands(d).positions) {
@@ -199,7 +199,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
-  def workerNumberSatisfied (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def workerNumberSatisfied (model: GRBModel, variables: WorkerVariables): Unit = {
     for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
       val expression = new GRBLinExpr()
       for (w <- possibleWorkersForDemands(d)(t)(p)) {
@@ -210,7 +210,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
-  def workerWorkerIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def satisfyWorkerWorkerIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
     val incompatibilities = problem.workerWorkerIncompatibilities
     for (incompatibility <- incompatibilities) {
       val w0 = incompatibility(0)
@@ -229,7 +229,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   }
 
 
-  def workerClientIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def satisfyWorkerClientIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
     val incompatibilities = problem.workerClientIncompatibilities
     for (incompatibility <- incompatibilities) {
       val iw = incompatibility(0)
@@ -241,6 +241,37 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
           for (p <- demands(d).positions) {
             model.addConstr(variables(t)(d)(p)(iw), GRB.EQUAL, 0, s"iwc[$t][$d][$p][$iw]")
           }
+        }
+      }
+    }
+  }
+
+  private def satisfyAdditionalSkills(model: GRBModel, variables: WorkerVariables): Unit = {
+    for (d <- Demands) {
+      val demand = demands(d)
+      for (t <- demand.periods) {
+
+        // Take only all the possible workers for that demand
+        val possibleWorkersForDemand = possibleWorkersForDemands(d)(t).reduce((a, b) => a.union(b))
+
+        for (skill <- demand.additionalSkills) {
+          val name = skill.name
+
+          val possibleWorkers = possibleWorkersForDemand.intersect(workersWithSkills(name))
+            .filter(workers(_).satisfySkill(skill))
+
+          if (possibleWorkers.isEmpty) {
+            throw new Error(s"NoSolutionError: No workers with skill $name")
+          }
+
+          val expression = new GRBLinExpr()
+          for (w <- possibleWorkers) {
+            for (p <- demand.positions) {
+              expression.addTerm(1, workerVariables(t)(d)(p)(w))
+            }
+          }
+
+          model.addConstr(expression, GRB.GREATER_EQUAL, 1, s"skill+[$d][$t]")
         }
       }
     }
@@ -379,8 +410,8 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   def applyConstraints (): Unit = {
     allDifferentWorkers(model, workerVariables)
     workerNumberSatisfied(model, workerVariables)
-    workerWorkerIncompatibilities(model, workerVariables)
-    workerClientIncompatibilities(model, workerVariables)
+    satisfyWorkerWorkerIncompatibilities(model, workerVariables)
+    satisfyWorkerClientIncompatibilities(model, workerVariables)
 
     removeImpossibleZones(model, zoneVariables)
     applyAllDifferentLocations(model, zoneVariables)
