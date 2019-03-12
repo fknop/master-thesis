@@ -4,7 +4,7 @@ import oscar.cp._
 import oscar.cp.constraints.AtLeastNValue
 import oscar.cp.core.CPPropagStrength
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.modeling.{Problem, Solution, VillageOneModel}
+import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
 import village1.util.Utilities
 
 
@@ -206,10 +206,8 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
           val possibleWorkers = possibleWorkersForDemand.intersect(workersWithSkills(name))
               .filter(workers(_).satisfySkill(skill))
 
-          println(possibleWorkers)
-
           if (possibleWorkers.isEmpty) {
-            throw new NoSolutionException(s"No workers with skill $name")
+            throw new UnsolvableException(s"No workers with skill $name")
           }
 
           val valueOccurrences = possibleWorkers.map(w => (w, CPBoolVar()))

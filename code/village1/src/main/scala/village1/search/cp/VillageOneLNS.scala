@@ -9,6 +9,7 @@ import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
+import village1.search.Search
 import village1.util.Benchmark.time
 import village1.util.Utilities
 

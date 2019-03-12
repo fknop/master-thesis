@@ -1,16 +1,18 @@
-package village1.modeling.cp
+package village1.modeling.mip
 
+import gurobi.GRBException
 import org.scalatest._
-import oscar.cp.core.NoSolutionException
 import village1.json.JsonParser
 import village1.modeling.{Problem, UnsolvableException}
-import village1.search.cp.VillageOneSearch
+import village1.search.mip.MIPSearch
 
-class VillageOneCPModelSpec extends FunSpec with Matchers {
+class VillageOneMIPModelSpec extends FunSpec with Matchers {
 
-  private def getSearch(problem: Problem): VillageOneSearch = {
-    new VillageOneSearch(problem)
+
+  private def getSearch(problem: Problem): MIPSearch = {
+    new MIPSearch(problem)
   }
+
 
   describe("Additional skills for demands") {
     it("Should return the correct workers assigned with additional skills") {
@@ -32,7 +34,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         List(workers0(0), workers0(1)) should contain (0)
       }
 
-      search.solve()
+      search.solve().dispose()
     }
 
     it("Should return the correct workers assigned with additional skills (with special Max value)") {
@@ -47,7 +49,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         workers should have size 3
       }
 
-      search.solve()
+      search.solve().dispose()
     }
 
     it("Should return the correct workers assigned with additional skills (with special Min value)") {
@@ -62,14 +64,14 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         workers should have size 3
       }
 
-      search.solve()
+      search.solve().dispose()
     }
 
-    it("Should be unsolvable") {
-      an [NoSolutionException] should be thrownBy {
-        getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
-      }
-    }
+//    it("Should be unsolvable") {
+//      an [NoSolutionException] should be thrownBy {
+//        getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
+//      }
+//    }
 
     it("Should be unsolvable - 2") {
       an [UnsolvableException] should be thrownBy {
@@ -105,7 +107,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         }
       }
 
-      search.solve()
+      search.solve().dispose()
     }
   }
 
@@ -124,7 +126,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         p1.locationAssignment.get should equal(0)
       }
 
-      search.solve()
+      search.solve().dispose()
     }
 
     it("Should have different location assigned") {
@@ -150,7 +152,9 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
         }
       }
 
-      search.solve()
+      search.solve().dispose()
     }
   }
+
+
 }

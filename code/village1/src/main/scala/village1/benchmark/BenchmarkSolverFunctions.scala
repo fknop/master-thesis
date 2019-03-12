@@ -7,11 +7,12 @@ import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation}
 import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}
 import village1.search.cp.MainLNS.search
 import village1.search.cp.VillageOneLNS
+import village1.search.mip.MIPSearch
 
 object BenchmarkSolverFunctions {
   def solveMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
      base: VillageOneModel => {
-      val model = new VillageOneMIPModel(base)
+      val model = new MIPSearch(base)
       val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
       solver.dispose()
 
@@ -21,7 +22,7 @@ object BenchmarkSolverFunctions {
 
   def solveMIPWithSymmetries (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
-      val model = new VillageOneMIPModel(base, MipModelOptions(symmetryBreaking = false))
+      val model = new MIPSearch(base, MipModelOptions(symmetryBreaking = false))
       val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
       solver.dispose()
 

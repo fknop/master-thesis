@@ -1,4 +1,4 @@
-package village1.search.cp
+package village1.search
 
 import village1.modeling.Solution
 
