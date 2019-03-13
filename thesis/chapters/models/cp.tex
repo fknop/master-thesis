@@ -1,0 +1,111 @@
+% !TEX root = ../../thesis.tex
+
+\documentclass[../../thesis.tex]{subfiles}
+ 
+\begin{document}
+
+
+\section{Constraint Programming Model}
+
+The translation to the mathematical (MIP) model to the CP model is fairly
+straightforward. Binary variables are translated to integer variables, each value representing
+one resource (i.e. worker, zone or machines). 
+For example, binary variables $w_{0jkl}, \dots, w_{njkl}$ are transformed to a single variable 
+$w_{jkl} \in \{0, \dots, n\}$
+
+
+
+\subsection{Variables}
+
+First, we need to express the set of workers for each demand at each time period in which that demand occurs.
+
+\begin{equation}
+\begin{split}
+    w_{ijk} \in W \label{cpworkervariable} \\
+\end{split}
+\end{equation}
+
+(\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k^{\text{th}}$ position 
+with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. This is done by using a 3-dimensional array of variables. The first dimension being the indices of the 
+time periods, the second dimension is the indices of the demands while the last dimension is the list of worker variables. 
+This last dimension has the size of the number of required workers for that demand.
+
+The same reasoning is used for zones and machines:
+
+\begin{align}
+    m_{ij} &\in M \label{cpmachinevariable} \\ 
+    z_i &\in Z \label{cpzonevariable} 
+\end{align}
+
+(\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the zone used for demand $i$
+
+Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
+per demand.
+
+\subsection{Constraints}
+
+\subsubsection{A worker can only work for one demand at a time}
+
+Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of worker variables 
+for all the demands accross time period $i$. The constraint $\texttt{allDifferent}(X_i)$ states that all workers working at time $i$ need to be different.
+For each time period $i$ and set $X_i$, we need an \texttt{allDifferent} constraint.
+
+\subsubsection{All workers can only work when they’re available}
+
+Let $W_i = \{w \mid t_i \notin w^T \}$ be the set of workers not available at $t_i$. 
+The constraint \texttt{notEqual} can be used to remove values from the worker variables $w_{ijk}$.
+For each time period $i$ and demand, remove the values contained in the set $W_i$.
+This can however be done at the domain initialization time by omitting those values instead of having an
+additional constraint.
+
+\subsubsection{Incompatibilities between workers}
+
+We can solve this constraint using a \texttt{negativeTable} constraint. 
+For each pair of variables $(a, b)$ in the set $\{w_{ij0}, \dots, w_{ijn \mid n = d^w_j - 1}\}$, we add $\texttt{negativeTable}(a, b, I_{ww})$.
+This prevents workers to work with incompatible other workers. Note that we need to cover the two directions of incompatibilities from $I_ww$. 
+We can do this by adding another $\texttt{negativeTable}(b, a, I_{ww})$ or simply by appending the reversed direction to the $I_{ww}$ table.
+
+\subsubsection{Incompatibilities between workers and clients}
+
+This constraint is much simpler than the one described above. Contrary to the worker-worker incompatibilities,
+the clients are fixed values. 
+We simply need to remove values 
+from the domain of worker variables. For each $(w, c) \in I_{wc}$, we remove the value $w$ to each variable on 
+demand $d$ where $d^c = c$. This can be done by a \texttt{notEqual} constraint or by removing the value at initialization.
+
+\subsubsection{Skill requirements}
+
+The variable modeling makes this constraint simple. Each position is described by one worker variable.
+Each position is assigned a set of skills needed by one worker. Again, we need to remove values 
+from the domain of the worker variables when those workers do not meet the skill requirements of that position. 
+
+For example, if a demand has a requirement of two workers, one \texttt{lifter} and another one with no particular skill. 
+The first worker variable for that demand will remove all workers that do not have the \texttt{lifter} skill while the second variable will remain untouched.
+
+\subsubsection{Additional skill requirement}
+
+Additionnal skills are the skills that can be satisfied by any worker in the group.
+TODO: explain gcc + sum occurences
+
+\subsubsection{No zone should be used by two overlapping demands}
+
+Let $Z^O_i = \{ z_j \mid j \in d^O_i \}$ be the set of zone variables for demands that overlap in time with demand $i$.
+The constraint $\texttt{allDifferent}(Z^O_i)$ states that all zones for overlapping demands 
+should be different. For each demand $i$ and set $Z^O_i$, we add an \texttt{allDifferent} constraint.
+
+\subsubsection{No machine should be used by two overlapping demands}
+
+Let $M^O_i = \left\{ m_{jk} \mid j \in d^O_i, k \in \{0, \dots, |d^M_j| - 1 \} \right\}$ be the set of machine variables for demands that overlap in time 
+with demand $i$. The constraint $\texttt{allDifferent}(M^O_i)$ states that all machines for overlapping demands 
+should be different. For each demand $i$ and set $M^O_i$, we add an \texttt{allDifferent} constraint.
+
+\subsubsection{Objective function}
+
+The objective function expresses the minimization of the sum of different worker for each shift.
+Let $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of all worker variables for demand $j$ at position $k$ accross all time periods for that demand.
+We use this set to compute the number of different workers for a given shift with the constraint
+$\texttt{atLeastNValue}(W_{jk}, N_{jk})$ with $N_{jk}$ being the number of different workers for shift $k$ of demand $j$.
+The objective can be expressed by $\sum_{j, k} N_{jk}$ which is the sum of different workers over all shifts. 
+
+\end{document}
+
