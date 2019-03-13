@@ -3,7 +3,7 @@ package village1.modeling.cp
 import org.scalatest._
 import oscar.cp.core.NoSolutionException
 import village1.json.JsonParser
-import village1.modeling.{Problem, UnsolvableException}
+import village1.modeling._
 import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends FunSpec with Matchers {
@@ -12,12 +12,16 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
     new VillageOneSearch(problem)
   }
 
+  private def checkValid (solution: Solution): Unit = {
+    solution.valid should matchPattern { case ValidSolution => }
+  }
+
   describe("Additional skills for demands") {
     it("Should return the correct workers assigned with additional skills") {
       val search = getSearch(JsonParser.parse("data/test/additional-skills.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
         val plannings = solution.plannings
         plannings should have size 2
 
@@ -39,7 +43,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/additional-skills-value.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
         val plannings = solution.plannings
         val p = plannings(0)
 
@@ -54,7 +58,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/additional-skills-value-2.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
         val plannings = solution.plannings
         val p = plannings(0)
 
@@ -83,7 +87,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/machines-assignment.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -114,7 +118,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/locations-assignment.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -133,7 +137,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/locations-assignment2.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -165,7 +169,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/Iww.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -211,7 +215,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/Iwc.json"))
 
       search.onSolutionFound { solution =>
-        solution.valid should be (true, "OK")
+        checkValid(solution)
 
         val plannings = solution.plannings
         plannings should have size 2

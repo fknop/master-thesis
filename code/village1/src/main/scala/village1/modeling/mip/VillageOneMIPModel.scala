@@ -443,35 +443,5 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       applyObjectives(model, workerVariables)
     }
   }
-
-//  def solve(timeLimit: Int = -1, nSols: Int = Int.MaxValue, silent: Boolean = false, MIPFocus: Int = 0): SolverResult = {
-//
-//    if (timeLimit > 0) {
-//      model.set(GRB.DoubleParam.TimeLimit, timeLimit)
-//    }
-//
-//    if (silent) {
-//      model.set(GRB.IntParam.LogToConsole, 0)
-//    }
-//
-//    model.set(GRB.IntParam.MIPFocus, MIPFocus)
-//    model.set(GRB.IntParam.SolutionLimit, nSols)
-//
-//
-//    val solutionListener = new SolutionListener(this)
-//    model.setCallback(solutionListener)
-//
-//    val t = time {
-//      model.optimize()
-//    }
-//
-//    new SolverResult {
-//      lazy val solution: Solution = solutionListener.solution
-//      val solveTime: Long = t
-//      override def dispose(): Unit = {
-//        model.dispose()
-//      }
-//    }
-//  }
 }
 

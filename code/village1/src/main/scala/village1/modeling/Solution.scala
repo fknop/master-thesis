@@ -2,10 +2,14 @@ package village1.modeling
 
 import village1.data.DemandAssignment
 
+trait ValidationResult
+object ValidSolution extends ValidationResult
+final case class InvalidSolution(message: String) extends ValidationResult
+
 case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
 
-  def valid: (Boolean, String) = {
 
+  def valid: ValidationResult = {
     val workers = problem.workers
     val demands = problem.demands
 
@@ -17,7 +21,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
       val demand = demands(planning.demand)
 
       if (planning.workerAssignments.size != demand.periods.size) {
-        return (false, "The number of timeslots is not satisfied")
+        return InvalidSolution("The number of timeslots is not satisfied")
       }
 
       planning.locationAssignment match {
@@ -27,7 +31,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           }
 
           if (!demand.possibleLocations.contains(assignment)) {
-            return (false, s"Location $assignment is not a possible position for demand ${planning.demand}")
+            return InvalidSolution(s"Location $assignment is not a possible position for demand ${planning.demand}")
           }
         case None =>
       }
@@ -53,7 +57,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           }
 
           if (satisfied != demand.machineNeeds.length) {
-            return (false, "Machine assignment")
+            return InvalidSolution("Machine assignment")
           }
         case None =>
       }
@@ -64,15 +68,33 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
         val w = assignment.workers
 
         if (w.length != demand.requiredWorkers) {
-          return (false, "The number of required workers is not satisfied")
+          return InvalidSolution("The number of required workers is not satisfied")
         }
 
         if (!demand.periods.contains(t)) {
-          return (false, s"The demand does not contain timeslot $t")
+          return InvalidSolution(s"The demand does not contain timeslot $t")
         }
 
         if (!allDifferent(w)) {
-          return (false, "The same worker works at two different positions")
+          return InvalidSolution("The same worker works at two different positions")
+        }
+
+        for (incompatibility <- problem.workerWorkerIncompatibilities) {
+          val w0 = incompatibility(0)
+          val w1 = incompatibility(1)
+
+          if (w.contains(w0) && w.contains(w1)) {
+            return InvalidSolution(s"Incompatibility ww[$w0][$w1] not respected")
+          }
+        }
+
+        for (incompatibility <- problem.workerClientIncompatibilities) {
+          val w0 = incompatibility(0)
+          val c0 = incompatibility(1)
+
+          if (w.contains(w0) && demand.client == c0) {
+            return InvalidSolution(s"Incompatibility wc[$w0][$c0] not respected")
+          }
         }
 
         workersAtTime(t) ++= w
@@ -87,7 +109,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
             val worker = workers(w(r))
 
             if (!worker.satisfySkills(skills)) {
-              return (false, s"Worker $worker does not satisfy requirements($r) for demand ${demand.id} at time ${t} not satisfied")
+              return InvalidSolution(s"Worker $worker does not satisfy requirements($r) for demand ${demand.id} at time ${t} not satisfied")
             }
           }
         }
@@ -100,7 +122,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           }
 
           if (!satisfied) {
-            (false, s"Additional skill: ${skill.name} not satisfied")
+            return InvalidSolution(s"Additional skill: ${skill.name} not satisfied")
           }
         }
 
@@ -111,20 +133,20 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
 
     for (t <- 0 until problem.T) {
       if (!allDifferent(workersAtTime(t))) {
-        return (false, s"!allDifferent(workersAtTime($t))")
+        return InvalidSolution(s"!allDifferent(workersAtTime($t))")
       }
 
       if (!allDifferent(locationsAtTime(t))) {
-        return (false, s"!allDifferent(locationsAtTime($t))")
+        return InvalidSolution(s"!allDifferent(locationsAtTime($t))")
       }
 
       if (!allDifferent(machinesAtTime(t))) {
-        return (false, s"!allDifferent(machinesAtTime($t))")
+        return InvalidSolution(s"!allDifferent(machinesAtTime($t))")
       }
     }
 
 
-    (true, "OK")
+    ValidSolution
   }
 
   private[this] def allDifferent(array: Array[Int]): Boolean = {
