@@ -1,7 +1,6 @@
 package village1.generator
 
 import village1.data._
-import village1.json.JsonSerializer
 import village1.modeling.Problem
 import village1.util.Utilities.{rand, overlappingSets}
 
@@ -20,8 +19,7 @@ object InstanceGenerator {
   private def generateDemands(
       options: InstanceOptions,
       maxWorkers: Int,
-      skills: Array[Skill] = Array(),
-      skillProbability: Double = 0
+      skills: Array[Skill] = Array()
   ): Array[Demand] = {
 
     val n = options.demands
@@ -34,7 +32,7 @@ object InstanceGenerator {
       var requiredSkills = Array[Array[Skill]]()
 
       for (_ <- 0 until requiredWorkers) {
-        if (isTrue(skillProbability)) {
+        if (isTrue(options.probabilities.getOrElse("skill", 0.5))) {
           val skill = takeSkill(skills)
           requiredSkills :+= Array(skill)
         }
@@ -46,7 +44,8 @@ object InstanceGenerator {
     demands
   }
 
-  private def generatePeriodForDemand(demand: Demand, t: Int, prob: Double): Demand = {
+  private def generatePeriodForDemand(options: InstanceOptions, demand: Demand, t: Int): Demand = {
+    val prob = options.probabilities.getOrElse("period", 0.5)
     val periods = (0 until t).foldLeft(Set[Int]()) {
       // Second condition avoid empty periods
       (acc, i) => if (isTrue(prob) || (acc.isEmpty && i == t - 1)) acc + i else acc
@@ -160,7 +159,7 @@ object InstanceGenerator {
     Array.tabulate(options.machines)(i => Machine(s"Machine ${rand(0, different)}"))
   }
 
-  def generate(options: InstanceOptions, prob: Map[String, Double] = Map()): Problem = {
+  def generate(options: InstanceOptions): Problem = {
 
     val clients = generateClients(options)
     val skills = generateSkills(options)
@@ -169,10 +168,9 @@ object InstanceGenerator {
     val demands = generateDemands(
         options,
         maxWorkers = Math.min(options.demands, Math.max(options.workers / options.demands, 1)),
-        skills = skills,
-        skillProbability = prob.getOrElse("skill", 0.2)
+        skills = skills
       )
-      .map(d => generatePeriodForDemand(d, options.t, prob = prob.getOrElse("period", 0.5)))
+      .map(d => generatePeriodForDemand(options, d, options.t))
 
 
     assignLocations(demands, locations)
@@ -193,29 +191,3 @@ object InstanceGenerator {
   }
 }
 
-object InstanceGeneratorApp extends App {
-
-  val t = 10
-  val c = 30
-  val d = 50
-  val w = 300
-  val s = 20
-  val prob = Map("skill" -> 0.2, "period" -> 0.6)
-
-  val problem = InstanceGenerator.generate(
-    InstanceOptions(
-      t = t,
-      clients = c,
-      demands = d,
-      workers = w,
-      skills = s,
-      machines = 10,
-      locations = 10
-    ),
-    prob = prob
-  )
-
-  val fileName = s"t${t}d${d}w${w}-${rand(0, 1000)}"
-  val folder = "data/instances/generated/"
-  JsonSerializer.serialize(problem)(s"$folder/$fileName.json")
-}

@@ -149,7 +149,6 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
       }
     }
 
-
     ValidSolution
   }
 

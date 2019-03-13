@@ -224,7 +224,6 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   /**
     * A worker should work on the same demand as time goes on
     * Count the number of different workers assigned to a shift
-    * TODO: implementation (check if this is the best way to do this)
     */
   private def computeShiftNWorkers (): Unit = {
     for (d <- Demands) {
