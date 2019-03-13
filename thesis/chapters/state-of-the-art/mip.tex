@@ -4,14 +4,37 @@
  
 \begin{document}
 
-The most common MIP problems are of the form:
+The most common \emph{Mixed Integer Programming} (MIP) problems are of the form:
 
 \begin{align}
-  \textrm{min} \quad & c^Tx & \\ 
-  \textrm{s.t} \quad & Ax = b & \\
-   & l \leq x \leq u & \\
-   & \text{Some or all $x_j$ must take integer values}
+  \textrm{min} \quad & \bm{c}^T\bm{x} & \label{mipobj} \\ 
+  \textrm{s.t} \quad & A\bm{x} = \bm{b} & \label{miplinearcst} \\
+   & \bm{l} \leq \bm{x} \leq \bm{u} & \label{mipboundcst} \\
+   & \text{Some or all $x_i$ must take integer values} \label{mipinteger}
 \end{align}
+
+(\ref{mipobj}) is the problem objective. $\bm{c}^T$ is the vector of coefficient, $\bm{x}$ is the vector of variables.
+(\ref{miplinearcst}) are the linear constraints. $\bm{b}$ is a vector of bounds while $A$ is a matrix of coefficients for the constraints.
+(\ref{mipboundcst}) are the bound constraints. Each $x_i$ can only take values between $l_i$ and $u_i$.
+And finally, (\ref{mipinteger}) states the integrality constraints over some or all variables.
+
+
+MIP problems are usually solved using a branch-and-bound algorithm \cite{mip-basics}.
+The process is as follow: we start with the MIP formulation and remove all integrality constraints 
+to create a resulting linear-programming (LP) relaxation to the original problem. The relaxation can be solved 
+easily compared to the original problem. The result might satisfy all integrality constraints and be a solution to the original problem.
+But more often than not, a variable has a fractional value.
+We can then solve two relaxations by imposing two additional constraints. For example, if $x$ takes value 5.5, we add the 
+following linear constraints: $x \leq 5.0$ and $x \geq 6.0$. 
+This process is repeated throughout the search until a valid solution is found.
+More techniques are used to find solution more efficiently. Each solver uses its
+own algorithm (e.g Gurobi Optimizer \cite{mip-basics}).
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{branch-and-bound.png}
+  \caption{MIP Branch \& Bound search tree \cite{mip-basics}}
+\end{figure}
 
 \end{document}
 
