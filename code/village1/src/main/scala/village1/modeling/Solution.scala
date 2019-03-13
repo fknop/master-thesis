@@ -3,8 +3,12 @@ package village1.modeling
 import village1.data.DemandAssignment
 
 trait ValidationResult
-object ValidSolution extends ValidationResult
-final case class InvalidSolution(message: String) extends ValidationResult
+object ValidSolution extends ValidationResult {
+  override def toString: String = "Solution is valid."
+}
+final case class InvalidSolution(message: String) extends ValidationResult {
+  override def toString: String = s"Solution is invalid:\nReason: $message"
+}
 
 case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
 
