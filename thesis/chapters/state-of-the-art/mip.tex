@@ -26,7 +26,7 @@ easily compared to the original problem. The result might satisfy all integralit
 But more often than not, a variable has a fractional value.
 We can then solve two relaxations by imposing two additional constraints. For example, if $x$ takes value 5.5, we add the 
 following linear constraints: $x \leq 5.0$ and $x \geq 6.0$. 
-This process is repeated throughout the search until a valid solution is found.
+This process is repeated throughout the search tree (\autoref{mip-tree}) a valid solution is found.
 More techniques are used to find solution more efficiently. Each solver uses its
 own algorithm (e.g Gurobi Optimizer \cite{mip-basics}).
 
@@ -34,6 +34,7 @@ own algorithm (e.g Gurobi Optimizer \cite{mip-basics}).
   \centering
   \includegraphics[scale=0.5]{branch-and-bound.png}
   \caption{MIP Branch \& Bound search tree \cite{mip-basics}}
+  \label{mip-tree}
 \end{figure}
 
 \end{document}

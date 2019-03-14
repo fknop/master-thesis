@@ -21,6 +21,7 @@
 
 
 
+
 \graphicspath{{images/}{../images/}}
 
 % Name of the student author(s)
@@ -31,6 +32,8 @@
 % Name of the supervisor(s)
 \supervisor{Pierre \textsc{Schaus}}
 \secondsupervisor{Charles \textsc{Thomas}}	
+
+
 % Name of the reader(s)
 \readerone{Hélène \textsc{Verhaeghe}}
 
@@ -39,6 +42,10 @@
 
 % Document
 \begin{document}
+  
+  \def\chapterautorefname{Chapter}
+  \newcommand{\vone}{Village n\textsuperscript{o}1}
+
   % Front cover page
   
   \maketitle
@@ -46,9 +53,11 @@
   \tableofcontents
 
   \chapter{Introduction}
+  \label{chapter:introduction}
   \subfile{chapters/introduction}
 
-  \chapter{The Village n\textsuperscript{o}1 problem}
+  \chapter{The \vone\ problem}
+  \label{chapter:problem}
   \subfile{chapters/problem}
 
 
@@ -86,6 +95,7 @@
   \label{chapter:experiments}
 
   \chapter{Conclusion}
+  \label{chapter:conclusion}
 
   \bibliography{bibliography/oscar, bibliography/gurobi, bibliography/cp-definition} 
   \bibliographystyle{ieeetr}

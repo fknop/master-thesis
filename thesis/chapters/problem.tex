@@ -1,44 +1,48 @@
 % !TEX root = ../thesis.tex
 
 \documentclass[../thesis.tex]{subfiles}
- 
+
+
+
 \begin{document}
 
-Village n\textsuperscript{o}1 is a belgian company employing persons with disabilities.
-They offer services to companies and private individuals such as industrial jobs.
-They are currently in the process of automating the way they schedule these jobs. 
-The company has internal work for their employees but also receives demands from external clients.
-They need to assign workers for one or more time periods to those demands. They also need to assign other resources
-such as vehicles, machines, locations to these demands.
-Moreover, persons with disabilities have more constraints related to their working capabilities and
-availabilities. The workers need specific skills and may have some restrictions which
-prevent them to work for certain jobs (e.g. a worker can't lift more than five kilograms).
+This chapter presents the resource allocation problem.
+We first introduce the general problem and its constraints, 
+the formal models are described in \autoref{chapter:models}.
+
+As stated before, the problem consists of allocating resources to work demands. 
+The company (\vone) has internal work for their employees but also receives 
+external labor requests. The problem is separated in multiple time periods all equal in time.
+A demand often occurs in multiple time slots and consists of a required number of workers, an eventual 
+work location and additional resources like machines or vehicles.
+
+Each demand has:
+
+\begin{itemize}
+  \item A given set of time periods.
+  \item A required number of workers per period.
+  \item Some skills requirements to be fullfilled by the workers. 
+  It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
+  \item A list of machines to perform the work.
+  \item An eventual list of possible locations where the demand can be executed and a vehicle to drive the workers to destination.
+  A demand can only have a location if it is an external labor request. Internal work to the company use predefined locations.
+  \item An eventual need for a worker supervisor which will supervise the group.
+\end{itemize}
 
 
-\subsection{Problem Description}
+Each worker has:
 
-\subsubsection{Demands}
+\begin{itemize}
+  \item Some skills and restrictions (e.g. package lifter, supervisor, etc.)
+  \item A list of availabilities at which the worker can work.
+  \item A list of incompatibilities with other workers (i.e. workers that can't work together).
+  \item A list of incompatibilities with clients (i.e. workers that can't work for clients).
+\end{itemize}
 
-The problem consists of solving resource allocation to various demands. 
-Each demand has a set of required workers with specific skills, a list of required machines and eventual possible locations.
-A demand may be an external demand, which means an external company asked for workers for a given task.
-For this problem, demands are already assigned a given set of time periods that the workers need to be assigned to. It does not take into account the 
-start and end date of a demand.
-
-\subsubsection{Workers}
-
-Workers are the employees with disabilities that work for Village n\textsuperscript{o}1. They each have a set of availabilities which need to 
-be respected. Each worker has a set of skills that can be put to use for various demands. 
-Workers can also have some incompatibilities with other workers or clients making them unable to work with or for those people.
-
-\subsubsection{Machines}
-
-Machines also need to be assigned to demands. For this problem, we consider vehicles to also be machines.
-
-\subsubsection{Locations}
-
-Locations are working places that workers need to go to for their daily work. A demand may need to have a location assigned to it but it is not always the case 
-as some external demands might already have the locations decided by the client.
+The goal is to assign workers, machines and locations to a list of demands over the set of all time slots.
+Each resource can only be assigned once per time period and need to satisfy all the constraints stated by the demand. 
+The sub-goal is to also assign workers in such a way that they work the longest time possible for the same position and 
+ such that the assignments between workers are balanced throughout the entire schedule.
 
 
 \end{document}
