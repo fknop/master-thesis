@@ -2,7 +2,7 @@ package village1.generator
 
 import village1.data._
 import village1.modeling.Problem
-import village1.util.Utilities.{rand, overlappingSets}
+import village1.util.Utils.{rand, overlappingSets}
 
 object InstanceGenerator {
 

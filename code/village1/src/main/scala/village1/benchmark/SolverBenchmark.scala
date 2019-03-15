@@ -1,8 +1,8 @@
 package village1.benchmark
 
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.modeling.VillageOneModel
-import village1.util.Benchmark._
+import village1.modeling.{Problem, VillageOneModel}
+import village1.util.BenchmarkUtils._
 
 
 
@@ -13,47 +13,36 @@ class SolverBenchmark(
    val options: BenchmarkOptions
  ) {
 
-  println(options.toString)
-
   val Repeat: Int = options.repeat
   val DryRun: Int = options.dryRun
   val SolutionLimit: Int = options.solutionLimit
   val TimeLimit: Int = options.timeLimit
 
+  private def generate(t: Int, d: Int, w: Int): Problem = {
+    InstanceGenerator.generate(
+      InstanceOptions(
+        t = T(t),
+        clients = D(d), // This parameter doesn't really matter
+        demands = D(d),
+        workers = W(w),
+        skills = 10,
+        machines = 20,
+        locations = 20,
+        probabilities = Map("skill" -> 0.2, "period" -> 0.6)
+      )
+    )
+  }
+
   val baseModels: Array[Array[Array[Array[VillageOneModel]]]] = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
 
     if (!options.noKeep) {
-      val problem = InstanceGenerator.generate(
-        InstanceOptions(
-          t = T(t),
-          clients = D(d), // This parameter doesn't really matter
-          demands = D(d),
-          workers = W(w),
-          skills = 10,
-          machines = 20,
-          locations = 20
-        ),
-        prob = Map("skill" -> 0.2, "period" -> 0.6)
-      )
-
+      val problem = generate(t, d, w)
       val model = new VillageOneModel(problem)
       Array.fill[VillageOneModel](Repeat + DryRun)(model)
     }
     else {
       Array.tabulate(Repeat + DryRun)(_ => {
-        val problem = InstanceGenerator.generate(
-          InstanceOptions(
-            t = T(t),
-            clients = D(d), // This parameter doesn't really matter
-            demands = D(d),
-            workers = W(w),
-            skills = 10,
-            machines = 20,
-            locations = 20
-          ),
-          prob = Map("skill" -> 0.2, "period" -> 0.6)
-        )
-
+        val problem = generate(t, d, w)
         new VillageOneModel(problem)
       })
     }
@@ -117,48 +106,6 @@ class SolverBenchmark(
       stdDev(measurements)
     )
   }
-
-//  private def solveCPThenMIP (base: VillageOneModel): (Long, Int) = {
-//    val cp = new VillageOneSearch(base)
-//    val stat = cp.solve(nSols = 1, timeLimit = TimeLimit * 1000, silent = true)
-//
-//    val remaining = TimeLimit - (stat.time / 1000).toInt
-//
-//
-//    val model = new VillageOneMIPModel(base)
-//    model.initialize(withObjective = true)
-//
-//    if (cp.lastSolution != null) {
-//      model.setInitialSolution(cp.lastSolution)
-//    }
-//
-//    val solver: SolverResult = model.solve(silent = true, timeLimit = remaining, nSols = SolutionLimit)
-//    solver.dispose()
-//    (solver.solveTime + stat.time, solver.solution.objective)
-//  }
-//
-//  private def solveMIP (base: VillageOneModel): (Long, Int) = {
-//    val model = new VillageOneMIPModel(base)
-//    model.initialize(withObjective = true)
-//    val solver: SolverResult = model.solve(silent = true, timeLimit = TimeLimit, nSols = SolutionLimit)
-//    solver.dispose()
-//
-//    (solver.solveTime, solver.solution.objective)
-//  }
-//
-//  private def solveCP (base: VillageOneModel): (Long, Int) = {
-//    val search = new VillageOneLNS(base)
-//    val stats = search.solve(nSols = SolutionLimit, timeLimit = TimeLimit * 1000, silent = true)
-//    assert(search.lastSolution != null)
-//    (stats, search.lastSolution.objective)
-//  }
-//
-//  private def solveCPDefaultHeuristic (base: VillageOneModel): (Long, Int) = {
-//    val search = new VillageOneLNS(base)
-//    val stats = search.solve(nSols = SolutionLimit, timeLimit = TimeLimit * 1000, silent = true, heuristic = SearchHeuristic.Default)
-//    assert(search.lastSolution != null)
-//    (stats, search.lastSolution.objective)
-//  }
 }
 
 

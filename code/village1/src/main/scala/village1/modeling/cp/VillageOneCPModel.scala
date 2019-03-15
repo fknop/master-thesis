@@ -5,7 +5,7 @@ import oscar.cp.constraints.AtLeastNValue
 import oscar.cp.core.CPPropagStrength
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
-import village1.util.Utilities
+import village1.util.Utils
 
 
 case class CPModelOptions(symmetryBreaking: Boolean = true)
@@ -97,9 +97,9 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   private def removeWorkerSymmetries (): Unit = {
     for (d <- Demands) {
       for (t <- demands(d).periods) {
-        val symmetries = Utilities.groupByEquality(possibleWorkersForDemands(d)(t))
+        val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
         if (symmetries.nonEmpty) {
-          val possibleWithoutSymmetries = Utilities.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
+          val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
           for (symmetry <- symmetries) {
             for (p <- symmetry) {
               val possible = possibleWithoutSymmetries(p)
@@ -153,7 +153,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     for (period <- Periods; demand <- Demands) {
       val demandVar = workerVariables(period)(demand)
       if (demandVar.length >= 2) {
-        val permutations = Utilities.generatePermutationsOfTwo(demandVar.length)
+        val permutations = Utils.generatePermutationsOfTwo(demandVar.length)
         for ((i, j) <- permutations) {
           add(negativeTable(Array(demandVar(i), demandVar(j)), wwIncompatibilities))
         }

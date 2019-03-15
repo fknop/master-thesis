@@ -1,20 +1,26 @@
 package village1.search.mip
 
 import gurobi.{GRB, GRBCallback, GRBException}
-import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, VillageOneModel}
-import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}
+import village1.modeling.mip.{MipModelOptions, VillageOneMIPModel}
 import village1.search.Search
 import village1.search.cp.VillageOneLNS
-import village1.util.Benchmark.time
+import village1.util.BenchmarkUtils.time
+
+trait MipSolverResult {
+  val solution: Solution
+  val optimal: Boolean
+  val solveTime: Long
+}
+
 
 class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneMIPModel(problem, options, base) with Search {
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
   def this(base: VillageOneModel, options: MipModelOptions) = this(base.problem, options, Some(base))
 
 
-  def solve(timeLimit: Int = -1, nSols: Int = Int.MaxValue, silent: Boolean = false, MIPFocus: Int = 0): SolverResult = {
+  def solve(timeLimit: Int = -1, nSols: Int = Int.MaxValue, silent: Boolean = false, MIPFocus: Int = 0): MipSolverResult = {
 
     if (timeLimit > 0) {
       model.set(GRB.DoubleParam.TimeLimit, timeLimit)
@@ -36,12 +42,22 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
       model.optimize()
     }
 
-    new SolverResult {
+    val status = model.get(GRB.IntAttr.Status)
+
+    if (status == GRB.INFEASIBLE) {
+      // TODO: throw infeasible
+    }
+
+    model.dispose()
+
+    new MipSolverResult {
       lazy val solution: Solution = solutionListener.solution
       val solveTime: Long = t
-      override def dispose(): Unit = {
-        model.dispose()
-      }
+      val optimal: Boolean = status == GRB.OPTIMAL
+      // TODO: dispose after optimize
+//      override def dispose(): Unit = {
+//        model.dispose()
+//      }
     }
   }
 }
@@ -65,11 +81,11 @@ object MipMain2 extends App {
 
   try {
 
-    val solver: SolverResult = model.solve(timeLimit = 60)
+    val solver: MipSolverResult = model.solve(timeLimit = 60)
     val solution = solver.solution
     println(solution.valid)
     println(solver.solveTime)
-    solver.dispose()
+//    solver.dispose()
     JsonSerializer.serialize(solution)(s"data/results/mip-${name}-o=${solution.objective}.json")
 
   }

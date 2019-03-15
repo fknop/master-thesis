@@ -2,7 +2,7 @@ package village1.generator
 
 import scopt.OParser
 import village1.json.JsonSerializer
-import village1.util.Utilities
+import village1.util.Utils
 
 
 object InstanceGeneratorCLI extends App {
@@ -105,7 +105,7 @@ object InstanceGeneratorCLI extends App {
       val t = problem.T
       val d = problem.demands.length
       val w = problem.workers.length
-      val fileName = s"t${t}d${d}w${w}-${Utilities.rand(0, 1000)}.json"
+      val fileName = s"t${t}d${d}w${w}-${Utils.rand(0, 1000)}.json"
       val folder = "data/instances/generated/"
       s"$folder$fileName"
   }

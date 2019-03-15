@@ -38,7 +38,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         List(workers0(0), workers0(1)) should contain (0)
       }
 
-      search.solve().dispose()
+      search.solve()
     }
 
     it("Should return the correct workers assigned with additional skills (with special Max value)") {
@@ -53,7 +53,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         workers should have size 3
       }
 
-      search.solve().dispose()
+      search.solve()
     }
 
     it("Should return the correct workers assigned with additional skills (with special Min value)") {
@@ -68,7 +68,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         workers should have size 3
       }
 
-      search.solve().dispose()
+      search.solve()
     }
 
     it("Should be unsolvable") {
@@ -76,7 +76,6 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
       val result = search.solve()
       result.solution should equal(null)
       search.lastSolution should equal(null)
-      result.dispose()
     }
 
     it("Should be unsolvable - 2") {
@@ -113,7 +112,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         }
       }
 
-      search.solve().dispose()
+      search.solve()
     }
   }
 
@@ -134,7 +133,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         p1.locationAssignment.get should equal(0)
       }
 
-      search.solve().dispose()
+      search.solve()
     }
 
     it("Should have different location assigned") {
@@ -162,7 +161,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         }
       }
 
-      search.solve().dispose()
+      search.solve()
     }
   }
 
@@ -209,7 +208,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         }
       }
 
-      search.solve().dispose()
+      search.solve()
     }
   }
 
@@ -234,7 +233,7 @@ class VillageOneMIPModelSpec extends FunSpec with Matchers {
         w2 should contain only (0, 3)
       }
 
-      search.solve().dispose()
+      search.solve()
     }
   }
 

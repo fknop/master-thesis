@@ -4,7 +4,7 @@ import village1.data.Demand
 
 import scala.collection.mutable
 
-object Utilities {
+object Utils {
   private val random = new scala.util.Random
 
   /**

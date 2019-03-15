@@ -1,21 +1,16 @@
 package village1.benchmark
 
-import oscar.cp.{CPIntVar, CPSolver}
-import oscar.cp.searches.lns.CPIntSol
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation}
-import village1.modeling.mip.{MipModelOptions, SolverResult, VillageOneMIPModel}
-import village1.search.cp.MainLNS.search
-import village1.search.cp.VillageOneLNS
-import village1.search.mip.MIPSearch
+import village1.modeling.mip.MipModelOptions
+import village1.search.cp.{VillageOneLNS, VillageOneSearch}
+import village1.search.mip.{MIPSearch, MipSolverResult}
 
 object BenchmarkSolverFunctions {
   def solveMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
      base: VillageOneModel => {
       val model = new MIPSearch(base)
-      val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
-      solver.dispose()
-
+      val solver: MipSolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
       (solver.solveTime, solver.solution.objective)
     }
   }
@@ -23,9 +18,7 @@ object BenchmarkSolverFunctions {
   def solveMIPWithSymmetries (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val model = new MIPSearch(base, MipModelOptions(symmetryBreaking = false))
-      val solver: SolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
-      solver.dispose()
-
+      val solver: MipSolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
       (solver.solveTime, solver.solution.objective)
     }
   }
@@ -63,4 +56,24 @@ object BenchmarkSolverFunctions {
       (stats, search.lastSolution.objective)
     }
   }
+
+    def solveCPThenMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+
+      base: VillageOneModel => {
+        val cp = new VillageOneSearch(base)
+        val stat = cp.solve(nSols = 1, timeLimit = b.TimeLimit * 1000, silent = true)
+
+        val remaining = b.TimeLimit - (stat.time / 1000.0).round.toInt
+
+        val mip = new MIPSearch(base)
+
+        if (cp.lastSolution != null) {
+          mip.setInitialSolution(cp.lastSolution)
+        }
+
+        val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = b.SolutionLimit)
+        (solver.solveTime + stat.time, mip.lastSolution.objective)
+      }
+    }
+
 }

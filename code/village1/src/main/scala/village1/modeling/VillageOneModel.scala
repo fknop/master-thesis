@@ -1,7 +1,7 @@
 package village1.modeling
 
 import village1.data.{Demand, Worker}
-import village1.util.Utilities
+import village1.util.Utils
 
 /**
   * Common precomputed data for CP/MIP model(s)
@@ -24,7 +24,7 @@ class VillageOneModel(val problem: Problem, model: Option[VillageOneModel] = Non
   val Machines: Range = 0 until M
   val Locations: Range = 0 until L
 
-  val overlappingSets: Array[Set[Int]] = Utilities.overlappingSets(problem.demands)
+  val overlappingSets: Array[Set[Int]] = Utils.overlappingSets(problem.demands)
 
   val allWorkers: Set[Int] = workers.indices.toSet
 

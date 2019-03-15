@@ -7,8 +7,6 @@ object SymmetryBreakingBenchmark extends CommandLineBenchmark {
 
   val options = parseArgs(BenchmarkArgs(out = "data/benchmark/cp-symmetry.json"))
 
-  println(options)
-
   val benchmark = new SolverBenchmark(options = options)
   val cpResults = benchmark.run(solveCP(benchmark))
   val cpResultsSB = benchmark.run(solveCPWithSymmetries(benchmark))

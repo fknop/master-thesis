@@ -5,16 +5,10 @@ import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
-import village1.util.Benchmark.time
-import village1.util.Utilities
+import village1.util.BenchmarkUtils.time
+import village1.util.Utils
 
 import scala.util.Random
-
-trait SolverResult {
-  def dispose(): Unit
-  val solution: Solution
-  val solveTime: Long
-}
 
 
 
@@ -24,64 +18,6 @@ object VillageOneMIPModel {
     env.dispose()
   }
 }
-
-//class SolutionListener(model: VillageOneMIPModel) extends GRBCallback {
-//
-//  type WorkerVariablesSolution = Array[Array[Array[Array[Double]]]]
-//
-//  private var _solution: Solution = null
-//
-//  def solution: Solution = _solution
-//
-//  private def getValues(): WorkerVariablesSolution = {
-//    val variables = model.workerVariables
-//    variables.map(
-//      _.map(
-//        _.map(
-//          _.map(v =>
-//            if (v == null) 0 else getSolution(v)
-//          )
-//        )
-//      )
-//    )
-//  }
-//
-//  // Only call this once model is optimized
-//  private def createSolution (values: WorkerVariablesSolution): Solution = {
-//    var demandAssignments: Array[DemandAssignment] = Array()
-//
-//    for (d <- model.Demands) {
-//      val demand = model.demands(d)
-//      var workerAssignments: Array[WorkerAssignment] = Array()
-//
-//      for (t <- demand.periods) {
-//        var workers = Array[Int]()
-//
-//        for (p <- demand.positions; w <- model.Workers) {
-//          val value = values(t)(d)(p)(w)
-//          if (value == 1.0) {
-//            workers :+= w
-//          }
-//        }
-//
-//        workerAssignments :+= WorkerAssignment(workers, t)
-//      }
-//
-//      demandAssignments :+= DemandAssignment(d, workerAssignments, None, None)
-//    }
-//
-//
-//    val objective = this.getDoubleInfo(GRB.CB_MIPSOL_OBJ)
-//    Solution(model.problem, demandAssignments, objective.toInt)
-//  }
-//
-//
-//  override def callback(): Unit = {
-//    if (where == GRB.CB_MIPSOL) {
-//      _solution = createSolution(getValues())
-//    }
-//  }
-//}
 
 
 case class MipModelOptions(symmetryBreaking: Boolean = true, objective: Boolean = true)
@@ -135,9 +71,9 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     val expression = new GRBLinExpr()
     for (d <- Demands) {
       for (t <- demands(d).periods) {
-        val symmetries = Utilities.groupByEquality(possibleWorkersForDemands(d)(t))
+        val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
         if (symmetries.nonEmpty) {
-          val possibleWithoutSymmetries = Utilities.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
+          val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
           for (symmetry <- symmetries) {
             for (p <- symmetry) {
               val possible = possibleWithoutSymmetries(p)

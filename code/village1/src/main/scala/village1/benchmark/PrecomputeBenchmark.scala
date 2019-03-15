@@ -26,8 +26,7 @@ object PrecomputeBenchmark extends App {
               demands = d,
               workers = w,
               skills = 10
-            ),
-            prob = Map("skill" -> 0.2, "period" -> 0.6)
+            )
           )
 
           val model = new VillageOneModel(problem)

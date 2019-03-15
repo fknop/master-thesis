@@ -4,7 +4,7 @@ package village1.util
 import org.scalatest._
 import village1.data.Demand
 
-class UtilitiesSpec extends FunSpec with Matchers {
+class UtilsSpec extends FunSpec with Matchers {
 
   describe("Overlapping sets") {
 
@@ -22,7 +22,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
     ).toArray
 
     it("Should return the correct overlapping sets") {
-      val overlapping = Utilities.overlappingSets(demands)
+      val overlapping = Utils.overlappingSets(demands)
 
       overlapping should have size 6
 
@@ -47,7 +47,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
   describe("Permutations of two") {
 
     it("Should return the correct permutations") {
-      val permutations = Utilities.generatePermutationsOfTwo(5)
+      val permutations = Utils.generatePermutationsOfTwo(5)
 
       permutations should contain only (
         (0, 1),
@@ -74,7 +74,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
       val f = Set(3, 2, 1) // with a and d
       val g = Set(1, 2, 3, 4) // with b
 
-      val groups = Utilities.groupByEquality(Array(a, b, c, d, e, f, g))
+      val groups = Utils.groupByEquality(Array(a, b, c, d, e, f, g))
       groups should have size 2
       groups(0) should have size 2
       groups(1) should have size 3
@@ -93,7 +93,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
     val d = Set(5, 4, 3, 2, 1)
 
     it("Should split symmetries (even sets)") {
-      val sets = Utilities.removeSymmetries(Array(a, b))
+      val sets = Utils.removeSymmetries(Array(a, b))
       sets(0) should have size 2
       sets(1) should have size 2
 
@@ -102,7 +102,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
     }
 
     it("Should split symmetries (odd sets)") {
-      val sets = Utilities.removeSymmetries(Array(c, d))
+      val sets = Utils.removeSymmetries(Array(c, d))
       sets(0) should have size 2
       sets(1) should have size 3
 
@@ -111,7 +111,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
     }
 
     it("Should split symmetries (both even and odd sets)") {
-      val sets = Utilities.removeSymmetries(Array(a, b, c, d))
+      val sets = Utils.removeSymmetries(Array(a, b, c, d))
       sets(0) should have size 2
       sets(1) should have size 2
 
@@ -126,7 +126,7 @@ class UtilitiesSpec extends FunSpec with Matchers {
     }
 
     it("Should split symmetries (unused sets)") {
-      val sets = Utilities.removeSymmetries(Array(a, c, b))
+      val sets = Utils.removeSymmetries(Array(a, c, b))
       sets(0) should have size 2
       sets(1) should have size 5
       sets(2) should have size 2

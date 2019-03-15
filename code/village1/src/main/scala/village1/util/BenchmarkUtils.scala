@@ -1,6 +1,6 @@
 package village1.util
 
-object Benchmark {
+object BenchmarkUtils {
 
   /**
     * Returns the time passed to execute a block of code

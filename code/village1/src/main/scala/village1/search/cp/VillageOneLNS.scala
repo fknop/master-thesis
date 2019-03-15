@@ -4,14 +4,13 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.{PropagationGuidedRelax, RelaxationFunctions}
+import oscar.cp.searches.lns.operators.{RelaxationFunctions}
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.json.{JsonParser, JsonSerializer}
+import village1.json.{JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.Search
-import village1.util.Benchmark.time
-import village1.util.Utilities
+import village1.util.BenchmarkUtils.time
 
 object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
@@ -107,16 +106,14 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
       while (bestObjective > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
         val remainingTime = timeLimit - totalTime
-        val stat = startSubjectTo(failureLimit = limit, timeLimit = (remainingTime / 1000).toInt) {
-          val percentage = 50
+        val stat = startSubjectTo(nSols = nSols - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
           relaxation()
-//          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
         }
 
         totalSol += stat.nSols
         totalTime += stat.time
 
-        if (timeLimit - totalTime < 1000) {
+        if (timeLimit - totalTime < 200) {
           totalTime = timeLimit
         }
 
@@ -162,9 +159,9 @@ object MainLNS extends App {
         workers = 300,
         skills = 10,
         machines = 20,
-        locations = 10
-      ),
-      prob = Map("skill" -> 0.2, "period" -> 0.6)
+        locations = 10,
+        probabilities = Map("skill" -> 0.2, "period" -> 0.6)
+      )
     )
 
 
@@ -179,7 +176,7 @@ object MainLNS extends App {
 
     //  var nSolution = 0
     //  search.onSolutionFound( _ => nSolution += 1)
-    val stats = search.solve(timeLimit = 5 * 1000)
+    val stats = search.solve(timeLimit = 10 * 1000, silent = true)
 
 
     //  println("nsolution " + nSolution)
