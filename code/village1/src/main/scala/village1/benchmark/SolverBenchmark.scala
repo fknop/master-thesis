@@ -7,9 +7,6 @@ import village1.util.BenchmarkUtils._
 
 
 class SolverBenchmark(
-   val T: Array[Int] = Array(5),
-   val D: Array[Int] = Array(30, 50),
-   val W: Array[Int] = Array(100, 200, 300),
    val options: BenchmarkOptions
  ) {
 
@@ -19,6 +16,9 @@ class SolverBenchmark(
   val DryRun: Int = options.dryRun
   val SolutionLimit: Int = options.solutionLimit
   val TimeLimit: Int = options.timeLimit
+  val T: Array[Int] = options.T
+  val D: Array[Int] = options.D
+  val W: Array[Int] = options.W
 
   private def generate(t: Int, d: Int, w: Int): Problem = {
     InstanceGenerator.generate(
