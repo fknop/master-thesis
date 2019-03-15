@@ -13,6 +13,8 @@ class SolverBenchmark(
    val options: BenchmarkOptions
  ) {
 
+  println(options)
+
   val Repeat: Int = options.repeat
   val DryRun: Int = options.dryRun
   val SolutionLimit: Int = options.solutionLimit

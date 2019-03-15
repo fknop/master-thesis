@@ -9,6 +9,9 @@ case class BenchmarkArgs(
   override val repeat: Int = 1,
   override val dryRun: Int = 1,
   override val noKeep: Boolean = false,
+  override val T: Array[Int] = Array(5),
+  override val D: Array[Int] = Array(30, 50),
+  override val W: Array[Int] = Array(100, 200, 300),
   out: String = "") extends BenchmarkOptions {
   override def toString: String = super.toString
 }
@@ -38,6 +41,14 @@ class CommandLineBenchmark extends App {
       else failure(message)
     }
 
+    def validateParams(x: Seq[Int], message: String): Either[String, Unit] = {
+      import builder._
+      x.find(_ <= 0) match {
+        case Some(_) => failure(message)
+        case None => success
+      }
+    }
+
     val parser = {
       import builder._
       OParser.sequence(
@@ -57,6 +68,18 @@ class CommandLineBenchmark extends App {
         opt[Int]('d', "dryRun")
           .action((x, c) => c.copy(dryRun = x))
           .validate(x => positiveOrZero(x, "dryRun must be positive")),
+
+        opt[Seq[Int]]("T")
+          .action((x, c) => c.copy(T = x.toArray))
+          .validate(x => validateParams(x, "T must only have positive values")),
+
+        opt[Seq[Int]]("D")
+          .action((x, c) => c.copy(D = x.toArray))
+          .validate(x => validateParams(x, "D must only have positive values")),
+
+      opt[Seq[Int]]("W")
+          .action((x, c) => c.copy(W = x.toArray))
+          .validate(x => validateParams(x, "W must only have positive values")),
 
         opt[String]('o', "out")
           .action((x, c) => c.copy(out = x))
