@@ -85,6 +85,10 @@
 
     function chart (i) {
       Highcharts.chart(`container${i}`, {
+        exporting: {
+          sourceWidth: 720,
+          scale: 1
+        },
         title: {
           text: titles[i]
         },
@@ -97,7 +101,8 @@
         yAxis: {
           title: {
             text: yAxis[i]
-          }
+          },
+          min: 0
         },
 
         legend: {
@@ -134,7 +139,7 @@
         responsive: {
           rules: [{
             condition: {
-              maxWidth: 500
+              maxWidth: 700
             },
             chartOptions: {
               legend: {

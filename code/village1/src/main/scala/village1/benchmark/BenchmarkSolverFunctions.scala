@@ -9,9 +9,11 @@ import village1.search.mip.{MIPSearch, MipSolverResult}
 object BenchmarkSolverFunctions {
   def solveMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
      base: VillageOneModel => {
-      val model = new MIPSearch(base)
-      val solver: MipSolverResult = model.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
-      (solver.solveTime, solver.solution.objective)
+      val search = new MIPSearch(base)
+      val solver: MipSolverResult = search.solve(silent = true, timeLimit = b.TimeLimit, nSols = b.SolutionLimit)
+
+      if (search.lastSolution == null) null
+      else (solver.solveTime, search.lastSolution.objective)
     }
   }
 
@@ -37,8 +39,8 @@ object BenchmarkSolverFunctions {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
       val stats = search.solve(nSols = b.SolutionLimit, timeLimit = b.TimeLimit * 1000, silent = true)
-      assert(search.lastSolution != null)
-      (stats, search.lastSolution.objective)
+      if (search.lastSolution == null) null
+      else (stats, search.lastSolution.objective)
     }
   }
 
@@ -57,7 +59,7 @@ object BenchmarkSolverFunctions {
     }
   }
 
-    def solveCPThenMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+    def solveCP_MIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
 
       base: VillageOneModel => {
         val cp = new VillageOneSearch(base)
@@ -71,8 +73,10 @@ object BenchmarkSolverFunctions {
           mip.setInitialSolution(cp.lastSolution)
         }
 
-        val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = b.SolutionLimit)
-        (solver.solveTime + stat.time, mip.lastSolution.objective)
+        val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = b.SolutionLimit - stat.nSols)
+        if (mip.lastSolution == null && cp.lastSolution == null) null
+        else if (mip.lastSolution == null && cp.lastSolution != null) (stat.time, cp.lastSolution.objective)
+        else (solver.solveTime, mip.lastSolution.objective)
       }
     }
 

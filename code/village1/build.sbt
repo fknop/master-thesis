@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.12.4"
 
+// offline := true
+
 resolvers += "Oscar Snapshots" at "http://artifactory.info.ucl.ac.be/artifactory/libs-snapshot-local/"
 resolvers += "emueller-bintray" at "http://dl.bintray.com/emueller/maven"
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
@@ -17,9 +19,13 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
 
-addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")
 
+
+assemblyJarName in assembly := "village1.jar"
+test in assembly := {}
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
+addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3")

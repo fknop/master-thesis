@@ -73,10 +73,17 @@ class SolverBenchmark(
         for (j <- D.indices) {
           for (k <- W.indices) {
             val baseModel = baseModels(i)(j)(k)(r + DryRun)
-            val (time, objective) = solve(baseModel)
+            val result = solve(baseModel)
             if (measure) {
-              timeMeasurements(i)(j)(k)(r) = time
-              objectiveMeasurements(i)(j)(k)(r) = objective
+              if (result == null) {
+                timeMeasurements(i)(j)(k)(r) = -1
+                objectiveMeasurements(i)(j)(k)(r) = -1
+              }
+              else {
+                val (time, objective) = result
+                timeMeasurements(i)(j)(k)(r) = time
+                objectiveMeasurements(i)(j)(k)(r) = objective
+              }
             }
           }
         }
@@ -101,12 +108,20 @@ class SolverBenchmark(
   }
 
   private def getMeasurements(measurements: Array[Long]): BenchmarkMeasurement = {
-    BenchmarkMeasurement(
-      measurements.min,
-      measurements.max,
-      mean(measurements),
-      stdDev(measurements)
-    )
+
+    val filtered = measurements.filter(_ >= 0)
+
+    if (filtered.isEmpty) {
+      BenchmarkMeasurement(0, 0, 0, 0)
+    }
+    else {
+      BenchmarkMeasurement(
+        filtered.min,
+        filtered.max,
+        mean(filtered),
+        stdDev(filtered)
+      )
+    }
   }
 }
 

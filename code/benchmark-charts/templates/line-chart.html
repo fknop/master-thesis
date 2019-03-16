@@ -12,7 +12,7 @@
   <style>
     #container0, #container1 {
       min-width: 310px;
-      max-width: 800px;
+      max-width: 1000px;
       height: 400px;
       margin: 0 auto
     }
@@ -85,6 +85,10 @@
 
     function chart (i) {
       Highcharts.chart(`container${i}`, {
+        exporting: {
+          sourceWidth: 1920,
+          scale: 1
+        },
         title: {
           text: titles[i]
         },
@@ -97,7 +101,8 @@
         yAxis: {
           title: {
             text: yAxis[i]
-          }
+          },
+          min: 0
         },
 
         legend: {
@@ -125,7 +130,7 @@
           }
         },
 
-        series: [...series[i], ...errors[i]],
+        series: [...series[i], /*..errors[i]*/],
 
         credits: {
             enabled: false
@@ -134,7 +139,7 @@
         responsive: {
           rules: [{
             condition: {
-              maxWidth: 500
+              maxWidth: 700
             },
             chartOptions: {
               legend: {
