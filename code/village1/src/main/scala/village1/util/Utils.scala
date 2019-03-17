@@ -3,6 +3,7 @@ package village1.util
 import village1.data.Demand
 
 import scala.collection.mutable
+import scala.util.Random
 
 object Utils {
   private val random = new scala.util.Random
@@ -44,7 +45,9 @@ object Utils {
     * @param end the end value
     * @return a random integer value between [start, end]
     */
-  def rand (start: Int, end: Int): Int = start + random.nextInt((end - start) + 1)
+  def randomInt (start: Int, end: Int): Int = randomInt(random, start, end)
+
+  def randomInt (r: Random, start: Int, end: Int): Int = start + r.nextInt((end - start) + 1)
 
   def groupByEquality (sets: Array[Set[Int]]): List[Set[Int]] = {
     val used = mutable.Set[Int]()

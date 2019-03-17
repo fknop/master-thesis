@@ -12,6 +12,8 @@ object PrecomputeBenchmark extends App {
   val measurements = Array.fill(T.length, D.length, W.length)(0L)
   val repeat = 10
 
+  val generator = new InstanceGenerator()
+
   for (r <- 0 to repeat) {
     for (i <- T.indices) {
       val t = T(i)
@@ -19,7 +21,7 @@ object PrecomputeBenchmark extends App {
         val d = D(j)
         for (k <- W.indices) {
           val w = W(k)
-          val problem = InstanceGenerator.generate(
+          val problem = generator.generate(
             InstanceOptions(
               t = t,
               clients = d,

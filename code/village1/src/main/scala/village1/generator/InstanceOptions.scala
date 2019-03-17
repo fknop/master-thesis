@@ -9,5 +9,12 @@ case class InstanceOptions(
   skills: Int,
   locations: Int = 0,
   machines: Int = 0,
-  probabilities: Map[String, Double] = Map("skill" -> 0.2, "period" -> 0.6)
+  probabilities: Map[String, Double] = Map(
+    "assignSkill" -> 0.2,
+    "assignWorkerSkill" -> 0.2,
+    "assignPeriod" -> 0.6,
+    "assignLocation" -> 0.5,
+    "assignMachines" -> 0.3,
+    "takeMachine" -> 0.2
+  )
 )

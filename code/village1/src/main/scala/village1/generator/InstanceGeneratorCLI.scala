@@ -1,34 +1,17 @@
 package village1.generator
 
-import scopt.OParser
+import scopt.{OParser, OParserBuilder}
 import village1.json.JsonSerializer
 import village1.util.Utils
-
+import village1.util.CLIValidations._
 
 object InstanceGeneratorCLI extends App {
 
   var out: Option[String] = None
+  var seed: Long = 0L
 
   def parseArgs(): InstanceOptions = {
-    val builder = OParser.builder[InstanceOptions]
-
-    def positive(x: Int, message: String): Either[String, Unit] = {
-      import builder._
-      if (x > 0) success
-      else failure(message)
-    }
-
-    def positiveOrZero(x: Int, message: String): Either[String, Unit] = {
-      import builder._
-      if (x >= 0) success
-      else failure(message)
-    }
-
-    def probability(x: Double, message: String): Either[String, Unit] = {
-      import builder._
-      if (x >= 0.0 && x <= 1.0) success
-      else failure(message)
-    }
+    implicit val builder: OParserBuilder[InstanceOptions] = OParser.builder[InstanceOptions]
 
     val parser = {
       import builder._
@@ -63,11 +46,11 @@ object InstanceGeneratorCLI extends App {
           .validate(x => positive(x, "machines must be positive")),
 
         opt[Double]( "s-prob")
-          .action((x, c) => c.copy(probabilities = c.probabilities.updated("skill", x)))
+          .action((x, c) => c.copy(probabilities = c.probabilities.updated("assignSkill", x)))
           .validate(x => probability(x, "s-prob must be between 0.0 and 1.0")),
 
         opt[Double]( "p-prob")
-          .action((x, c) => c.copy(probabilities = c.probabilities.updated("period", x)))
+          .action((x, c) => c.copy(probabilities = c.probabilities.updated("assignPeriod", x)))
           .validate(x => probability(x, "p-prob must be between 0.0 and 1.0")),
 
         opt[String]( 'o', "out")
@@ -76,6 +59,12 @@ object InstanceGeneratorCLI extends App {
             c
           })
           .validate(x => if (x.trim().isEmpty) failure("out cannot be empty") else success),
+        opt[Long]("seed")
+          .action((x, c) => {
+            seed = x
+            c
+          })
+          .validate(x => positiveOrZero(x, "seed should be positive or zero"))
       )
     }
 
@@ -97,7 +86,8 @@ object InstanceGeneratorCLI extends App {
     }
   }
 
-  val problem = InstanceGenerator.generate(parseArgs())
+  val generator = new InstanceGenerator()
+  val problem = generator.generate(parseArgs())
 
   val output = out match {
     case Some(path) => path
@@ -105,7 +95,7 @@ object InstanceGeneratorCLI extends App {
       val t = problem.T
       val d = problem.demands.length
       val w = problem.workers.length
-      val fileName = s"t${t}d${d}w${w}-${Utils.rand(0, 1000)}.json"
+      val fileName = s"t${t}d${d}w${w}-${Utils.randomInt(0, 1000)}.json"
       val folder = "data/instances/generated/"
       s"$folder$fileName"
   }

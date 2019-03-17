@@ -2,18 +2,22 @@ package village1.generator
 
 import village1.data._
 import village1.modeling.Problem
-import village1.util.Utils.{rand, overlappingSets}
+import village1.util.Utils.{overlappingSets, randomInt}
 
-object InstanceGenerator {
+import scala.util.Random
 
-  private def isTrue(probability: Double = 0.5): Boolean = math.random() < probability
+class InstanceGenerator(seed: Long = 0L) {
+
+  private val random: Random = new Random(seed)
+
+  private def isTrue(probability: Double = 0.5): Boolean = random.nextDouble() < probability
 
   private def generateWorkforce(options: InstanceOptions): Array[Worker] = {
     Array.tabulate(options.workers)(i => Worker(id = i, name = s"Worker $i", availabilities = Set()))
   }
 
   private def takeSkill(skills: Array[Skill]): Skill = {
-    skills(rand(0, skills.length - 1))
+    skills(randomInt(random, 0, skills.length - 1))
   }
 
   private def generateDemands(
@@ -28,24 +32,24 @@ object InstanceGenerator {
     val demands = Array.fill[Demand](n)(null)
 
     for (i <- 0 until n) {
-      val requiredWorkers = rand(1, maxWorkers)
+      val requiredWorkers = randomInt(random, 1, maxWorkers)
       var requiredSkills = Array[Array[Skill]]()
 
       for (_ <- 0 until requiredWorkers) {
-        if (isTrue(options.probabilities.getOrElse("skill", 0.5))) {
+        if (isTrue(options.probabilities.getOrElse("assignSkill", 0.5))) {
           val skill = takeSkill(skills)
           requiredSkills :+= Array(skill)
         }
       }
 
-      demands(i) = Demand(id = i, client = rand(0, clients - 1), periods = Set(), requiredWorkers = requiredWorkers, requiredSkills = requiredSkills)
+      demands(i) = Demand(id = i, client = randomInt(random, 0, clients - 1), periods = Set(), requiredWorkers = requiredWorkers, requiredSkills = requiredSkills)
     }
 
     demands
   }
 
   private def generatePeriodForDemand(options: InstanceOptions, demand: Demand, t: Int): Demand = {
-    val prob = options.probabilities.getOrElse("period", 0.5)
+    val prob = options.probabilities.getOrElse("assignPeriod", 0.5)
     val periods = (0 until t).foldLeft(Set[Int]()) {
       // Second condition avoid empty periods
       (acc, i) => if (isTrue(prob) || (acc.isEmpty && i == t - 1)) acc + i else acc
@@ -56,11 +60,12 @@ object InstanceGenerator {
 
 
   // TODO: make this more efficient and cleaner
-  private def generateWorkersAvailabilities(workers: Array[Worker], demands: IndexedSeq[Demand], T: Int, skills: Array[Skill]): Array[Worker] = {
+  private def generateWorkersAvailabilities(options: InstanceOptions, workers: Array[Worker], demands: IndexedSeq[Demand], skills: Array[Skill]): Array[Worker] = {
+    val T = options.t
     for (d <- demands.indices) {
       for (t <- demands(d).periods) {
         var done = 0
-        var i = rand(0, workers.length - 1)
+        var i = randomInt(random, 0, workers.length - 1)
         while (done < demands(d).requiredWorkers) {
 
           // Trick to avoid infinite loop for now
@@ -82,22 +87,25 @@ object InstanceGenerator {
 
             done += 1
           }
-          i = rand(0, workers.length - 1)
+          i = randomInt(random, 0, workers.length - 1)
         }
       }
 
       // Add all availabilities to random workers (might be workers who already are available)
       var done = 0
-      var i = rand(0, workers.length - 1)
+      var i = randomInt(random, 0, workers.length - 1)
       while (done < demands(d).requiredWorkers) {
         workers(i) = workers(i).copy(availabilities = workers(i).availabilities ++ demands(d).periods)
         done += 1
-        i = rand(0, workers.length - 1)
+        i = randomInt(random, 0, workers.length - 1)
       }
+
+
+      val assignWorkerSkill = options.probabilities.getOrElse("assignWorkerSkill", 0.2)
 
       // Add random skills to particular workers with random probability
       for (i <- workers.indices) {
-        if (isTrue(0.2)) {
+        if (isTrue(assignWorkerSkill)) {
           val skill = takeSkill(skills)
           workers(i) = workers(i).copy(skills = workers(i).skills.updated(skill.name, skill))
         }
@@ -108,18 +116,18 @@ object InstanceGenerator {
     workers
   }
 
-  private def assignLocations(demands: Array[Demand], locations: Array[Location]): Unit = {
+  private def assignLocations(options: InstanceOptions, demands: Array[Demand], locations: Array[Location]): Unit = {
     val overlapping = overlappingSets(demands)
 
     val locationsIndices = locations.indices.toList
 
     var i = demands.length - 1
+    val prob = options.probabilities.getOrElse("assignLocation", 0.5)
     while (i >= 0) {
-
-      if (isTrue(0.5)) {
+      if (isTrue(prob)) {
         val size = overlapping(i).size
         if (size <= locations.length) {
-          val shuffled = util.Random.shuffle(locationsIndices)
+          val shuffled = random.shuffle(locationsIndices)
           val possibleLocations = shuffled.take(size).toSet
           demands(i) = demands(i).copy(possibleLocations = possibleLocations)
         }
@@ -129,16 +137,18 @@ object InstanceGenerator {
     }
   }
 
-  private def assignMachines(demands: Array[Demand], machines: Array[Machine]): Unit = {
+  private def assignMachines(options: InstanceOptions, demands: Array[Demand], machines: Array[Machine]): Unit = {
     val overlapping = overlappingSets(demands)
-    val machineIndices = machines.indices.toList
 
     var i = demands.length - 1
+    val assignMachines = options.probabilities.getOrElse("assignMachines", 0.3)
+    val takeMachine = options.probabilities.getOrElse("takeMachine", 0.2)
+
     while (i >= 0) {
 
-      if (isTrue(0.3)) {
+      if (isTrue(assignMachines)) {
         val names: Set[String] = overlapping(i).flatMap(demands(_).machineNeeds).map(_.name)
-        val needs = machines.filter(m => !names.contains(m.name) && isTrue(0.2))
+        val needs = machines.filter(m => !names.contains(m.name) && isTrue(takeMachine))
         if (needs.nonEmpty) {
           demands(i) = demands(i).copy(machineNeeds = needs)
         }
@@ -155,8 +165,8 @@ object InstanceGenerator {
 
   private def generateLocations(options: InstanceOptions) = Array.tabulate(options.locations)(i => Location(s"Location $i"))
   private def generateMachines(options: InstanceOptions) = {
-    val different = if (options.machines == 0) 0 else rand(options.machines / 2, options.machines - 1) // Allow to have some duplication (same machines)
-    Array.tabulate(options.machines)(i => Machine(s"Machine ${rand(0, different)}"))
+    val different = if (options.machines == 0) 0 else randomInt(random, options.machines / 2, options.machines - 1) // Allow to have some duplication (same machines)
+    Array.tabulate(options.machines)(i => Machine(s"Machine ${randomInt(random, 0, different)}"))
   }
 
   def generate(options: InstanceOptions): Problem = {
@@ -173,11 +183,11 @@ object InstanceGenerator {
       .map(d => generatePeriodForDemand(options, d, options.t))
 
 
-    assignLocations(demands, locations)
-    assignMachines(demands, machines)
+    assignLocations(options, demands, locations)
+    assignMachines(options, demands, machines)
 
     val workforce = generateWorkforce(options)
-    val workers = generateWorkersAvailabilities(workforce, demands, options.t, skills)
+    val workers = generateWorkersAvailabilities(options, workforce, demands, skills)
 
 
     Problem(

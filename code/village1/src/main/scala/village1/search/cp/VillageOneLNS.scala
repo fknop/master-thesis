@@ -4,13 +4,15 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.{RelaxationFunctions}
+import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.json.{JsonSerializer}
+import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.Search
 import village1.util.BenchmarkUtils.time
+
+import scala.util.Random
 
 object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
@@ -136,6 +138,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
 object MainLNS extends App {
 
+
   val folder = "data/instances"
   val instance = s"$folder/problem2.json"
   val generatedFolder = s"$folder/generated/"
@@ -150,19 +153,19 @@ object MainLNS extends App {
   val path = generatedInstancesPath(id)
   val name = generatedInstances(id)
 
+  val generator = new InstanceGenerator()
 
-    val problem = InstanceGenerator.generate(
-      InstanceOptions(
-        t = 10,
-        clients = 10,
-        demands = 50,
-        workers = 300,
-        skills = 10,
-        machines = 20,
-        locations = 10,
-        probabilities = Map("skill" -> 0.2, "period" -> 0.6)
-      )
+  val problem = generator.generate(
+    InstanceOptions(
+      t = 10,
+      clients = 10,
+      demands = 50,
+      workers = 300,
+      skills = 10,
+      machines = 20,
+      locations = 10
     )
+  )
 
 
     //  val problem = JsonParser.parse(path)
@@ -176,7 +179,7 @@ object MainLNS extends App {
 
     //  var nSolution = 0
     //  search.onSolutionFound( _ => nSolution += 1)
-    val stats = search.solve(timeLimit = 10 * 1000, silent = true)
+    val stats = search.solve(timeLimit = 10 * 1000)
 
 
     //  println("nsolution " + nSolution)

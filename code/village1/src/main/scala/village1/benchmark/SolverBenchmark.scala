@@ -4,13 +4,14 @@ import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.BenchmarkUtils._
 
+import scala.util.Random
+
 
 
 class SolverBenchmark(
    val options: BenchmarkOptions
  ) {
 
-  println(options)
 
   val Repeat: Int = options.repeat
   val DryRun: Int = options.dryRun
@@ -20,8 +21,18 @@ class SolverBenchmark(
   val D: Array[Int] = options.D
   val W: Array[Int] = options.W
 
+  val seed: Long = if (options.seed == -1L) Random.nextLong() else options.seed
+  private val generator = new InstanceGenerator(seed)
+
+  log(options)
+  log(s"Seed=$seed")
+
+  private def log(message: Any): Unit = {
+    println(message)
+  }
+
   private def generate(t: Int, d: Int, w: Int): Problem = {
-    InstanceGenerator.generate(
+    generator.generate(
       InstanceOptions(
         t = T(t),
         clients = D(d), // This parameter doesn't really matter
@@ -29,8 +40,7 @@ class SolverBenchmark(
         workers = W(w),
         skills = 10,
         machines = 20,
-        locations = 20,
-        probabilities = Map("skill" -> 0.2, "period" -> 0.6)
+        locations = 20
       )
     )
   }
@@ -52,20 +62,22 @@ class SolverBenchmark(
   }
 
 
-  def makeInstance(series: (String, Array[BenchmarkResult])*): BenchmarkInstance = {
+  def makeInstance(series: BenchmarkSerie*): BenchmarkInstance = {
     BenchmarkInstance(
       Repeat,
       DryRun,
       TimeLimit,
       SolutionLimit,
-      series.map(s => BenchmarkSerie(s._1, s._2))
+      series
     )
   }
 
 
-  def run (solve: VillageOneModel => (Long, Int)): Array[BenchmarkResult] = {
+  def run (name: String, solve: VillageOneModel => (Long, Int)): BenchmarkSerie = {
     val timeMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
     val objectiveMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
+
+    log("Start run")
 
     for (r <- -DryRun until Repeat) {
       val measure = r >= 0
@@ -88,7 +100,12 @@ class SolverBenchmark(
           }
         }
       }
+
+      log(s"End run: $r")
     }
+
+    log("End run")
+    log("Start measurements")
 
     val results = Array.fill[BenchmarkResult](T.length * D.length * W.length)(null)
     var r = 0
@@ -104,7 +121,9 @@ class SolverBenchmark(
       }
     }
 
-    results
+    log("End measurements")
+
+    BenchmarkSerie(name, results)
   }
 
   private def getMeasurements(measurements: Array[Long]): BenchmarkMeasurement = {

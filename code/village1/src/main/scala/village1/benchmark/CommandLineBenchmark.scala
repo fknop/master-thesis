@@ -1,7 +1,9 @@
 package village1.benchmark
 
 import org.apache.commons.lang.StringUtils
-import scopt.OParser
+import scopt.{OParser, OParserBuilder}
+
+import village1.util.CLIValidations.{positive, positiveOrZero, allPositive}
 
 case class BenchmarkArgs(
   override val solutionLimit: Int = Int.MaxValue,
@@ -12,6 +14,7 @@ case class BenchmarkArgs(
   override val T: Array[Int] = Array(5),
   override val D: Array[Int] = Array(30, 50),
   override val W: Array[Int] = Array(100, 200, 300),
+  override val seed: Long = -1L,
   out: String = "") extends BenchmarkOptions {
   override def toString: String = super.toString
 }
@@ -24,30 +27,11 @@ case class BenchmarkArgs(
   * -s --solutionLimit: solution limit for the solver
   * -r --repeat: number of repeat of the benchmark (without dry runs)
   * -d --dryRun: number of dryRun for the benchmark
+  * --seed set the seed, otherwise it will be random
   */
 class CommandLineBenchmark extends App {
   def parseArgs(defaultOptions: BenchmarkArgs = BenchmarkArgs()): BenchmarkArgs = {
-    val builder = OParser.builder[BenchmarkArgs]
-
-    def positive(x: Int, message: String): Either[String, Unit] = {
-      import builder._
-      if (x > 0) success
-      else failure(message)
-    }
-
-    def positiveOrZero(x: Int, message: String): Either[String, Unit] = {
-      import builder._
-      if (x >= 0) success
-      else failure(message)
-    }
-
-    def validateParams(x: Seq[Int], message: String): Either[String, Unit] = {
-      import builder._
-      x.find(_ <= 0) match {
-        case Some(_) => failure(message)
-        case None => success
-      }
-    }
+    implicit val builder: OParserBuilder[BenchmarkArgs] = OParser.builder[BenchmarkArgs]
 
     val parser = {
       import builder._
@@ -71,22 +55,26 @@ class CommandLineBenchmark extends App {
 
         opt[Seq[Int]]("T")
           .action((x, c) => c.copy(T = x.toArray))
-          .validate(x => validateParams(x, "T must only have positive values")),
+          .validate(x => allPositive(x, "T must only have positive values")),
 
         opt[Seq[Int]]("D")
           .action((x, c) => c.copy(D = x.toArray))
-          .validate(x => validateParams(x, "D must only have positive values")),
+          .validate(x => allPositive(x, "D must only have positive values")),
 
       opt[Seq[Int]]("W")
           .action((x, c) => c.copy(W = x.toArray))
-          .validate(x => validateParams(x, "W must only have positive values")),
+          .validate(x => allPositive(x, "W must only have positive values")),
 
         opt[String]('o', "out")
           .action((x, c) => c.copy(out = x))
           .validate(x => if (x.trim().isEmpty) failure("out cannot be empty") else success),
 
         opt[Unit]("no-keep")
-          .action((_, c) => c.copy(noKeep = true))
+          .action((_, c) => c.copy(noKeep = true)),
+
+        opt[Long]("seed")
+          .action((x, c) => c.copy(seed = x))
+          .validate(x => positiveOrZero(x, "seed must be postive or zero"))
       )
     }
 
