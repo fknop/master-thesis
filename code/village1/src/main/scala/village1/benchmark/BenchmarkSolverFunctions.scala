@@ -59,7 +59,7 @@ object BenchmarkSolverFunctions {
     }
   }
 
-    def solveCP_MIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+    def solveCP_MIP (b: SolverBenchmark, startMipProbability: Double = 0.5): VillageOneModel => (Long, Int) = {
 
       base: VillageOneModel => {
         val cp = new VillageOneSearch(base)
@@ -70,13 +70,13 @@ object BenchmarkSolverFunctions {
         val mip = new MIPSearch(base)
 
         if (cp.lastSolution != null) {
-          mip.setInitialSolution(cp.lastSolution)
+          mip.setInitialSolution(cp.lastSolution, startMipProbability)
         }
 
         val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = b.SolutionLimit - stat.nSols)
         if (mip.lastSolution == null && cp.lastSolution == null) null
-        else if (mip.lastSolution == null && cp.lastSolution != null) (stat.time, cp.lastSolution.objective)
-        else (solver.solveTime, mip.lastSolution.objective)
+        else if (mip.lastSolution == null && cp.lastSolution != null) (stat.time + solver.solveTime, cp.lastSolution.objective)
+        else (stat.time + solver.solveTime, mip.lastSolution.objective)
       }
     }
 

@@ -3,7 +3,7 @@ package village1.generator
 import scopt.{OParser, OParserBuilder}
 import village1.json.JsonSerializer
 import village1.util.Utils
-import village1.util.CLIValidations._
+import village1.util.cli.Validations._
 
 object InstanceGeneratorCLI extends App {
 

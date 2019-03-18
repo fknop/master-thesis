@@ -4,7 +4,7 @@ version := "0.1"
 
 scalaVersion := "2.12.4"
 
-// offline := true
+offline := true
 
 resolvers += "Oscar Snapshots" at "http://artifactory.info.ucl.ac.be/artifactory/libs-snapshot-local/"
 resolvers += "emueller-bintray" at "http://dl.bintray.com/emueller/maven"

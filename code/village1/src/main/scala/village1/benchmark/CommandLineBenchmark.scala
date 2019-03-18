@@ -3,7 +3,7 @@ package village1.benchmark
 import org.apache.commons.lang.StringUtils
 import scopt.{OParser, OParserBuilder}
 
-import village1.util.CLIValidations.{positive, positiveOrZero, allPositive}
+import village1.util.cli.Validations.{positive, positiveOrZero, allPositive}
 
 case class BenchmarkArgs(
   override val solutionLimit: Int = Int.MaxValue,

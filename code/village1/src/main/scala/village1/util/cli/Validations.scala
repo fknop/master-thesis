@@ -1,24 +1,26 @@
-package village1.util
+package village1.util.cli
 
-import scopt.{OParser, OParserBuilder}
+import scopt.OParserBuilder
 
-object CLIValidations {
-
+object Validations {
   def positive[T, C](x: T, message: String)(implicit n: Numeric[T], builder: OParserBuilder[C]): Either[String, Unit] = {
     import builder._
-    if (n.gt(x, n.zero)) success
+    import n._
+    if (x > n.zero) success
     else failure(message)
   }
 
   def positiveOrZero[T, C](x: T, message: String)(implicit n: Numeric[T], builder: OParserBuilder[C]): Either[String, Unit] = {
     import builder._
-    if (n.gteq(x, n.zero)) success
+    import n._
+    if (x >= n.zero) success
     else failure(message)
   }
 
   def allPositive[T, C](x: Seq[T], message: String)(implicit n: Numeric[T], builder: OParserBuilder[C]): Either[String, Unit] = {
     import builder._
-    x.find(n.lteq(_, n.zero)) match {
+    import n._
+    x.find(_ <= n.zero) match {
       case Some(_) => failure(message)
       case None => success
     }
@@ -29,5 +31,4 @@ object CLIValidations {
     if (x >= 0.0 && x <= 1.0) success
     else failure(message)
   }
-
 }

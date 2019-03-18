@@ -10,13 +10,17 @@ This chapter presents the resource allocation problem.
 We first introduce the general problem and its constraints, 
 the formal models are described in \autoref{chapter:models}.
 
-As stated before, the problem consists of allocating resources to work demands. 
-The company (\vone) has internal work for their employees but also receives 
+The \vone\ problem consists of allocating resources to work demands.
+This problem is a type of staff scheduling problem, it can be seen as a variant of the 
+well known \emph{Nurses Scheduling Problem} (NSP) \cite{Burke2004}. The goal of the NSP is to assign 
+nurses to shifts such that the entire schedule is satisfied. 
+This type of problem often have hard constraints to state restrictions 
+and soft constraints to state preferences. 
+
+\vone\ has internal work for their employees but also receives 
 external labor requests. The problem is separated in multiple time periods all equal in time.
 A demand often occurs in multiple time slots and consists of a required number of workers, an eventual 
-work location and additional resources like machines or vehicles.
-
-Each demand has:
+work location and additional resources like machines or vehicles. Each demand has:
 
 \begin{itemize}
   \item A given set of time periods.
@@ -44,6 +48,89 @@ Each resource can only be assigned once per time period and need to satisfy all 
 The sub-goal is to also assign workers in such a way that they work for the longest time possible at the same position and 
  such that the assignments between workers are balanced throughout the entire schedule.
 
+\section{Constraints}
+\subsection{Hard Constraints}
+
+\subsubsection{Respect worker availabilities}
+
+A worker has a set of availabilities and should not be assigned to a 
+shift when not available.
+
+\subsubsection{Respect demand occurences}
+
+A demand has a set of time periods in which it occurs,
+no workers should be assigned to that demand if the demand is not 
+occuring.
+
+\subsubsection{No worker should be assigned twice for the same period}
+
+A worker obviously can't work at two positions at the same time. 
+
+\subsubsection{Required number of workers}
+
+A demand has a needed number of workers to be satisfied. 
+For each time period a demand is occuring, it should have the required 
+number of workers assigned to it.
+
+\subsubsection{Skill restrictions}
+
+Each position of a demand might require skills to be satisfied. 
+To be assigned to that position, a worker must have the required skills.
+
+\subsubsection{Worker-worker incompatibilities}
+
+Workers might be incompatible with each other. Such workers can't 
+be assigned together at the same time period.
+
+\subsubsection{Worker-client incompatibilities}
+
+A worker and a client might be incompatible with each other. 
+If this is the case, the worker must not be assigned at a demand for such client.
+
+\subsubsection{The required machines must always be assigned}
+
+A demand has machine needs. Such machines should always be assigned 
+for a demand to be satisfied.
+
+\subsubsection{No machines should be assigned twice for the same period}
+
+A machine is assigned for the entirety of a demand. It can be used for other demands 
+that do not overlap in time with the first one. But it can never be assigned twice 
+for the same time period.
+
+\subsubsection{The location assigned must be in the set of possible locations}
+
+A demand has a set of possible locations. Only one of those locations can be assigned 
+to that demand.
+
+\subsubsection{No location should be assigned twice for the same period}
+
+As with machines, locations must be assigned only once per time period.
+
+
+
+
+\subsection{Soft Constraints}
+
+\subsubsection{Client-worker preference}
+
+A client might prefer some workers over others. 
+We use a soft constraint for this as it might not always be possible to 
+satisfy.
+
+\subsubsection{Contiguous shifts}
+
+A demand consists of multiple positions over a period of time. 
+For each position, a worker should keep working at that position for the longest time possible. 
+We want to avoid the hassle of changing shift everytime. 
+As this constraint is harder to solve, we express it as a soft constraint and minimize the number of 
+violations.
+
+\subsubsection{Workload balancing}
+
+Worker assignments should be balanced throughout the entire schedule.
+We want to make sure every employees has enough work.
+No worker should work everyday while another barely works.
 
 \end{document}
 

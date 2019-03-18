@@ -327,8 +327,8 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     model.setObjective(expression, GRB.MINIMIZE)
   }
 
-  def setInitialSolution(solution: Solution): Unit = {
-          val rand = new Random(0)
+  def setInitialSolution(solution: Solution, probability: Double = 0.5): Unit = {
+    val rand = new Random(0)
     for (demandAssignment <- solution.plannings) {
       val d = demandAssignment.demand
       val workerAssignments = demandAssignment.workerAssignments
@@ -336,7 +336,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
         val t = assignment.timeslot
         val workers = assignment.workers
         for (i <- workers.indices) {
-          if (rand.nextInt(100) < 50) {
+          if (rand.nextDouble() <= probability) {
             workerVariables(t)(d)(i)(workers(i)).set(GRB.DoubleAttr.Start, 1.0)
           }
         }
