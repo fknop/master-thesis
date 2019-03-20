@@ -23,24 +23,24 @@ A demand often occurs in multiple time slots and consists of a required number o
 work location and additional resources like machines or vehicles. Each demand has:
 
 \begin{itemize}
-  \item A given set of time periods.
-  \item A required number of workers per period.
-  \item Some skills requirements to be fullfilled by the workers. 
+  \item[$-$] A given set of time periods.
+  \item[$-$] A required number of workers per period.
+  \item[$-$] Some skills requirements to be fullfilled by the workers. 
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
-  \item A list of machines to perform the work.
-  \item An eventual list of possible locations where the demand can be executed and a vehicle to drive the workers to destination.
+  \item[$-$] A list of machines to perform the work.
+  \item[$-$] An eventual list of possible locations where the demand can be executed and a vehicle to drive the workers to destination.
   A demand can only have a location if it is an external labor request. Internal work to the company use predefined locations.
-  \item An eventual need for a worker supervisor which will supervise the group.
+  \item[$-$] An eventual need for a worker supervisor which will supervise the group.
 \end{itemize}
 
 
 Each worker has:
 
 \begin{itemize}
-  \item Some skills and restrictions (e.g. package lifter, supervisor, etc.)
-  \item A list of availabilities at which the worker can work.
-  \item A list of incompatibilities with other workers (i.e. workers that can't work together).
-  \item A list of incompatibilities with clients (i.e. workers that can't work for clients).
+  \item[$-$] Some skills and restrictions (e.g. package lifter, supervisor, etc.)
+  \item[$-$] A list of availabilities at which the worker can work.
+  \item[$-$] A list of incompatibilities with other workers (i.e. workers that can't work together).
+  \item[$-$] A list of incompatibilities with clients (i.e. workers that can't work for clients).
 \end{itemize}
 
 The goal is to assign workers, machines and locations to a list of demands over the set of all time slots.
