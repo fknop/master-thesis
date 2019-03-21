@@ -1,0 +1,39 @@
+{
+  "T": 10,
+  "machines": [],
+  "locations": [],
+  "workers": [
+    {
+      "name": "Worker 0",
+      "availabilities": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    {
+      "name": "Worker 1",
+      "availabilities": [0, 1, 2]
+    },
+    {
+      "name": "Worker 2",
+      "availabilities": [0, 1, 2]
+    }
+  ],
+  "workingRequirements": [
+    {
+      "worker": 0,
+      "minWorkingPeriods": 4
+    }
+  ],
+  "clients": [
+    {
+      "name": "Client 0"
+    }
+  ],
+  "demands": [
+    {
+      "client": 0,
+      "periods": [0, 1],
+      "requiredWorkers": 2
+    }
+  ]
+}
+
+

@@ -176,6 +176,26 @@ object JsonParser {
     case None => Array[Array[Int]]()
   }
 
+  private def parseWorkingRequirement(json: JsValue): WorkingRequirement = {
+    val worker = (json \ "worker").as[Int]
+    val minWorkingPeriods = (json \ "minWorkingPeriods").toOption match {
+      case Some(min) => Some(min.as[Int])
+      case None => None
+    }
+
+    val maxWorkingPeriods = (json \ "maxWorkingPeriods").toOption match {
+      case Some(min) => Some(min.as[Int])
+      case None => None
+    }
+
+    WorkingRequirement(worker, minWorkingPeriods, maxWorkingPeriods)
+  }
+
+  private def parseWorkingRequirements(json: JsValue): Array[WorkingRequirement] = (json \ "workingRequirements").toOption match {
+    case Some(value) => value.as[Array[JsValue]].map(parseWorkingRequirement)
+    case None => Array()
+  }
+
   def validate (jsonSchema: JsValue, json: JsValue): JsResult[JsValue] = {
     import Version7._
     val schema = Json.fromJson[SchemaType](jsonSchema).get
@@ -201,7 +221,8 @@ object JsonParser {
       demands = parseDemands(json),
       clients = parseClients(json),
       workerWorkerIncompatibilities = parseWorkerWorkerIncompatibilities(json),
-      workerClientIncompatibilities = parseWorkerClientIncompatibilities(json)
+      workerClientIncompatibilities = parseWorkerClientIncompatibilities(json),
+      workingRequirements = parseWorkingRequirements(json)
     )
   }
 

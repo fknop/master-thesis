@@ -33,9 +33,16 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   val locationVariables: LocationVariables = generateLocationVariables()
 
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
-  val objective: CPIntVar = sum(shiftNWorkers.flatten)
+  var workingRequirementsViolations: CPIntVar = _
 
   initialize()
+
+  val objective: CPIntVar =
+      if (workingRequirementsViolations != null)
+        sum(shiftNWorkers.flatten :+ workingRequirementsViolations)
+      else
+        sum(shiftNWorkers.flatten)
+
 
   def initialize (): Unit = {
     if (options.symmetryBreaking) {
@@ -46,6 +53,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     applyWorkerWorkerIncompatibilities()
     applyWorkerClientIncompatibilities()
     applyAdditionalSkills()
+    applyWorkingRequirements()
 
     // Locations constraints
     applyAllDifferentLocations()
@@ -218,6 +226,35 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
           add(gcc(workersForDemand, valueOccurrences))
         }
       }
+    }
+  }
+
+  private def applyWorkingRequirements (): Unit = {
+    val requirements = problem.workingRequirements
+    if (requirements.nonEmpty) {
+      val variables = workerVariables.flatten.flatten
+
+      val low = Array.fill(W)(0)
+      val up = Array.tabulate(W)(workers(_).availabilities.size)
+      val values = workers.indices
+
+      for (r <- requirements) {
+        r.min match {
+          case Some(min) => low(r.worker) = min
+          case None =>
+        }
+
+        r.max match {
+          case Some(max) => up(r.worker) = max
+          case None =>
+        }
+      }
+
+      workingRequirementsViolations = CPIntVar(0, CPIntVar.MaxValue)
+
+      add(
+        softGcc(variables, values, low, up, workingRequirementsViolations), CPPropagStrength.Strong
+      )
     }
   }
 

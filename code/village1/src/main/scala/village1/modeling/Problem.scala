@@ -10,7 +10,8 @@ case class Problem(
   locations: Array[Location] = Array(),
   machines: Array[Machine] = Array(),
   workerWorkerIncompatibilities: Array[Array[Int]] = Array(),
-  workerClientIncompatibilities: Array[Array[Int]] = Array()
+  workerClientIncompatibilities: Array[Array[Int]] = Array(),
+  workingRequirements: Array[WorkingRequirement] = Array()
 ) {
 
   for (i <- demands.indices) {

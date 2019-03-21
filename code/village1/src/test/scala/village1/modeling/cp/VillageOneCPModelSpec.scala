@@ -233,4 +233,20 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       search.solve()
     }
   }
+
+  describe("Working requirements") {
+    it("Should take into account working requirements") {
+      val search = getSearch(JsonParser.parse("data/test/working-requirements.json"))
+      search.onSolutionFound { solution =>
+        checkValid(solution)
+
+        println(search.workingRequirementsViolations.min)
+        println(search.workingRequirementsViolations.max)
+      }
+
+      search.solve()
+
+
+    }
+  }
 }

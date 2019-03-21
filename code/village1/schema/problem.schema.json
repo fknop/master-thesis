@@ -167,6 +167,24 @@
       }
     },
 
+    "workingRequirements": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "worker": {
+            "type": "integer"
+          },
+          "minWorkingPeriods": {
+            "type": "integer"
+          },
+          "maxWorkingPeriods": {
+            "type": "integer"
+          }
+        },
+        "required": ["worker"]
+      }
+    },
+
     "workerWorkerIncompatibilities": {
       "type": "array",
       "items": {
