@@ -1,8 +1,9 @@
 package village1.modeling.cp
 
+import oscar.algo.Inconsistency
 import oscar.cp._
-import oscar.cp.constraints.AtLeastNValue
-import oscar.cp.core.CPPropagStrength
+import oscar.cp.constraints._
+import oscar.cp.core.{CPPropagStrength, Constraint, NoSolutionException}
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
 import village1.util.Utils
@@ -34,14 +35,15 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
   var workingRequirementsViolations: CPIntVar = _
+  val sentinelViolations = CPIntVar(0, CPIntVar.MaxValue)
 
   initialize()
 
   val objective: CPIntVar =
       if (workingRequirementsViolations != null)
-        sum(shiftNWorkers.flatten :+ workingRequirementsViolations)
+        sum(shiftNWorkers.flatten :+ workingRequirementsViolations :+ sentinelViolations)
       else
-        sum(shiftNWorkers.flatten)
+        sum(shiftNWorkers.flatten :+ sentinelViolations)
 
 
   def initialize (): Unit = {
@@ -49,6 +51,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       removeWorkerSymmetries()
     }
 
+    minimizeSentinelWorker()
     applyAllDifferentWorkers()
     applyWorkerWorkerIncompatibilities()
     applyWorkerClientIncompatibilities()
@@ -74,7 +77,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       val demand = demands(d)
 
       if (demand.hasPeriod(t)) {
-        Array.tabulate(demand.requiredWorkers)(i => CPIntVar(possibleWorkersForDemands(d)(t)(i)))
+        Array.tabulate(demand.requiredWorkers)(i => CPIntVar(possibleWorkersForDemands(d)(t)(i) + -1))
       }
       else {
         EMPTY_INT_VAR_ARRAY
@@ -125,11 +128,13 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     for (period <- Periods) {
       val workersForPeriod = workerVariables(period).flatten
 
-      if (!workersForPeriod.isEmpty) {
-        add(allDifferent(workersForPeriod))
+      if (workersForPeriod.length >= 2) {
+        add(new AllDiffExcept(workersForPeriod, Set(-1)), CPPropagStrength.Strong)
       }
     }
   }
+
+
 
 
   private def applyAllDifferentLocations(): Unit = {
@@ -158,12 +163,14 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     val wwIncompatibilities = problem.workerWorkerIncompatibilities ++ problem.workerWorkerIncompatibilities.map(_.reverse)
 
     // Workers with incompatibilities cannot work together
-    for (period <- Periods; demand <- Demands) {
-      val demandVar = workerVariables(period)(demand)
-      if (demandVar.length >= 2) {
-        val permutations = Utils.generatePermutationsOfTwo(demandVar.length)
-        for ((i, j) <- permutations) {
-          add(negativeTable(Array(demandVar(i), demandVar(j)), wwIncompatibilities))
+    if (wwIncompatibilities.nonEmpty) {
+      for (period <- Periods; demand <- Demands) {
+        val demandVar = workerVariables(period)(demand)
+        if (demandVar.length >= 2) {
+          val permutations = Utils.generatePermutationsOfTwo(demandVar.length)
+          for ((i, j) <- permutations) {
+            add(negativeTable(Array(demandVar(i), demandVar(j)), wwIncompatibilities))
+          }
         }
       }
     }
@@ -258,6 +265,13 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     }
   }
 
+  private def minimizeSentinelWorker(): Unit = {
+    val variables = workerVariables.flatten.flatten
+    add(
+      softGcc(variables, -1 to -1, Array(0), Array(0), sentinelViolations), CPPropagStrength.Strong
+    )
+  }
+
   /**
     * A worker should work on the same demand as time goes on
     * Count the number of different workers assigned to a shift
@@ -321,6 +335,4 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
     Solution(problem, demandAssignments, objective.value)
   }
-
-
 }

@@ -249,4 +249,20 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
     }
   }
+
+  describe("Not enough workers") {
+    it("Should have the sentinel values") {
+      val search = getSearch(JsonParser.parse("data/test/not-enough-workers.json"))
+
+      search.onSolutionFound { solution =>
+        println(solution.plannings(0).workerAssignments(0).workers.mkString(" "))
+//        checkValid(solution)
+      }
+
+      search.solve()
+
+      println(search.lastSolution.plannings(0).workerAssignments(0).workers.mkString(" "))
+
+    }
+  }
 }

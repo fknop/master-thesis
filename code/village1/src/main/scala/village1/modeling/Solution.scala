@@ -71,6 +71,11 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
         val t = assignment.timeslot
         val w = assignment.workers
 
+
+        if (w.contains(-1)) {
+          return InvalidSolution("Partial solution")
+        }
+
         if (w.length != demand.requiredWorkers) {
           return InvalidSolution("The number of required workers is not satisfied")
         }

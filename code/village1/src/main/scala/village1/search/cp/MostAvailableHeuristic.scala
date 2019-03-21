@@ -50,9 +50,14 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     mostAvailable
   }
 
-  def varHeuristic(i: Int): (Int) = {
+  def varHeuristic(i: Int): Int = {
     val (_, d, p) = reverseMap(i)
-    if (model.demands(d).requiredSkills.length > p) {
+
+   // Choose this variable if domain is 2: meaning it has one value and the sentinel value.
+    if (x(i).size == 2) {
+      Int.MinValue
+    }
+    else if (model.demands(d).requiredSkills.length > p) {
       maxDegree(x(i)) - model.demands(d).requiredSkills(p).length
     }
     else {
@@ -64,17 +69,22 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     val (_, d, p) = reverseMap(i)
     val mostAvailableWorkers = mostAvailable(d)(p)
 
-    // Hot code, use while loop instead of for
-    var j = 0
-    while (j < mostAvailableWorkers.length) {
-      if (x(i).hasValue(mostAvailableWorkers(j))) {
-        return mostAvailableWorkers(j)
-      }
-      j += 1
+    // If x(i) has one value and the sentinel value
+    if (x(i).size == 2 && x(i).hasValue(-1)) {
+      x(i).max
     }
+    else {
+      // Hot code, use while loop instead of for
+      var j = 0
+      while (j < mostAvailableWorkers.length) {
+        if (x(i).hasValue(mostAvailableWorkers(j))) {
+          return mostAvailableWorkers(j)
+        }
+        j += 1
+      }
 
-    // Should not happen
-    x(i).min
+      x(i).min
+    }
   }
 
 
