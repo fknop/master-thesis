@@ -162,8 +162,8 @@ object MainLNS extends App {
       demands = 50,
       workers = 300,
       skills = 10,
-      machines = 20,
-      locations = 10
+      machines = 0,
+      locations = 0
     )
   )
 
@@ -187,7 +187,7 @@ object MainLNS extends App {
     if (solution != null) {
       JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
       println(solution.valid)
+      println("Partial: " + solution.partial)
     }
-
 }
 

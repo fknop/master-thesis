@@ -1,6 +1,7 @@
 package village1.modeling
 
 import village1.data.DemandAssignment
+import village1.modeling.Constants._
 
 trait ValidationResult
 object ValidSolution extends ValidationResult {
@@ -10,8 +11,27 @@ final case class InvalidSolution(message: String) extends ValidationResult {
   override def toString: String = s"Solution is invalid:\nReason: $message"
 }
 
-case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int = 0) {
+case class SolutionObjective(
+  objective: Int = 0,
+  contiguousShifts: Int = 0,
+  requirementsViolations: Int = 0,
+  sentinelViolations: Int = 0
+)
 
+case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullObjective: SolutionObjective = SolutionObjective()) {
+
+  val objective: Int = fullObjective.objective
+
+  def partial: Boolean = {
+    for (planning <- plannings; assignment <- planning.workerAssignments) {
+      val w = assignment.workers
+      if (w.contains(SentinelWorker)) {
+        return true
+      }
+    }
+
+    false
+  }
 
   def valid: ValidationResult = {
     val workers = problem.workers
@@ -72,9 +92,9 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
         val w = assignment.workers
 
 
-        if (w.contains(-1)) {
-          return InvalidSolution("Partial solution")
-        }
+//        if (w.contains(SentinelWorker)) {
+//          return InvalidSolution("Partial solution")
+//        }
 
         if (w.length != demand.requiredWorkers) {
           return InvalidSolution("The number of required workers is not satisfied")
@@ -84,7 +104,8 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           return InvalidSolution(s"The demand does not contain timeslot $t")
         }
 
-        if (!allDifferent(w)) {
+
+        if (!allDifferent(w.filterNot(_ == SentinelWorker))) {
           return InvalidSolution("The same worker works at two different positions")
         }
 
@@ -141,7 +162,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
 
 
     for (t <- 0 until problem.T) {
-      if (!allDifferent(workersAtTime(t))) {
+      if (!allDifferent(workersAtTime(t).filterNot(_ == SentinelWorker))) {
         return InvalidSolution(s"!allDifferent(workersAtTime($t))")
       }
 

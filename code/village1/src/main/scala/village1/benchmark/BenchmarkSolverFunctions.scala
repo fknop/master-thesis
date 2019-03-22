@@ -35,9 +35,9 @@ object BenchmarkSolverFunctions {
     }
   }
 
-  def solveCP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+  def solveCP (b: SolverBenchmark, options: CPModelOptions = CPModelOptions()): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
-      val search = new VillageOneLNS(base)
+      val search = new VillageOneLNS(base, options)
       val stats = search.solve(nSols = b.SolutionLimit, timeLimit = b.TimeLimit * 1000, silent = true)
       if (search.lastSolution == null) null
       else (stats, search.lastSolution.objective)

@@ -8,16 +8,17 @@ import village1.modeling.VillageOneModel
 
 class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
 
-  // d -> (p -> (w0, w1, w2))
-  private val mostAvailable: Array[Array[Array[Int]]] = generateMostAvailableWorkers()
+  private val demands = model.demands
+  private val workers = model.workers
+  private val mostAvailable: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkers()
   private val reverseMap = buildReverseMap()
 
   private def buildReverseMap(): Array[(Int, Int, Int)] = {
     var i = 0
     val reverse = Array.fill[(Int, Int, Int)](x.length)(null)
     for (t <- model.Periods) {
-      for (d <- model.Demands if model.demands(d).hasPeriod(t)) {
-        for (p <- model.demands(d).positions) {
+      for (d <- model.Demands if demands(d).hasPeriod(t)) {
+        for (p <- demands(d).positions) {
           reverse(i) = (t, d, p)
           i += 1
         }
@@ -26,27 +27,25 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     reverse
   }
 
-  private def generateMostAvailableWorkers(): Array[Array[Array[Int]]] = {
+  private def generateMostAvailableWorkers(): Array[Array[Array[Array[Int]]]] = {
     val possible = model.possibleWorkersForDemands
-    val workers = model.workers
-    val demands = model.demands
-    val mostAvailable = Array.fill[Array[Array[Int]]](model.D)(null)
-    for (d <- model.Demands) {
-      val pArray = Array.fill[Array[Int]](demands(d).nWorkers)(null)
-      for (p <- demands(d).positions) {
-        val possibleWorkers = demands(d).periods.foldLeft(Set[Int]())( (acc, t) => acc.union(possible(d)(t)(p)))
-
-        val sorted = possibleWorkers.toArray.sortBy(w => {
-          val worker = workers(w)
-          worker.availabilities.intersect(demands(d).periods).size
-        })(Ordering[Int].reverse)
-
-        pArray(p) = sorted
+    val mostAvailable = Array.tabulate(model.D) { d =>
+      Array.tabulate(model.demands(d).requiredWorkers) { p =>
+        Array.fill[Array[Int]](model.T)(null)
       }
-
-      mostAvailable(d) = pArray
     }
+    for (d <- model.Demands) {
+      for (p <- demands(d).positions) {
+        for (t <- demands(d).periods) {
+          val possibleWorkers = possible(d)(t)(p)
+          val sorted = possibleWorkers.toArray.sortBy(w => {
+            workers(w).availabilities.intersect(demands(d).periods).size
+          })(Ordering[Int].reverse)
 
+          mostAvailable(d)(p)(t) = sorted
+        }
+      }
+    }
     mostAvailable
   }
 
@@ -57,8 +56,9 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     if (x(i).size == 2) {
       Int.MinValue
     }
-    else if (model.demands(d).requiredSkills.length > p) {
-      maxDegree(x(i)) - model.demands(d).requiredSkills(p).length
+    // First choose variables that need skill assignments
+    else if (demands(d).requiredSkills.length > p) {
+      maxDegree(x(i)) - demands(d).requiredSkills(p).length
     }
     else {
       maxDegree(x(i))
@@ -66,8 +66,8 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   }
 
   def valueHeuristic(i: Int): Int = {
-    val (_, d, p) = reverseMap(i)
-    val mostAvailableWorkers = mostAvailable(d)(p)
+    val (t, d, p) = reverseMap(i)
+    val mostAvailableWorkers = mostAvailable(d)(p)(t)
 
     // If x(i) has one value and the sentinel value
     if (x(i).size == 2 && x(i).hasValue(-1)) {

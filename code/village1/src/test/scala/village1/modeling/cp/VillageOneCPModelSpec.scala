@@ -8,12 +8,20 @@ import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends FunSpec with Matchers {
 
-  private def getSearch(problem: Problem): VillageOneSearch = {
-    new VillageOneSearch(problem)
+  private def getSearch(problem: Problem, options: CPModelOptions = CPModelOptions()): VillageOneSearch = {
+    new VillageOneSearch(problem, options)
   }
 
   private def checkValid (solution: Solution): Unit = {
     solution.valid should matchPattern { case ValidSolution => }
+  }
+
+  private def checkNotPartial(solution: Solution): Unit = {
+    solution.partial should equal(false)
+  }
+
+  private def checkPartial(solution: Solution): Unit = {
+    solution.partial should equal(true)
   }
 
   describe("Additional skills for demands") {
@@ -22,6 +30,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
         val plannings = solution.plannings
         plannings should have size 2
 
@@ -44,6 +53,8 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
+
         val plannings = solution.plannings
         val p = plannings(0)
 
@@ -59,6 +70,8 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
+
         val plannings = solution.plannings
         val p = plannings(0)
 
@@ -76,7 +89,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
     }
 
     it("Should be unsolvable - 2") {
-      an [UnsolvableException] should be thrownBy {
+      an [NoSolutionException] should be thrownBy {
         getSearch(JsonParser.parse("data/test/additional-skills-impossible2.json"))
       }
     }
@@ -88,6 +101,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -119,6 +133,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -138,6 +153,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -170,6 +186,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -216,6 +233,7 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         val plannings = solution.plannings
         plannings should have size 2
@@ -239,30 +257,36 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       val search = getSearch(JsonParser.parse("data/test/working-requirements.json"))
       search.onSolutionFound { solution =>
         checkValid(solution)
+        checkNotPartial(solution)
 
         println(search.workingRequirementsViolations.min)
         println(search.workingRequirementsViolations.max)
       }
 
       search.solve()
-
-
     }
   }
 
   describe("Not enough workers") {
+
+    val problem = JsonParser.parse("data/test/not-enough-workers.json")
+
     it("Should have the sentinel values") {
-      val search = getSearch(JsonParser.parse("data/test/not-enough-workers.json"))
+      val search = getSearch(problem)
 
       search.onSolutionFound { solution =>
-        println(solution.plannings(0).workerAssignments(0).workers.mkString(" "))
-//        checkValid(solution)
+        checkValid(solution)
+        checkPartial(solution)
+        search.sentinelViolations.value should equal(2)
       }
 
       search.solve()
+    }
 
-      println(search.lastSolution.plannings(0).workerAssignments(0).workers.mkString(" "))
-
+    it("Should throw NoSolutionException (allowPartial = false)") {
+      an [NoSolutionException] should be thrownBy {
+        getSearch(problem, CPModelOptions().copy(allowPartial = false))
+      }
     }
   }
 }

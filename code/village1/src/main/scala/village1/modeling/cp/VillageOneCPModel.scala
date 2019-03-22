@@ -5,11 +5,11 @@ import oscar.cp._
 import oscar.cp.constraints._
 import oscar.cp.core.{CPPropagStrength, Constraint, NoSolutionException}
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
+import village1.modeling._
 import village1.util.Utils
+import village1.modeling.Constants._
 
-
-case class CPModelOptions(symmetryBreaking: Boolean = true)
+case class CPModelOptions(symmetryBreaking: Boolean = true, allowPartial: Boolean = true)
 
 
 class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneModel(problem, base) with CPModel {
@@ -39,20 +39,34 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
   initialize()
 
-  val objective: CPIntVar =
-      if (workingRequirementsViolations != null)
-        sum(shiftNWorkers.flatten :+ workingRequirementsViolations :+ sentinelViolations)
-      else
-        sum(shiftNWorkers.flatten :+ sentinelViolations)
+  private[this] var objectiveList: List[CPIntVar] = List(shiftNWorkers.flatten: _*)
+
+  if (options.allowPartial) {
+    objectiveList ::= sentinelViolations
+  }
+
+  if (workingRequirementsViolations != null) {
+    objectiveList ::= workingRequirementsViolations
+  }
+
+  val objective: CPIntVar = sum(objectiveList)
 
 
   def initialize (): Unit = {
+
     if (options.symmetryBreaking) {
       removeWorkerSymmetries()
     }
 
-    minimizeSentinelWorker()
+
+
+    if (options.allowPartial) {
+      minimizeSentinelWorker()
+    }
+
     applyAllDifferentWorkers()
+
+
     applyWorkerWorkerIncompatibilities()
     applyWorkerClientIncompatibilities()
     applyAdditionalSkills()
@@ -77,7 +91,10 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       val demand = demands(d)
 
       if (demand.hasPeriod(t)) {
-        Array.tabulate(demand.requiredWorkers)(i => CPIntVar(possibleWorkersForDemands(d)(t)(i) + -1))
+        Array.tabulate(demand.requiredWorkers)(i => {
+          if (options.allowPartial) CPIntVar(possibleWorkersForDemands(d)(t)(i) + SentinelWorker)
+          else CPIntVar(possibleWorkersForDemands(d)(t)(i))
+        })
       }
       else {
         EMPTY_INT_VAR_ARRAY
@@ -108,6 +125,12 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   private def removeWorkerSymmetries (): Unit = {
     for (d <- Demands) {
       for (t <- demands(d).periods) {
+
+        val all = possibleWorkersForDemands(d)(t).foldLeft(Set[Int]())( (acc, s) => acc.union(s))
+        if (all.size < demands(d).requiredWorkers) {
+          return
+        }
+
         val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
         if (symmetries.nonEmpty) {
           val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
@@ -129,7 +152,12 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       val workersForPeriod = workerVariables(period).flatten
 
       if (workersForPeriod.length >= 2) {
-        add(new AllDiffExcept(workersForPeriod, Set(-1)), CPPropagStrength.Strong)
+        if (options.allowPartial) {
+          add(new AllDiffExcept(workersForPeriod, Set(SentinelWorker)), CPPropagStrength.Strong)
+        }
+        else {
+          add(allDifferent(workersForPeriod), CPPropagStrength.Strong)
+        }
       }
     }
   }
@@ -153,7 +181,9 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
       for (o <- overlappingDemands if demands(o).machineNeeds.nonEmpty) {
         val machines = machineVariables(o) ++ machineVariables(d)
-        add(allDifferent(machines))
+        if (machines.length >= 2) {
+          add(allDifferent(machines))
+        }
       }
     }
   }
@@ -222,15 +252,17 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
               .filter(workers(_).satisfySkill(skill))
 
           if (possibleWorkers.isEmpty) {
-            throw new UnsolvableException(s"No workers with skill $name")
+            throw new NoSolutionException(s"No workers with skill $name")
           }
 
           val valueOccurrences = possibleWorkers.map(w => (w, CPBoolVar()))
           val occurrences = valueOccurrences.map(_._2)
 
           // At least one worker has the skill
-          add(sum(occurrences) >= 1)
-          add(gcc(workersForDemand, valueOccurrences))
+          if (occurrences.nonEmpty) {
+            add(sum(occurrences) >= 1)
+            add(gcc(workersForDemand, valueOccurrences))
+          }
         }
       }
     }
@@ -268,7 +300,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   private def minimizeSentinelWorker(): Unit = {
     val variables = workerVariables.flatten.flatten
     add(
-      softGcc(variables, -1 to -1, Array(0), Array(0), sentinelViolations), CPPropagStrength.Strong
+      softGcc(variables, SentinelWorker to SentinelWorker, Array(0), Array(0), sentinelViolations), CPPropagStrength.Strong
     )
   }
 
@@ -333,6 +365,11 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     }
 
 
-    Solution(problem, demandAssignments, objective.value)
+    Solution(problem, demandAssignments, SolutionObjective(
+      objective = objective.value,
+      contiguousShifts = shiftNWorkers.flatten.map(_.value).sum,
+      requirementsViolations = if (workingRequirementsViolations != null) workingRequirementsViolations.value else 0,
+      sentinelViolations = if (options.allowPartial) sentinelViolations.value else 0
+    ))
   }
 }
