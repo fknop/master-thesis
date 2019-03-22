@@ -1,7 +1,7 @@
 package village1.modeling.mip
 
 import gurobi._
-import village1.data.{DemandAssignment, WorkerAssignment}
+import village1.data.{DemandAssignment, WorkerAssignment, WorkingRequirement}
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
@@ -169,6 +169,54 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
       model.addConstr(expression, GRB.EQUAL, 1, s"c2[$t][$d][$p]")
     }
+  }
+
+  private def applyWorkingRequirements (model: GRBModel, variables: WorkerVariables): GRBLinExpr = {
+    val violations = new GRBLinExpr()
+    for (r <- problem.workingRequirements) {
+      val w = r.worker
+      val occurrences = new GRBLinExpr()
+      for (d <- Demands; t <- demands(d).periods if workers(w).available(t); p <- demands(d).positions) {
+        val variable = variables(t)(d)(p)(w)
+        if (variable != null) {
+          occurrences.addTerm(1, variable)
+        }
+      }
+
+      val sum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"occurrences[$w]")
+      occurrences.addTerm(-1, sum)
+      model.addConstr(occurrences, GRB.EQUAL, 0, "occurrencesSum[$w]")
+
+      r.min match {
+        case Some(min) =>
+          val minimum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMinimum[$w]")
+          val difference = model.addVar(-workers(w).availabilities.size, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMinDiff[$w]")
+          val expression = new GRBLinExpr()
+          expression.addConstant(min)
+          expression.multAdd(-1, occurrences)
+          expression.addTerm(-1, difference)
+          model.addConstr(expression, GRB.EQUAL, 0, s"requirementMinDiffCtr[$w]")
+          model.addGenConstrMin(minimum, Array(difference), 0, s"requirementMinCtr[$w]")
+          violations.addTerm(1, minimum)
+        case None =>
+      }
+
+      r.max match {
+        case Some(max) =>
+          val maximum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMaximum[$w]")
+          val difference = model.addVar(-workers(w).availabilities.size, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMaxDiff[$w]")
+          val expression = new GRBLinExpr()
+          expression.addConstant(-max)
+          expression.add(occurrences)
+          expression.addTerm(-1, difference)
+          model.addConstr(expression, GRB.EQUAL, 0, s"requirementMaxDiffCtr[$w]")
+          model.addGenConstrMax(maximum, Array(difference), 0, s"requirementMaxCtr[$w]")
+          violations.addTerm(1, maximum)
+        case None =>
+      }
+    }
+
+    violations
   }
 //
 //  private def applySentinels(model: GRBModel, workerVariables: WorkerVariables, sentinels: SentinelVariables): Unit = {
@@ -403,7 +451,8 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   private def applyObjectives (): Unit = {
     val objective = Array(
       minimizeShiftChange(model, workerVariables),
-      minimizeSentinelWorkers(model, sentinelVariables)
+      minimizeSentinelWorkers(model, sentinelVariables),
+      applyWorkingRequirements(model, workerVariables)
     )
 
     minimizeObjectives(objective)
