@@ -136,7 +136,12 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
         for (r <- requirements.indices) {
           val skills = requirements(r).skills
           if (skills.length > 0) {
+            if (w(r) == SentinelWorker) {
+              return InvalidSolution(s"Worker ${w(r)} does not satisfy requirements($r) for demand ${demand.id} at time ${t} not satisfied")
+            }
+
             val worker = workers(w(r))
+
 
             if (!worker.satisfySkills(skills)) {
               return InvalidSolution(s"Worker $worker does not satisfy requirements($r) for demand ${demand.id} at time ${t} not satisfied")

@@ -1,13 +1,9 @@
 package village1.modeling.mip
 
 import gurobi._
-import village1.data.{DemandAssignment, WorkerAssignment, WorkingRequirement}
-import village1.json.{JsonParser, JsonSerializer}
-import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
-import village1.search.cp.{VillageOneLNS, VillageOneSearch}
-import village1.util.BenchmarkUtils.time
-import village1.util.Utils
 import village1.modeling.Constants._
+import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
+import village1.util.Utils
 
 import scala.util.Random
 
@@ -111,38 +107,6 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
     model.addConstr(expression, GRB.EQUAL, 0, "symmetries")
   }
-//
-//  // TODO: remove constraints and add to initialization
-//  def removeImpossibleValues (model: GRBModel, variables: WorkerVariables): Unit = {
-//    val expression = new GRBLinExpr()
-//    for (t <- Periods; d <- Demands; w <- Workers) {
-//
-//      val impossible = (!demands(d).periods.contains(t)) ||
-//                       (!availableWorkers(d).contains(t)) ||
-//                       (!availableWorkers(d)(t).contains(w))
-//
-//      if (impossible) {
-//        for (p <- demands(d).positions) {
-//         // variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0.0)
-//          expression.addTerm(1, variables(t)(d)(p)(w))
-////          model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"imp[$t][$d][$p][$w]")
-//        }
-//      }
-//    }
-//
-//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
-//      val workers = possibleWorkersForDemands(d)(t)(p)
-//      for (w <- allWorkers.diff(workers)) {
-////      variables(t)(d)(p)(w).set(GRB.DoubleAttr.UB, 0)
-  //        expression.addTerm(1, variables(t)(d)(p)(w))
-  ////        model.addConstr(variables(t)(d)(p)(w), GRB.EQUAL, 0, s"requiredSkill[$t][$d][$p][$w]")
-  //      }
-  //    }
-  //
-  //    model.addConstr(expression, GRB.EQUAL, 0, s"impossibleValues")
-  //  }
-
-
 
   private def allDifferentWorkers (model: GRBModel, variables: WorkerVariables): Unit = {
     for (t <- Periods; w <- Workers) {

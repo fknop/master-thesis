@@ -1,13 +1,11 @@
-package village1.search.cp
+package village1.benchmark
 
 import oscar.algo.search.Branching
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.modeling.Branchings
-import oscar.cp.searches.WeightedDegreeHelper
 import village1.modeling.VillageOneModel
-import village1.util.Utils
 
-class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
+class MostAvailableHeuristic2(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
 
   private val demands = model.demands
   private val workers = model.workers
@@ -52,10 +50,8 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
         for (t <- demands(d).periods) {
           val possibleWorkers = possible(d)(t)(p)
           val sorted = possibleWorkers.toArray.sortBy(w => {
-            val size = workers(w).availabilities.intersect(demands(d).periods).size
-            val remaining = workers(w).availabilities.size - size 
-            (size, -remaining)
-          })(Ordering[(Int, Int)].reverse)
+            workers(w).availabilities.intersect(demands(d).periods).size
+          })(Ordering[Int].reverse)
 
           mostAvailable(d)(p)(t) = sorted
         }

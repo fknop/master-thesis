@@ -1,6 +1,7 @@
 package village1.search.cp
 
 
+import oscar.algo.search.Branching
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
@@ -26,20 +27,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
   def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
-//
-//  private def relaxShifts(variables: Array[CPIntVar], sol: CPIntSol, percentage: Int/* solution: Array[Array[Array[Int]]])*/) {
-//    val rand = new scala.util.Random(0)
-//    for (d <- Demands) {
-//      for (s <- 0 until demands(d).requiredWorkers if rand.nextInt(100) < percentage) {
-//        for (t <- demands(d).periods) {
-//
-//          //t * d + s
-//          add(variables((t * d) + s) === sol.values((t * d) + s))
-////          add(workerVariables(t)(d)(s) === solution(t)(d)(s))
-//        }
-//      }
-//    }
-//  }
+
 
   val flatWorkers: Array[CPIntVar] = workerVariables.flatten.flatten
   val flatMachines: Array[CPIntVar] = machineVariables.flatten
@@ -53,27 +41,29 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var bestObjective: Int = Int.MaxValue
 
   private var relaxation: Relaxation = () => RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
+  private val defaultHeuristic = new MostAvailableHeuristic(this, flatWorkers)
+  private var heuristic: Branching = defaultHeuristic.branching
 
   def relax(relaxation: Relaxation): Unit = {
     this.relaxation = relaxation
+  }
+
+  def heuristic(branching: Branching): Unit = {
+    this.heuristic = branching
   }
 
   def solve(
      nSols: Int = Int.MaxValue,
      timeLimit: Int = Int.MaxValue,
      repeat: Int = Int.MaxValue,
-     silent: Boolean = false,
-     heuristic: SearchHeuristic.Value = SearchHeuristic.MostAvailable
+     silent: Boolean = false
    ): Long = {
 
     solver.silent = silent
 
     minimize(objective)
     search {
-      var branching = heuristic match {
-        case SearchHeuristic.Default => binaryFirstFail(flatWorkers)
-        case SearchHeuristic.MostAvailable => new MostAvailableHeuristic(this, flatWorkers).branching
-      }
+      var branching = heuristic
 
       if (flatMachines.nonEmpty) {
         branching ++= binaryFirstFail(flatMachines)
@@ -157,13 +147,11 @@ object MainLNS extends App {
 
   val problem = generator.generate(
     InstanceOptions(
-      t = 10,
+      t = 15,
       clients = 10,
       demands = 50,
       workers = 300,
-      skills = 10,
-      machines = 0,
-      locations = 0
+      skills = 10
     )
   )
 
@@ -172,14 +160,12 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-    search.relax {
-      val relaxation = new PropagationGuidedRelaxation()
-      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
-    }
+//    search.relax {
+//      val relaxation = new PropagationGuidedRelaxation()
+//      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+//    }
 
-    //  var nSolution = 0
-    //  search.onSolutionFound( _ => nSolution += 1)
-    val stats = search.solve(timeLimit = 10 * 1000)
+    val stats = search.solve(timeLimit = 60 * 1000)
 
 
     //  println("nsolution " + nSolution)

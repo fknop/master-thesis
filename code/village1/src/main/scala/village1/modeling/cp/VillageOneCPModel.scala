@@ -1,13 +1,12 @@
 package village1.modeling.cp
 
-import oscar.algo.Inconsistency
 import oscar.cp._
 import oscar.cp.constraints._
-import oscar.cp.core.{CPPropagStrength, Constraint, NoSolutionException}
+import oscar.cp.core.{CPPropagStrength, NoSolutionException}
 import village1.data.{DemandAssignment, WorkerAssignment}
+import village1.modeling.Constants._
 import village1.modeling._
 import village1.util.Utils
-import village1.modeling.Constants._
 
 case class CPModelOptions(symmetryBreaking: Boolean = true, allowPartial: Boolean = true)
 
@@ -123,28 +122,54 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   }
 
   private def removeWorkerSymmetries (): Unit = {
-    for (d <- Demands) {
-      for (t <- demands(d).periods) {
 
-        val all = possibleWorkersForDemands(d)(t).foldLeft(Set[Int]())( (acc, s) => acc.union(s))
-        if (all.size < demands(d).requiredWorkers) {
-          return
-        }
+//      for (d <- Demands) {
+//        for (t <- demands(d).periods) {
+//
+//          val all = possibleWorkersForDemands(d)(t).foldLeft(Set[Int]())( (acc, s) => acc.union(s))
+//          if (all.size < demands(d).requiredWorkers) {
+//            return
+//          }
+//
+//          val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
+//          if (symmetries.nonEmpty) {
+//            val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
+//            for (symmetry <- symmetries) {
+//              for (p <- symmetry) {
+//                val possible = possibleWithoutSymmetries(p)
+//                for (value <- possible) {
+//                  workerVariables(t)(d)(p).removeValue(value)
+//                }
+//              }
+//            }
+//          }
+//        }
+//      }
 
-        val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
-        if (symmetries.nonEmpty) {
-          val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
-          for (symmetry <- symmetries) {
-            for (p <- symmetry) {
-              val possible = possibleWithoutSymmetries(p)
-              for (value <- possible) {
-                workerVariables(t)(d)(p).removeValue(value)
-              }
-            }
-          }
+
+
+    var x = Array[CPIntVar]()
+    var y = Array[CPIntVar]()
+    for (d <- Demands; t <- demands(d).periods if demands(d).requiredWorkers > 1) {
+
+      for (p <- 0 until demands(d).requiredWorkers - 1) {
+        val i = p
+        val j = p + 1
+        val possibleI = possibleWorkersForDemands(d)(t)(i)
+        val possibleJ = possibleWorkersForDemands(d)(t)(j)
+        val skillI = demands(d).requirements(i).skills
+        val skillJ = demands(d).requirements(j).skills
+        if (skillI.deep == skillJ.deep /**&& possibleI.diff(possibleJ).isEmpty **/) {
+          x :+= workerVariables(t)(d)(i)
+          y :+= workerVariables(t)(d)(j)
         }
       }
     }
+
+    if (x.nonEmpty) {
+      add(lexLeq(x, y))
+    }
+
   }
   // All workers for a given time must be different
   private def applyAllDifferentWorkers (): Unit = {
