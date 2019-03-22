@@ -250,7 +250,9 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
           // Take only all the possible workers for that demand
           val possibleWorkers = possibleWorkersForDemand.intersect(workersWithSkills(name))
               .filter(workers(_).satisfySkill(skill))
+              .union(if (options.allowPartial) Set(SentinelWorker) else Set())
 
+          // if options.allowPartial, possibleWorkers is never empty
           if (possibleWorkers.isEmpty) {
             throw new NoSolutionException(s"No workers with skill $name")
           }

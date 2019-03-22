@@ -84,14 +84,30 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
 
     it("Should be unsolvable") {
       an [NoSolutionException] should be thrownBy {
-        getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"))
+        getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"), CPModelOptions().copy(allowPartial = false))
       }
     }
 
     it("Should be unsolvable - 2") {
       an [NoSolutionException] should be thrownBy {
-        getSearch(JsonParser.parse("data/test/additional-skills-impossible2.json"))
+        getSearch(JsonParser.parse("data/test/additional-skills-impossible2.json"), CPModelOptions().copy(allowPartial = false))
       }
+    }
+
+    it("Should be a partial solution") {
+      val search = getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"), CPModelOptions())
+      search.onSolutionFound { solution =>
+        checkPartial(solution)
+      }
+      search.solve()
+    }
+
+    it("Should be a partial solution - 2") {
+      val search = getSearch(JsonParser.parse("data/test/additional-skills-impossible2.json"), CPModelOptions())
+      search.onSolutionFound { solution =>
+        checkPartial(solution)
+      }
+      search.solve()
     }
   }
 

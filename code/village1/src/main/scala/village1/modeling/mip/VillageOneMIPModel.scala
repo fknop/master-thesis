@@ -7,6 +7,7 @@ import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneMode
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
 import village1.util.BenchmarkUtils.time
 import village1.util.Utils
+import village1.modeling.Constants._
 
 import scala.util.Random
 
@@ -271,7 +272,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
-  private def satisfyAdditionalSkills(model: GRBModel, variables: WorkerVariables): Unit = {
+  private def satisfyAdditionalSkills(model: GRBModel, variables: WorkerVariables, sentinels: SentinelVariables): Unit = {
     for (d <- Demands) {
       val demand = demands(d)
       for (t <- demand.periods) {
@@ -284,6 +285,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
           val possibleWorkers = possibleWorkersForDemand.intersect(workersWithSkills(name))
             .filter(workers(_).satisfySkill(skill))
+            .union(if (options.allowPartial) Set(SentinelWorker) else Set())
 
           if (possibleWorkers.isEmpty) {
             throw new UnsolvableException(s"No workers with skill $name")
@@ -292,7 +294,14 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
           val expression = new GRBLinExpr()
           for (w <- possibleWorkers) {
             for (p <- demand.positions) {
-              expression.addTerm(1, workerVariables(t)(d)(p)(w))
+
+              if (w == SentinelWorker) {
+                expression.addTerm(1, sentinels(t)(d)(p))
+              }
+              else {
+                expression.addTerm(1, workerVariables(t)(d)(p)(w))
+              }
+
             }
           }
 
@@ -396,7 +405,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   /**
     * Minimize shift change between workers at one position
     */
-  private def minimizeShiftChange (model: GRBModel, variables: WorkerVariables): GRBLinExpr = {
+  private def minimizeShiftChange (model: GRBModel, variables: WorkerVariables, sentinels: SentinelVariables): GRBLinExpr = {
     val expression = new GRBLinExpr()
     for (d <- Demands; p <- demands(d).positions) {
 
@@ -410,6 +419,16 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
         expression.addTerm(1, isWorking)
       }
+
+      // TODO: verify this
+      val hasSentinel = model.addVar(0, 1, 0, GRB.BINARY, s"hasSentinal[$d][$p]")
+      model.addGenConstrOr(
+        hasSentinel,
+        demands(d).periods.map(sentinels(_)(d)(p)).filterNot(_ == null).toArray,
+        s"hasSentinalConstr[$d][$p]"
+      )
+
+      expression.addTerm(1, hasSentinel)
     }
 
     // Minimize the number of working workers at each position
@@ -450,7 +469,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
   private def applyObjectives (): Unit = {
     val objective = Array(
-      minimizeShiftChange(model, workerVariables),
+      minimizeShiftChange(model, workerVariables, sentinelVariables),
       minimizeSentinelWorkers(model, sentinelVariables),
       applyWorkingRequirements(model, workerVariables)
     )
@@ -463,7 +482,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     workerNumberSatisfied(model, workerVariables, sentinelVariables)
     satisfyWorkerWorkerIncompatibilities(model, workerVariables)
     satisfyWorkerClientIncompatibilities(model, workerVariables)
-    satisfyAdditionalSkills(model, workerVariables)
+    satisfyAdditionalSkills(model, workerVariables, sentinelVariables)
 
     removeImpossibleZones(model, zoneVariables)
     applyAllDifferentLocations(model, zoneVariables)
