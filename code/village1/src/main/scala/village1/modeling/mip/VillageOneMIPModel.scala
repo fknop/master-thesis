@@ -20,7 +20,7 @@ object VillageOneMIPModel {
 }
 
 
-case class MipModelOptions(symmetryBreaking: Boolean = true, objective: Boolean = true)
+case class MipModelOptions(symmetryBreaking: Boolean = true, allowPartial: Boolean = true, objective: Boolean = true)
 
 class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOptions(), v1model: Option[VillageOneModel] = None) extends VillageOneModel(problem, v1model) {
 
@@ -28,11 +28,14 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   def this(v1model: VillageOneModel, options: MipModelOptions) = this(v1model.problem, options, v1model = Some(v1model))
 
   type WorkerVariables = Array[Array[Array[Array[GRBVar]]]]
+  type SentinelVariables = Array[Array[Array[GRBVar]]]
   type ZoneVariables = Array[Array[GRBVar]]
   type MachineVariables = Array[Array[GRBVar]]
 
   private val env = VillageOneMIPModel.env
   val model: GRBModel = new GRBModel(env)
+
+  val sentinelVariables: SentinelVariables = createSentinelWorkers(model)
   val workerVariables: WorkerVariables = createWorkerVariables(model)
   val zoneVariables: ZoneVariables = createZoneVariables(model)
   val machineVariables: MachineVariables = createMachineVariables(model)
@@ -54,6 +57,18 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
+  private def createSentinelWorkers (model: GRBModel): SentinelVariables = {
+
+    Array.tabulate(T, D) { (t, d) =>
+      Array.tabulate(demands(d).requiredWorkers)  {p =>
+        if (demands(d).periods.contains(t))
+          model.addVar(0, 1, 0.0, GRB.BINARY, s"sentinel[$t][$d][$p]")
+        else
+          null
+      }
+    }
+  }
+
   private def createZoneVariables(model: GRBModel): ZoneVariables = {
     Array.tabulate(L, D)((l, d) => {
       model.addVar(0, 1, 0.0, GRB.BINARY, s"z[$l][$d]")
@@ -71,6 +86,12 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     val expression = new GRBLinExpr()
     for (d <- Demands) {
       for (t <- demands(d).periods) {
+
+        val all = possibleWorkersForDemands(d)(t).foldLeft(Set[Int]())( (acc, s) => acc.union(s))
+        if (all.size < demands(d).requiredWorkers) {
+          return
+        }
+
         val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
         if (symmetries.nonEmpty) {
           val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
@@ -135,16 +156,36 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
-  private def workerNumberSatisfied (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def workerNumberSatisfied (model: GRBModel, variables: WorkerVariables, sentinels: SentinelVariables): Unit = {
     for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
       val expression = new GRBLinExpr()
       for (w <- possibleWorkersForDemands(d)(t)(p)) {
         expression.addTerm(1, variables(t)(d)(p)(w))
       }
 
+      if (options.allowPartial) {
+        expression.addTerm(1, sentinels(t)(d)(p))
+      }
+
       model.addConstr(expression, GRB.EQUAL, 1, s"c2[$t][$d][$p]")
     }
   }
+//
+//  private def applySentinels(model: GRBModel, workerVariables: WorkerVariables, sentinels: SentinelVariables): Unit = {
+//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
+//      val expression = new GRBLinExpr()
+//      for (w <- Workers) {
+//        val variable = workerVariables(t)(d)(p)(w)
+//        if (variable != null) {
+//          expression.addTerm(1, variable)
+//        }
+//      }
+//
+//      val tmp = model.addVar(0, 1, 0, GRB.BINARY, s"sentinelTmp[$d][$t][$p]")
+//      model.addConstr(expression, GRB.EQUAL, tmp, s"sentinelTmpCtr[$d][$t][$p]")
+//      model.addGenConstrIndicator(sentinels(t)(d)(p), 1, expression, GRB.EQUAL, 0, s"sentinelCtr[$d][$t][$p]")
+//    }
+//  }
 
   private def satisfyWorkerWorkerIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
     val incompatibilities = problem.workerWorkerIncompatibilities
@@ -307,7 +348,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   /**
     * Minimize shift change between workers at one position
     */
-  def minimizeShiftChange (model: GRBModel, variables: WorkerVariables): Unit = {
+  private def minimizeShiftChange (model: GRBModel, variables: WorkerVariables): GRBLinExpr = {
     val expression = new GRBLinExpr()
     for (d <- Demands; p <- demands(d).positions) {
 
@@ -324,7 +365,22 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
 
     // Minimize the number of working workers at each position
-    model.setObjective(expression, GRB.MINIMIZE)
+    expression
+  }
+
+  def minimizeSentinelWorkers (model: GRBModel, variables: SentinelVariables): GRBLinExpr = {
+    val expression = new GRBLinExpr()
+    for (d <- Demands; p <- demands(d).positions; t <- demands(d).periods) {
+      expression.addTerm(1, variables(t)(d)(p))
+    }
+
+    expression
+  }
+
+  private def minimizeObjectives(expressions: Array[GRBLinExpr]): Unit = {
+    val objective = new GRBLinExpr()
+    expressions.foreach(objective.add)
+    model.setObjective(objective, GRB.MINIMIZE)
   }
 
   def setInitialSolution(solution: Solution, probability: Double = 0.5): Unit = {
@@ -344,13 +400,18 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     }
   }
 
-  def applyObjectives (model: GRBModel, variables: WorkerVariables): Unit = {
-    minimizeShiftChange(model, variables)
+  private def applyObjectives (): Unit = {
+    val objective = Array(
+      minimizeShiftChange(model, workerVariables),
+      minimizeSentinelWorkers(model, sentinelVariables)
+    )
+
+    minimizeObjectives(objective)
   }
 
-  def applyConstraints (): Unit = {
+  private def applyConstraints (): Unit = {
     allDifferentWorkers(model, workerVariables)
-    workerNumberSatisfied(model, workerVariables)
+    workerNumberSatisfied(model, workerVariables, sentinelVariables)
     satisfyWorkerWorkerIncompatibilities(model, workerVariables)
     satisfyWorkerClientIncompatibilities(model, workerVariables)
     satisfyAdditionalSkills(model, workerVariables)
@@ -376,7 +437,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     applyConstraints()
 
     if (options.objective) {
-      applyObjectives(model, workerVariables)
+      applyObjectives()
     }
   }
 }
