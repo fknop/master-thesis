@@ -1,6 +1,5 @@
 package village1.search.cp
 
-
 import oscar.algo.search.Branching
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
@@ -8,12 +7,10 @@ import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
-import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation, VillageOneCPModel}
+import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.Search
 import village1.util.BenchmarkUtils.time
-
-import scala.util.Random
 
 object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
@@ -147,7 +144,7 @@ object MainLNS extends App {
 
   val problem = generator.generate(
     InstanceOptions(
-      t = 15,
+      t = 10,
       clients = 10,
       demands = 50,
       workers = 300,
@@ -167,8 +164,6 @@ object MainLNS extends App {
 
     val stats = search.solve(timeLimit = 60 * 1000)
 
-
-    //  println("nsolution " + nSolution)
     val solution = search.lastSolution
     if (solution != null) {
       JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")

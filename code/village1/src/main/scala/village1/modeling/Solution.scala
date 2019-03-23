@@ -149,6 +149,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
           }
         }
 
+        println(w.mkString(" "))
         val additional = demand.additionalSkills
         for (skill <- additional) {
           var satisfied = false

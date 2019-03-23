@@ -13,7 +13,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   private val workers = model.workers
   private val mostAvailable: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkers()
   private val reverseMap = buildReverseMap()
-  private val demandsAtTime: Array[Int] = buildDemandsAtTime()
+//  private val demandsAtTime: Array[Int] = buildDemandsAtTime()
 
   private def buildDemandsAtTime(): Array[Int] = {
     val demandsAtTime = Array.fill(model.T)(0)
@@ -53,9 +53,9 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
           val possibleWorkers = possible(d)(t)(p)
           val sorted = possibleWorkers.toArray.sortBy(w => {
             val size = workers(w).availabilities.intersect(demands(d).periods).size
-            val remaining = workers(w).availabilities.size - size 
-            (size, -remaining)
-          })(Ordering[(Int, Int)].reverse)
+            val remaining = workers(w).availabilities.size - size
+            (size, -remaining, w)
+          })(Ordering[(Int, Int, Int)].reverse)
 
           mostAvailable(d)(p)(t) = sorted
         }
@@ -65,7 +65,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   }
 
   def varHeuristic(i: Int): Int = {
-    val (t, d, p) = reverseMap(i)
+    val (_, d, p) = reverseMap(i)
 
    // Choose this variable if domain is 2: meaning it has one value and the sentinel value.
     if (x(i).size == 2) {
@@ -77,8 +77,6 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   }
 
   def valueHeuristic(i: Int): Int = {
-
-
     val (t, d, p) = reverseMap(i)
     val mostAvailableWorkers = mostAvailable(d)(p)(t)
 
@@ -95,7 +93,6 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
         }
         j += 1
       }
-
 
       x(i).min
     }
