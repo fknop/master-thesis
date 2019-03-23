@@ -34,6 +34,9 @@ case class Skill(
     }
   }
 
+  override def toString: String = {
+    s"$name ($parameterType, $value)"
+  }
 
 }
 

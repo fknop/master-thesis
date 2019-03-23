@@ -2,6 +2,7 @@ package village1.modeling
 
 import village1.data.DemandAssignment
 import village1.modeling.Constants._
+import village1.modeling.violations.{AdditionalSkillViolation, Violation, WorkerViolation, WorkingRequirementViolation}
 
 trait ValidationResult
 object ValidSolution extends ValidationResult {
@@ -33,7 +34,69 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
     false
   }
 
+  def violations: List[Violation] = {
+
+    var violations = List[Violation]()
+    val workers = problem.workers
+    val demands = problem.demands
+
+    val workerOccurrences = Array.fill(problem.workers.length)(0)
+
+    for (planning <- plannings) {
+      val d = planning.demand
+      val demand = demands(d)
+
+      for (assignment <- planning.workerAssignments) {
+        val t = assignment.timeslot
+        val w = assignment.workers
+
+        for (i <- w.indices) {
+          if (w(i) == SentinelWorker) {
+            violations ::= WorkerViolation(d, i, t)
+          }
+          else {
+            workerOccurrences(w(i)) += 1
+          }
+        }
+
+        val additional = demand.additionalSkills
+        for (skill <- additional) {
+          var satisfied = false
+          for (i <- w.indices if w(i) != SentinelWorker) {
+            satisfied = satisfied || workers(w(i)).satisfySkill(skill)
+          }
+
+          if (!satisfied) {
+            violations ::= AdditionalSkillViolation(d, t, skill)
+          }
+        }
+      }
+    }
+
+    for (requirement <- problem.workingRequirements) {
+      val worker = requirement.worker
+      val min = requirement.min
+      val max = requirement.max
+
+      var violate = false
+
+      if (min.isDefined && workerOccurrences(worker) < min.get) {
+        violate = true
+      }
+
+      if (max.isDefined && workerOccurrences(worker) > max.get) {
+        violate = true
+      }
+
+      violations ::= WorkingRequirementViolation(worker, min, max, workerOccurrences(worker))
+    }
+
+    violations
+  }
+
   def valid: ValidationResult = {
+
+    val partial = this.partial
     val workers = problem.workers
     val demands = problem.demands
 
@@ -92,10 +155,6 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
         val w = assignment.workers
 
 
-//        if (w.contains(SentinelWorker)) {
-//          return InvalidSolution("Partial solution")
-//        }
-
         if (w.length != demand.requiredWorkers) {
           return InvalidSolution("The number of required workers is not satisfied")
         }
@@ -149,19 +208,19 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
           }
         }
 
-        println(w.mkString(" "))
-        val additional = demand.additionalSkills
-        for (skill <- additional) {
-          var satisfied = false
-          for (worker <- w) {
-            satisfied = satisfied || workers(worker).satisfySkill(skill)
-          }
+        if (!partial) {
+          val additional = demand.additionalSkills
+          for (skill <- additional) {
+            var satisfied = false
+            for (worker <- w if worker != SentinelWorker) {
+              satisfied = satisfied || workers(worker).satisfySkill(skill)
+            }
 
-          if (!satisfied) {
-            return InvalidSolution(s"Additional skill: ${skill.name} not satisfied")
+            if (!satisfied) {
+              return InvalidSolution(s"Additional skill: ${skill.name} not satisfied")
+            }
           }
         }
-
       }
     }
 

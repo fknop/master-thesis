@@ -4,6 +4,7 @@ import org.scalatest._
 import oscar.cp.core.NoSolutionException
 import village1.json.JsonParser
 import village1.modeling._
+import village1.modeling.violations.WorkerViolation
 import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends CommonSpec {
@@ -279,7 +280,14 @@ class VillageOneCPModelSpec extends CommonSpec {
       search.onSolutionFound { solution =>
         checkValid(solution)
         checkPartial(solution)
-        search.sentinelViolations.value should equal(2)
+
+
+        val violations = solution.violations.filter { violation => violation match {
+          case WorkerViolation(_, _, _) => true
+          case _ => false
+        }}
+
+        violations.size should equal(2)
       }
 
       search.solve()
