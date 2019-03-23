@@ -6,23 +6,12 @@ import village1.json.JsonParser
 import village1.modeling._
 import village1.search.cp.VillageOneSearch
 
-class VillageOneCPModelSpec extends FunSpec with Matchers {
+class VillageOneCPModelSpec extends CommonSpec {
 
   private def getSearch(problem: Problem, options: CPModelOptions = CPModelOptions()): VillageOneSearch = {
     new VillageOneSearch(problem, options)
   }
 
-  private def checkValid (solution: Solution): Unit = {
-    solution.valid should matchPattern { case ValidSolution => }
-  }
-
-  private def checkNotPartial(solution: Solution): Unit = {
-    solution.partial should equal(false)
-  }
-
-  private def checkPartial(solution: Solution): Unit = {
-    solution.partial should equal(true)
-  }
 
   describe("Additional skills for demands") {
     it("Should return the correct workers assigned with additional skills") {
@@ -274,9 +263,6 @@ class VillageOneCPModelSpec extends FunSpec with Matchers {
       search.onSolutionFound { solution =>
         checkValid(solution)
         checkNotPartial(solution)
-
-        println(search.workingRequirementsViolations.min)
-        println(search.workingRequirementsViolations.max)
       }
 
       search.solve()

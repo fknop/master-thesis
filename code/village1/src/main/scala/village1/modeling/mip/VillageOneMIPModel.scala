@@ -37,8 +37,26 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   val zoneVariables: ZoneVariables = createZoneVariables(model)
   val machineVariables: MachineVariables = createMachineVariables(model)
 
+  val sentinelViolations: GRBVar = createSentinelViolations(model)
+
   initialize()
 
+  private def createSentinelViolations(model: GRBModel): GRBVar = {
+    val variables = sentinelVariables.flatten.flatten.filter(_ != null)
+    val maxViolations = variables.length
+    val violations = model.addVar(0, maxViolations, 0, GRB.INTEGER, "sentinelViolations")
+
+    val expression = new GRBLinExpr()
+    for (v <- variables) {
+      expression.addTerm(1, v)
+    }
+
+    expression.addTerm(-1, violations)
+
+    model.addConstr(expression, GRB.EQUAL, 0, "sentinelViolationsCtr")
+
+    violations
+  }
 
   private def createWorkerVariables (model: GRBModel): WorkerVariables = {
 
@@ -147,10 +165,10 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
           occurrences.addTerm(1, variable)
         }
       }
-
-      val sum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"occurrences[$w]")
-      occurrences.addTerm(-1, sum)
-      model.addConstr(occurrences, GRB.EQUAL, 0, "occurrencesSum[$w]")
+//
+//      val sum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"occurrences[$w]")
+//      occurrences.addTerm(-1, sum)
+//      model.addConstr(occurrences, GRB.EQUAL, 0, "occurrencesSum[$w]")
 
       r.min match {
         case Some(min) =>
@@ -183,22 +201,6 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
     violations
   }
-//
-//  private def applySentinels(model: GRBModel, workerVariables: WorkerVariables, sentinels: SentinelVariables): Unit = {
-//    for (d <- Demands; t <- demands(d).periods; p <- demands(d).positions) {
-//      val expression = new GRBLinExpr()
-//      for (w <- Workers) {
-//        val variable = workerVariables(t)(d)(p)(w)
-//        if (variable != null) {
-//          expression.addTerm(1, variable)
-//        }
-//      }
-//
-//      val tmp = model.addVar(0, 1, 0, GRB.BINARY, s"sentinelTmp[$d][$t][$p]")
-//      model.addConstr(expression, GRB.EQUAL, tmp, s"sentinelTmpCtr[$d][$t][$p]")
-//      model.addGenConstrIndicator(sentinels(t)(d)(p), 1, expression, GRB.EQUAL, 0, s"sentinelCtr[$d][$t][$p]")
-//    }
-//  }
 
   private def satisfyWorkerWorkerIncompatibilities (model: GRBModel, variables: WorkerVariables): Unit = {
     val incompatibilities = problem.workerWorkerIncompatibilities
@@ -214,7 +216,6 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
         }
         model.addConstr(expression, GRB.LESS_EQUAL, 1, s"Iww[$w0][$w1]")
       }
-
     }
   }
 
@@ -401,10 +402,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
   def minimizeSentinelWorkers (model: GRBModel, variables: SentinelVariables): GRBLinExpr = {
     val expression = new GRBLinExpr()
-    for (d <- Demands; p <- demands(d).positions; t <- demands(d).periods) {
-      expression.addTerm(1, variables(t)(d)(p))
-    }
-
+    expression.addTerm(1.0, sentinelViolations)
     expression
   }
 

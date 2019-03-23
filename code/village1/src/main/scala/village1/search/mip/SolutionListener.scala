@@ -2,13 +2,14 @@ package village1.search.mip
 
 import gurobi.{GRB, GRBCallback}
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.modeling.{Solution, SolutionObjective}
+import village1.modeling.{Constants, Solution, SolutionObjective}
 import village1.modeling.mip.VillageOneMIPModel
 import village1.search.Search
 
 class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Search {
 
   type WorkerVariablesSolution = Array[Array[Array[Array[Double]]]]
+  type SentinelVariablesSolution = Array[Array[Array[Double]]]
   type ZoneVariablesSolution = Array[Array[Double]]
   type MachineVariablesSolution = Array[Array[Double]]
 
@@ -25,6 +26,15 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
             if (v == null) 0 else getSolution(v)
           )
         )
+      )
+    )
+  }
+
+  private def getSentinelValues: SentinelVariablesSolution = {
+    val variables = model.sentinelVariables
+    variables.map(
+      _.map(
+        _.map(v => if (v == null) 0.0 else getSolution(v))
       )
     )
   }
@@ -53,6 +63,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
     val workerValues = getWorkerValues
     val zoneValues = getZoneValues
     val machineValues = getMachineValues
+    val sentinelValues = getSentinelValues
 
     var demandAssignments: Array[DemandAssignment] = Array()
 
@@ -63,10 +74,18 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
       for (t <- demand.periods) {
         var workers = Array[Int]()
 
-        for (p <- demand.positions; w <- model.Workers) {
-          val value = workerValues(t)(d)(p)(w)
-          if (value == 1.0) {
-            workers :+= w
+        for (p <- demand.positions) {
+          val sentinel = sentinelValues(t)(d)(p)
+          if (sentinel == 1.0) {
+            workers :+= Constants.SentinelWorker
+          }
+          else {
+            for (w <- model.Workers) {
+              val value = workerValues(t)(d)(p)(w)
+              if (value == 1.0) {
+                workers :+= w
+              }
+            }
           }
         }
 
@@ -112,7 +131,11 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
 
 
     val objective = this.getDoubleInfo(GRB.CB_MIPSOL_OBJ)
-    Solution(model.problem, demandAssignments, SolutionObjective(objective = objective.toInt))
+
+    Solution(model.problem, demandAssignments, SolutionObjective(
+      objective = objective.toInt,
+      sentinelViolations = getSolution(model.sentinelViolations).toInt
+    ))
   }
 
 
