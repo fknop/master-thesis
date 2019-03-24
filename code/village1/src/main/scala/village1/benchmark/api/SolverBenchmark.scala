@@ -1,6 +1,7 @@
-package village1.benchmark
+package village1.benchmark.api
 
 import village1.generator.{InstanceGenerator, InstanceOptions}
+import village1.modeling.cp.VillageOneCPModel
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.BenchmarkUtils._
 
@@ -20,6 +21,8 @@ class SolverBenchmark(
   val T: Array[Int] = options.T
   val D: Array[Int] = options.D
   val W: Array[Int] = options.W
+
+  val sizes: Array[ProblemSize] = Array.tabulate(T.length, D.length, W.length)( (t, d, w) => ProblemSize(T(t), D(d), W(w))).flatten.flatten
 
   val seed: Long = if (options.seed == -1L) Random.nextLong() else options.seed
   private val generator = new InstanceGenerator(seed)
@@ -45,35 +48,46 @@ class SolverBenchmark(
     )
   }
 
-  val baseModels: Array[Array[Array[Array[VillageOneModel]]]] = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
-
-    if (!options.noKeep) {
+  val baseModels: Array[Array[Array[VillageOneModel]]] = Array.tabulate(T.length, D.length, W.length) { (t, d, w) =>
       val problem = generate(t, d, w)
       val model = new VillageOneModel(problem)
-      Array.fill[VillageOneModel](Repeat + DryRun)(model)
-    }
-    else {
-      Array.tabulate(Repeat + DryRun)(_ => {
-        val problem = generate(t, d, w)
-        new VillageOneModel(problem)
-      })
-    }
-
+      model
   }
 
 
-  def makeInstance(series: BenchmarkSerie*): BenchmarkInstance = {
+  def makeInstance(timeSeries: Seq[BenchmarkSerie], objectiveSeries: Seq[BenchmarkSerie]): BenchmarkInstance = {
     BenchmarkInstance(
       Repeat,
       DryRun,
       TimeLimit,
       SolutionLimit,
-      series
+      sizes,
+      timeSeries,
+      objectiveSeries
     )
   }
 
+  def lowerBoundSerie(): BenchmarkSerie = {
+    val results = Array.fill[BenchmarkMeasurement](T.length * D.length * W.length)(null)
+    var i = 0
+    for (t <- T.indices; d <- D.indices; w <- W.indices) {
+      val model = baseModels(t)(d)(w)
+      val problem = model.problem
+      var lb = 0
+      for (demand <- problem.demands) {
+        lb += demand.requiredWorkers
+      }
 
-  def run (name: String, solve: VillageOneModel => (Long, Int)): BenchmarkSerie = {
+      results(i) = BenchmarkMeasurement(lb, lb, lb, 0)
+      i += 1
+    }
+
+
+    BenchmarkSerie("Lowerbound", results)
+  }
+
+
+  def run (name: String, solve: VillageOneModel => (Long, Int)): (BenchmarkSerie, BenchmarkSerie) = {
     val timeMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
     val objectiveMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
 
@@ -84,7 +98,7 @@ class SolverBenchmark(
       for (i <- T.indices) {
         for (j <- D.indices) {
           for (k <- W.indices) {
-            val baseModel = baseModels(i)(j)(k)(r + DryRun)
+            val baseModel = baseModels(i)(j)(k)
             val result = solve(baseModel)
             if (measure) {
               if (result == null) {
@@ -107,15 +121,16 @@ class SolverBenchmark(
     log("End run")
     log("Start measurements")
 
-    val results = Array.fill[BenchmarkResult](T.length * D.length * W.length)(null)
+    val timeSerie = Array.fill[BenchmarkMeasurement](T.length * D.length * W.length)(null)
+    val objectiveSerie = Array.fill[BenchmarkMeasurement](T.length * D.length * W.length)(null)
     var r = 0
     for (i <- T.indices) {
       for (j <- D.indices) {
         for (k <- W.indices) {
-          val problemSize = ProblemSize(T(i), D(j), W(k))
           val timeMeasurement = getMeasurements(timeMeasurements(i)(j)(k))
           val objectiveMeasurement = getMeasurements(objectiveMeasurements(i)(j)(k))
-          results(r) = BenchmarkResult(problemSize, timeMeasurement, objectiveMeasurement)
+          timeSerie(r) = timeMeasurement
+          objectiveSerie(r) = objectiveMeasurement
           r += 1
         }
       }
@@ -123,7 +138,7 @@ class SolverBenchmark(
 
     log("End measurements")
 
-    BenchmarkSerie(name, results)
+    (BenchmarkSerie(name, timeSerie), BenchmarkSerie(name, objectiveSerie))
   }
 
   private def getMeasurements(measurements: Array[Long]): BenchmarkMeasurement = {

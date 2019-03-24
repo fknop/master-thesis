@@ -1,6 +1,7 @@
 package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
+import village1.benchmark.api.{CommandLineBenchmark, SolverBenchmark}
 
 object SymmetryBreakingMipBenchmark extends CommandLineBenchmark {
 

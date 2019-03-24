@@ -1,5 +1,6 @@
 package village1.benchmark
 
+import village1.benchmark.api.SolverBenchmark
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation}
 import village1.modeling.mip.MipModelOptions

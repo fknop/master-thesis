@@ -1,0 +1,1093 @@
+{
+  "repeat" : 1,
+  "dryRun" : 1,
+  "timeLimit" : 20,
+  "solutionLimit" : 1,
+  "series" : [ {
+    "name" : "CP-MA",
+    "results" : [ {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 9,
+        "max" : 9,
+        "mean" : 9,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 96,
+        "max" : 96,
+        "mean" : 96,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 26,
+        "max" : 26,
+        "mean" : 26,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 133,
+        "max" : 133,
+        "mean" : 133,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 37,
+        "max" : 37,
+        "mean" : 37,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 169,
+        "max" : 169,
+        "mean" : 169,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 65,
+        "max" : 65,
+        "mean" : 65,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 235,
+        "max" : 235,
+        "mean" : 235,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 78,
+        "max" : 78,
+        "mean" : 78,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 187,
+        "max" : 187,
+        "mean" : 187,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 11,
+        "max" : 11,
+        "mean" : 11,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 103,
+        "max" : 103,
+        "mean" : 103,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 23,
+        "max" : 23,
+        "mean" : 23,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 159,
+        "max" : 159,
+        "mean" : 159,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 58,
+        "max" : 58,
+        "mean" : 58,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 200,
+        "max" : 200,
+        "mean" : 200,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 93,
+        "max" : 93,
+        "mean" : 93,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 205,
+        "max" : 205,
+        "mean" : 205,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 138,
+        "max" : 138,
+        "mean" : 138,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 253,
+        "max" : 253,
+        "mean" : 253,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 18,
+        "max" : 18,
+        "mean" : 18,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 113,
+        "max" : 113,
+        "mean" : 113,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 93,
+        "max" : 93,
+        "mean" : 93,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 234,
+        "max" : 234,
+        "mean" : 234,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 149,
+        "max" : 149,
+        "mean" : 149,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 264,
+        "max" : 264,
+        "mean" : 264,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 221,
+        "max" : 221,
+        "mean" : 221,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 288,
+        "max" : 288,
+        "mean" : 288,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 387,
+        "max" : 387,
+        "mean" : 387,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 421,
+        "max" : 421,
+        "mean" : 421,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 53,
+        "max" : 53,
+        "mean" : 53,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 168,
+        "max" : 168,
+        "mean" : 168,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 106,
+        "max" : 106,
+        "mean" : 106,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 210,
+        "max" : 210,
+        "mean" : 210,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 129,
+        "max" : 129,
+        "mean" : 129,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 233,
+        "max" : 233,
+        "mean" : 233,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 335,
+        "max" : 335,
+        "mean" : 335,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 346,
+        "max" : 346,
+        "mean" : 346,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 585,
+        "max" : 585,
+        "mean" : 585,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 422,
+        "max" : 422,
+        "mean" : 422,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 60,
+        "max" : 60,
+        "mean" : 60,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 152,
+        "max" : 152,
+        "mean" : 152,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 235,
+        "max" : 235,
+        "mean" : 235,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 275,
+        "max" : 275,
+        "mean" : 275,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 292,
+        "max" : 292,
+        "mean" : 292,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 293,
+        "max" : 293,
+        "mean" : 293,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 331,
+        "max" : 331,
+        "mean" : 331,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 242,
+        "max" : 242,
+        "mean" : 242,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 655,
+        "max" : 655,
+        "mean" : 655,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 411,
+        "max" : 411,
+        "mean" : 411,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 130,
+        "max" : 130,
+        "mean" : 130,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 159,
+        "max" : 159,
+        "mean" : 159,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 214,
+        "max" : 214,
+        "mean" : 214,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 253,
+        "max" : 253,
+        "mean" : 253,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 529,
+        "max" : 529,
+        "mean" : 529,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 409,
+        "max" : 409,
+        "mean" : 409,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 680,
+        "max" : 680,
+        "mean" : 680,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 470,
+        "max" : 470,
+        "mean" : 470,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 1430,
+        "max" : 1430,
+        "mean" : 1430,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 519,
+        "max" : 519,
+        "mean" : 519,
+        "stdev" : 0
+      }
+    } ]
+  }, {
+    "name" : "CP-FF",
+    "results" : [ {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 18,
+        "max" : 18,
+        "mean" : 18,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 269,
+        "max" : 269,
+        "mean" : 269,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 50,
+        "max" : 50,
+        "mean" : 50,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 384,
+        "max" : 384,
+        "mean" : 384,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 73,
+        "max" : 73,
+        "mean" : 73,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 439,
+        "max" : 439,
+        "mean" : 439,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 130,
+        "max" : 130,
+        "mean" : 130,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 538,
+        "max" : 538,
+        "mean" : 538,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 156,
+        "max" : 156,
+        "mean" : 156,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 552,
+        "max" : 552,
+        "mean" : 552,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 22,
+        "max" : 22,
+        "mean" : 22,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 291,
+        "max" : 291,
+        "mean" : 291,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 47,
+        "max" : 47,
+        "mean" : 47,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 387,
+        "max" : 387,
+        "mean" : 387,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 114,
+        "max" : 114,
+        "mean" : 114,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 522,
+        "max" : 522,
+        "mean" : 522,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 187,
+        "max" : 187,
+        "mean" : 187,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 614,
+        "max" : 614,
+        "mean" : 614,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 5,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 280,
+        "max" : 280,
+        "mean" : 280,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 696,
+        "max" : 696,
+        "mean" : 696,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 35,
+        "max" : 35,
+        "mean" : 35,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 362,
+        "max" : 362,
+        "mean" : 362,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 191,
+        "max" : 191,
+        "mean" : 191,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 655,
+        "max" : 655,
+        "mean" : 655,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 300,
+        "max" : 300,
+        "mean" : 300,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 760,
+        "max" : 760,
+        "mean" : 760,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 457,
+        "max" : 457,
+        "mean" : 457,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 874,
+        "max" : 874,
+        "mean" : 874,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 808,
+        "max" : 808,
+        "mean" : 808,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1054,
+        "max" : 1054,
+        "mean" : 1054,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 109,
+        "max" : 109,
+        "mean" : 109,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 559,
+        "max" : 559,
+        "mean" : 559,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 212,
+        "max" : 212,
+        "mean" : 212,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 691,
+        "max" : 691,
+        "mean" : 691,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 258,
+        "max" : 258,
+        "mean" : 258,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 730,
+        "max" : 730,
+        "mean" : 730,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 679,
+        "max" : 679,
+        "mean" : 679,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1017,
+        "max" : 1017,
+        "mean" : 1017,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 10,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 1188,
+        "max" : 1188,
+        "mean" : 1188,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1246,
+        "max" : 1246,
+        "mean" : 1246,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 118,
+        "max" : 118,
+        "mean" : 118,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 591,
+        "max" : 591,
+        "mean" : 591,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 444,
+        "max" : 444,
+        "mean" : 444,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 944,
+        "max" : 944,
+        "mean" : 944,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 569,
+        "max" : 569,
+        "mean" : 569,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 992,
+        "max" : 992,
+        "mean" : 992,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 674,
+        "max" : 674,
+        "mean" : 674,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1043,
+        "max" : 1043,
+        "mean" : 1043,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 30,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 1322,
+        "max" : 1322,
+        "mean" : 1322,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1338,
+        "max" : 1338,
+        "mean" : 1338,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 261,
+        "max" : 261,
+        "mean" : 261,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 800,
+        "max" : 800,
+        "mean" : 800,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 150
+      },
+      "time" : {
+        "min" : 430,
+        "max" : 430,
+        "mean" : 430,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 947,
+        "max" : 947,
+        "mean" : 947,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 1095,
+        "max" : 1095,
+        "mean" : 1095,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1324,
+        "max" : 1324,
+        "mean" : 1324,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 250
+      },
+      "time" : {
+        "min" : 1355,
+        "max" : 1355,
+        "mean" : 1355,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1393,
+        "max" : 1393,
+        "mean" : 1393,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 2959,
+        "max" : 2959,
+        "mean" : 2959,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1824,
+        "max" : 1824,
+        "mean" : 1824,
+        "stdev" : 0
+      }
+    } ]
+  } ]
+}

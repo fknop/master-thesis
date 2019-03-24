@@ -1,4 +1,4 @@
-package village1.benchmark
+package village1.benchmark.api
 
 trait BenchmarkOptions {
   val solutionLimit: Int = Int.MaxValue

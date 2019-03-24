@@ -1,4 +1,4 @@
-package village1.benchmark
+package village1.benchmark.api
 
 case class BenchmarkMeasurement(min: Double, max: Double, mean: Double, stdev: Double)
 
@@ -17,12 +17,14 @@ case class ProblemSize(T: Int, D: Int, W: Int) extends Comparable[ProblemSize] {
   override def toString: String = s"T=$T\nD=$D\nW=$W"
 }
 
-case class BenchmarkResult(size: ProblemSize, time: BenchmarkMeasurement, objective: BenchmarkMeasurement)
-case class BenchmarkSerie(name: String, results: Array[BenchmarkResult])
+//case class BenchmarkResult(time: BenchmarkMeasurement, objective: BenchmarkMeasurement)
+case class BenchmarkSerie(name: String, results: Array[BenchmarkMeasurement])
 case class BenchmarkInstance(
     repeat: Int,
     dryRun: Int,
     timeLimit: Int,
     solutionLimit: Int,
-    series: Seq[BenchmarkSerie]
+    problems: Seq[ProblemSize],
+    timeSeries: Seq[BenchmarkSerie],
+    objectiveSeries: Seq[BenchmarkSerie]
 )

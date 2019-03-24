@@ -29,7 +29,7 @@
   <script>
     const data = { /** DATA **/ }
 
-    const categories = data.series[0].results.map(r => r.size)
+    const categories = data.problems
     const titles = ['Runtime', 'Objective']
     const yAxis = ['Runtime (ms)', 'Objective (lower is better)']
 
@@ -45,42 +45,45 @@
       return serie.map(s => ({...s, type: 'scatter'}))
     }
 
-    const timeSeries = data.series.map(s => ({
+
+    const timeSeries = data.timeSeries.map(s => ({
       name: s.name,
       id: s.name,
-      data: s.results.map(r => r.time).map(t => t.mean)
+      data: s.results.map(t => t.mean)
     }))
 
-
-    const timeErrors = data.series.map(s => ({
-      name: `${s.name} error`,
-      linkedTo: s.name,
-      type: 'errorbar',
-      data: s.results.map(r => r.time).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
-      tooltip: {
-        pointFormat: '(error range: {point.low}-{point.high})<br/>'
-      }
-    }))
-
-    const objectiveSeries = data.series.map(s => ({
+    const objectiveSeries = data.objectiveSeries.map(s => ({
       name: s.name,
       id: s.name,
-      data: s.results.map(r => r.objective).map(t => t.mean)
+      data: s.results.map(t => t.mean)
     }))
 
-    const objectiveErrors = data.series.map(s => ({
-      name: `${s.name} error`,
-      type: 'errorbar',
-      linkedTo: s.name,
-      data: s.results.map(r => r.objective).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
-      tooltip: {
-        pointFormat: '(error range: {point.low}-{point.high})<br/>'
-      }
-    }))
+ 
+    // const timeErrors = data.series.map(s => ({
+    //   name: `${s.name} error`,
+    //   linkedTo: s.name,
+    //   type: 'errorbar',
+    //   data: s.results.map(r => r.time).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+    //   tooltip: {
+    //     pointFormat: '(error range: {point.low}-{point.high})<br/>'
+    //   }
+    // }))
+
+    // const objectiveErrors = data.series.map(s => ({
+    //   name: `${s.name} error`,
+    //   type: 'errorbar',
+    //   linkedTo: s.name,
+    //   data: s.results.map(r => r.objective).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+    //   tooltip: {
+    //     pointFormat: '(error range: {point.low}-{point.high})<br/>'
+    //   }
+    // }))
 
 
     const series = [lineSeries(timeSeries), lineSeries(objectiveSeries)]
-    const errors = [timeErrors, objectiveErrors]
+    // const errors = [timeErrors, objectiveErrors]
+
+    console.log(categories)
 
 
     function chart (i) {

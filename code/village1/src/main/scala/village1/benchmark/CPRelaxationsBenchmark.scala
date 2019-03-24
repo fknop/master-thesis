@@ -1,6 +1,7 @@
 package village1.benchmark
 
 import BenchmarkSolverFunctions._
+import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
 import village1.json.JsonSerializer
 
 object CPRelaxationsBenchmark extends CommandLineBenchmark {
@@ -11,8 +12,8 @@ object CPRelaxationsBenchmark extends CommandLineBenchmark {
   val random = benchmark.run("CP-Random", solveCP(benchmark))
   val prop = benchmark.run("CP-Prop", solveCPPropagationRelax(benchmark))
 
-  val instance = benchmark.makeInstance(random, prop)
+//  val instance = benchmark.makeInstance(random, prop)
 
-  val writer = JsonSerializer.serialize(instance)
-  writer(options.out)
+//  val writer = JsonSerializer.serialize(instance)
+//  writer(options.out)
 }

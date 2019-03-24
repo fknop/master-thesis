@@ -1,6 +1,7 @@
 package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
+import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
 import village1.json.JsonSerializer
 import village1.util.Utils
 
@@ -15,8 +16,8 @@ object MIPStartBenchmark extends CommandLineBenchmark {
   val cp_mip3 = benchmark.run("CP+MIP 0.7", solveCP_MIP(benchmark, 0.7))
   val cp_mip4 = benchmark.run("CP+MIP 1", solveCP_MIP(benchmark, 1))
 
-  val instance = benchmark.makeInstance(cp_mip0, cp_mip1, cp_mip2, cp_mip3, cp_mip4)
+//  val instance = benchmark.makeInstance(cp_mip0, cp_mip1, cp_mip2, cp_mip3, cp_mip4)
 
-  val writer = JsonSerializer.serialize(instance)
-  writer(options.out)
+//  val writer = JsonSerializer.serialize(instance)
+//  writer(options.out)
 }
