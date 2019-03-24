@@ -392,11 +392,6 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     }
 
 
-    Solution(problem, demandAssignments, SolutionObjective(
-      objective = objective.value,
-      contiguousShifts = shiftNWorkers.flatten.map(_.value).sum,
-      requirementsViolations = if (workingRequirementsViolations != null) workingRequirementsViolations.value else 0,
-      sentinelViolations = if (options.allowPartial) sentinelViolations.value else 0
-    ))
+    Solution(problem, demandAssignments, objective.value)
   }
 }

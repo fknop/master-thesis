@@ -2,7 +2,7 @@ package village1.search.mip
 
 import gurobi.{GRB, GRBCallback}
 import village1.data.{DemandAssignment, WorkerAssignment}
-import village1.modeling.{Constants, Solution, SolutionObjective}
+import village1.modeling.{Constants, Solution}
 import village1.modeling.mip.VillageOneMIPModel
 import village1.search.Search
 
@@ -23,7 +23,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
       _.map(
         _.map(
           _.map(v =>
-            if (v == null) 0 else getSolution(v)
+            getSolution(v)
           )
         )
       )
@@ -34,7 +34,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
     val variables = model.sentinelVariables
     variables.map(
       _.map(
-        _.map(v => if (v == null) 0.0 else getSolution(v))
+        _.map(v => getSolution(v))
       )
     )
   }
@@ -132,10 +132,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
 
     val objective = this.getDoubleInfo(GRB.CB_MIPSOL_OBJ)
 
-    Solution(model.problem, demandAssignments, SolutionObjective(
-      objective = objective.toInt,
-      sentinelViolations = getSolution(model.sentinelViolations).toInt
-    ))
+    Solution(model.problem, demandAssignments, objective.toInt)
   }
 
 

@@ -1,10 +1,9 @@
 package village1.search.mip
 
-import gurobi.{GRB, GRBCallback, GRBException}
+import gurobi.{GRB, GRBException}
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.json.{JsonParser, JsonSerializer}
-import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.modeling.mip.{MipModelOptions, VillageOneMIPModel}
+import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.search.Search
 import village1.search.cp.VillageOneLNS
 import village1.util.BenchmarkUtils.time
@@ -34,13 +33,10 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
       model.set(GRB.IntParam.LogToConsole, 0)
     }
 
+//    model.set(GRB.IntParam.Symmetry, 2)
     model.set(GRB.IntParam.MIPFocus, MIPFocus)
     model.set(GRB.IntParam.SolutionLimit, nSols)
 
-
-//    val solutionListener = new SolutionListener(this)
-//    solutionListener.onSolutionFound(emitSolution)
-//    model.setCallback(solutionListener)
 
     val solutionListener = new SolutionListener(this)
     solutionListener.onSolutionFound(emitSolution)
@@ -67,7 +63,7 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
 }
 
 
-object MipMain2 extends App {
+object MipMain extends App {
 
   val name = "t10d50w300-638"
   val path = s"data/instances/generated/${name}.json"
@@ -92,7 +88,6 @@ object MipMain2 extends App {
 
   if (cpSearch.lastSolution != null) {
     println(cpSearch.lastSolution.valid)
-    println("test")
     model.setInitialSolution(cpSearch.lastSolution)
   }
 
@@ -104,7 +99,6 @@ object MipMain2 extends App {
     println(solution.valid)
     println(solver.solveTime)
     println(solver.optimal)
-//    solver.dispose()
 //    JsonSerializer.serialize(solution)(s"data/results/mip-${name}-o=${solution.objective}.json")
   }
   catch {

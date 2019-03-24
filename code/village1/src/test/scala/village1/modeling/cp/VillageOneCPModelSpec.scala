@@ -1,10 +1,11 @@
 package village1.modeling.cp
 
+import org.scalatest.Inside.inside
 import org.scalatest._
 import oscar.cp.core.NoSolutionException
 import village1.json.JsonParser
 import village1.modeling._
-import village1.modeling.violations.WorkerViolation
+import village1.modeling.violations.{WorkerViolation, WorkingRequirementViolation}
 import village1.search.cp.VillageOneSearch
 
 class VillageOneCPModelSpec extends CommonSpec {
@@ -267,6 +268,32 @@ class VillageOneCPModelSpec extends CommonSpec {
       }
 
       search.solve()
+
+      val violations = search.lastSolution.violations
+      violations.size should equal(1)
+      violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
+      inside(violations.head) {
+        case WorkingRequirementViolation(_, _, _, v) =>
+          v should equal(2)
+      }
+    }
+
+    it("Should take into account working requirements (max)") {
+      val search = getSearch(JsonParser.parse("data/test/working-requirements-max.json"))
+      search.onSolutionFound { solution =>
+        checkValid(solution)
+        checkNotPartial(solution)
+      }
+
+      search.solve()
+
+      val violations = search.lastSolution.violations
+      violations.size should equal(1)
+      violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
+      inside(violations.head) {
+        case WorkingRequirementViolation(_, _, _, v) =>
+          v should equal(5)
+      }
     }
   }
 
