@@ -74,7 +74,7 @@ object BenchmarkSolverFunctions {
           mip.setInitialSolution(cp.lastSolution, startMipProbability)
         }
 
-        val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = b.SolutionLimit - stat.nSols)
+        val solver: MipSolverResult = mip.solve(silent = true, timeLimit = remaining, nSols = math.max(b.SolutionLimit - stat.nSols, 1))
         if (mip.lastSolution == null && cp.lastSolution == null) null
         else if (mip.lastSolution == null && cp.lastSolution != null) (stat.time + solver.solveTime, cp.lastSolution.objective)
         else (stat.time + solver.solveTime, mip.lastSolution.objective)

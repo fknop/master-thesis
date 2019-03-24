@@ -24,8 +24,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
 
     minimize(objective)
     search {
-
-      var branching = binaryIdx(flatWorkers, heuristic.varHeuristic, heuristic.valueHeuristic)
+      var branching = heuristic.branching
 
       if (flatMachines.nonEmpty) {
         branching = branching ++ binaryFirstFail(flatMachines)

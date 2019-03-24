@@ -8,9 +8,11 @@ import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
-import village1.modeling.{Problem, VillageOneModel}
+import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.search.Search
 import village1.util.BenchmarkUtils.time
+
+import scala.util.Random
 
 object SearchHeuristic extends Enumeration {
   val MostAvailable, Default = Value
@@ -30,6 +32,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   val flatMachines: Array[CPIntVar] = machineVariables.flatten
   val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
+
   solver.addDecisionVariables(flatWorkers)
   solver.addDecisionVariables(flatMachines)
   solver.addDecisionVariables(flatLocations)
@@ -40,6 +43,40 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   private var relaxation: Relaxation = () => RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
   private val defaultHeuristic = new MostAvailableHeuristic(this, flatWorkers)
   private var heuristic: Branching = defaultHeuristic.branching
+
+  def setInitialSolution(solution: Solution): Unit = {
+
+    val values = Array.tabulate(T, D)((t, d) => {
+      val demand = demands(d)
+
+      if (demand.hasPeriod(t)) {
+        Array.fill(demand.requiredWorkers)(0)
+      }
+      else {
+        Array[Int]()
+      }
+    })
+
+
+
+    bestObjective = solution.objective
+    objective.updateMax(bestObjective)
+    val rand = new Random(0)
+    for (demandAssignment <- solution.plannings) {
+      val d = demandAssignment.demand
+      val workerAssignments = demandAssignment.workerAssignments
+      for (assignment <- workerAssignments) {
+        val t = assignment.timeslot
+        val workers = assignment.workers
+        for (i <- workers.indices) {
+            values(t)(d)(i) = workers(i)
+        }
+      }
+    }
+
+    currentSolution = new CPIntSol(values.flatten.flatten, solution.objective, 0L)
+
+  }
 
   def relax(relaxation: Relaxation): Unit = {
     this.relaxation = relaxation
@@ -84,7 +121,14 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       var totalTime = 0L
       var totalSol = 0
 
-      val stat = start(nSols = 1, timeLimit = timeLimit / 1000)
+      val stat =
+        if (currentSolution != null)
+          startSubjectTo(nSols = 1, timeLimit = timeLimit / 1000) {
+            println("test")
+            relaxation()
+          }
+        else
+          start(nSols = 1, timeLimit = timeLimit / 1000)
 
       totalSol = stat.nSols
       totalTime += stat.time

@@ -1,8 +1,9 @@
 package village1.modeling.mip
 
+import org.scalatest.Inside._
 import village1.json.JsonParser
 import village1.modeling._
-import village1.modeling.violations.WorkerViolation
+import village1.modeling.violations.{WorkerViolation, WorkingRequirementViolation}
 import village1.search.mip.{MIPSearch, MipSolverResult}
 
 class VillageOneMIPModelSpec extends CommonSpec {
@@ -122,14 +123,40 @@ class VillageOneMIPModelSpec extends CommonSpec {
 
 
   describe("Working requirements") {
-    it("Should take into account working requirements") {
-      val search = getSearch(JsonParser.parse("data/test/working-requirements.json"))
+    it("Should take into account working requirements (min)") {
+      val search = getSearch(JsonParser.parse("data/test/working-requirements.json"), MipModelOptions().copy(allowPartial = false))
       search.onSolutionFound { solution =>
         checkValid(solution)
         checkNotPartial(solution)
       }
 
       solve(search)
+
+      val violations = search.lastSolution.violations
+      violations.size should equal(1)
+      violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
+      inside(violations.head) {
+        case WorkingRequirementViolation(_, _, _, v) =>
+          v should equal(2)
+      }
+    }
+
+    it("Should take into account working requirements (max)") {
+      val search = getSearch(JsonParser.parse("data/test/working-requirements-max.json"), MipModelOptions().copy(allowPartial = false))
+      search.onSolutionFound { solution =>
+        checkValid(solution)
+        checkNotPartial(solution)
+      }
+
+      solve(search)
+
+      val violations = search.lastSolution.violations
+      violations.size should equal(1)
+      violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
+      inside(violations.head) {
+        case WorkingRequirementViolation(_, _, _, v) =>
+          v should equal(5)
+      }
     }
   }
 
@@ -143,12 +170,14 @@ class VillageOneMIPModelSpec extends CommonSpec {
       search.onSolutionFound { solution =>
         checkValid(solution)
         checkPartial(solution)
+
         val violations = solution.violations.filter { violation => violation match {
           case WorkerViolation(_, _, _) => true
           case _ => false
         }}
 
         violations.size should equal(2)
+
       }
 
       search.solve()

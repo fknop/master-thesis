@@ -23,7 +23,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
       _.map(
         _.map(
           _.map(v =>
-            if (v == null) 0 else getSolution(v)
+            getSolution(v)
           )
         )
       )
@@ -34,7 +34,7 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Searc
     val variables = model.sentinelVariables
     variables.map(
       _.map(
-        _.map(v => if (v == null) 0.0 else getSolution(v))
+        _.map(v => getSolution(v))
       )
     )
   }

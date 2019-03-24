@@ -57,8 +57,6 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       removeWorkerSymmetries()
     }
 
-
-
     if (options.allowPartial) {
       minimizeSentinelWorker()
     }
@@ -165,6 +163,8 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
         }
       }
     }
+
+
 
     if (x.nonEmpty) {
       add(lexLeq(x, y))

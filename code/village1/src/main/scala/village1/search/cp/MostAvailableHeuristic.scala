@@ -13,7 +13,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   private val workers = model.workers
   private val mostAvailable: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkers()
   private val reverseMap = buildReverseMap()
-//  private val demandsAtTime: Array[Int] = buildDemandsAtTime()
+  private val demandsAtTime: Array[Int] = buildDemandsAtTime()
 
   private def buildDemandsAtTime(): Array[Int] = {
     val demandsAtTime = Array.fill(model.T)(0)
@@ -47,6 +47,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
         Array.fill[Array[Int]](model.T)(null)
       }
     }
+
     for (d <- model.Demands) {
       for (p <- demands(d).positions) {
         for (t <- demands(d).periods) {
@@ -54,8 +55,8 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
           val sorted = possibleWorkers.toArray.sortBy(w => {
             val size = workers(w).availabilities.intersect(demands(d).periods).size
             val remaining = workers(w).availabilities.size - size
-            (size, -remaining, w)
-          })(Ordering[(Int, Int, Int)].reverse)
+            (-size, remaining, w)
+          })(Ordering[(Int, Int, Int)])
 
           mostAvailable(d)(p)(t) = sorted
         }
@@ -64,15 +65,15 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     mostAvailable
   }
 
-  def varHeuristic(i: Int): Int = {
-    val (_, d, p) = reverseMap(i)
+  def varHeuristic(i: Int): (Int, Int, Int) = {
+    val (t, d, p) = reverseMap(i)
 
    // Choose this variable if domain is 2: meaning it has one value and the sentinel value.
     if (x(i).size == 2) {
-      Int.MinValue
+      (Int.MinValue, demands(d).requiredWorkers, -demands(d).periods.size)
     }
     else {
-      maxDegree(x(i)) - demands(d).requirements(p).skills.length - demands(d).periods.size //- demandsAtTime(t)
+      (maxDegree(x(i)) - demands(d).requirements(p).skills.length, demands(d).requiredWorkers, -demands(d).periods.size)
     }
   }
 
@@ -99,5 +100,5 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   }
 
 
-  def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
+  def branching: Branching = binaryFirstFailIdx(x, valueHeuristic)
 }
