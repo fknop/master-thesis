@@ -1,0 +1,178 @@
+{
+  "repeat" : 1,
+  "dryRun" : 1,
+  "timeLimit" : 60,
+  "solutionLimit" : 1,
+  "series" : [ {
+    "name" : "CP",
+    "results" : [ {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 186,
+        "max" : 186,
+        "mean" : 186,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 176,
+        "max" : 176,
+        "mean" : 176,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 701,
+        "max" : 701,
+        "mean" : 701,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 310,
+        "max" : 310,
+        "mean" : 310,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 1473,
+        "max" : 1473,
+        "mean" : 1473,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 337,
+        "max" : 337,
+        "mean" : 337,
+        "stdev" : 0
+      }
+    } ]
+  }, {
+    "name" : "MIP",
+    "results" : [ {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 533,
+        "max" : 533,
+        "mean" : 533,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 756,
+        "max" : 756,
+        "mean" : 756,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 1635,
+        "max" : 1635,
+        "mean" : 1635,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1235,
+        "max" : 1235,
+        "mean" : 1235,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 2948,
+        "max" : 2948,
+        "mean" : 2948,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 1545,
+        "max" : 1545,
+        "mean" : 1545,
+        "stdev" : 0
+      }
+    } ]
+  }, {
+    "name" : "CP+MIP",
+    "results" : [ {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 100
+      },
+      "time" : {
+        "min" : 698,
+        "max" : 698,
+        "mean" : 698,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 146,
+        "max" : 146,
+        "mean" : 146,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 200
+      },
+      "time" : {
+        "min" : 2212,
+        "max" : 2212,
+        "mean" : 2212,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 254,
+        "max" : 254,
+        "mean" : 254,
+        "stdev" : 0
+      }
+    }, {
+      "size" : {
+        "T" : 15,
+        "D" : 50,
+        "W" : 300
+      },
+      "time" : {
+        "min" : 4977,
+        "max" : 4977,
+        "mean" : 4977,
+        "stdev" : 0
+      },
+      "objective" : {
+        "min" : 275,
+        "max" : 275,
+        "mean" : 275,
+        "stdev" : 0
+      }
+    } ]
+  } ]
+}

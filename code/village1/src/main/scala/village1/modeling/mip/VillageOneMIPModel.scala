@@ -30,7 +30,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   type MachineVariables = Array[Array[GRBVar]]
 
   private val env = VillageOneMIPModel.env
-  val model: GRBModel = new GRBModel(env)
+  var model: GRBModel = new GRBModel(env)
 
   val sentinelVariables: SentinelVariables = createSentinelWorkers(model)
   val workerVariables: WorkerVariables = createWorkerVariables(model)
@@ -42,7 +42,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   initialize()
 
   private def createSentinelViolations(model: GRBModel): GRBVar = {
-    val variables = sentinelVariables.flatten.flatten.filter(_ != null)
+    val variables = sentinelVariables.flatten.flatten//.filter(_ != null)
     val maxViolations = variables.length
     val violations = model.addVar(0, maxViolations, 0, GRB.INTEGER, "sentinelViolations")
 
@@ -51,9 +51,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       expression.addTerm(1, v)
     }
 
-    expression.addTerm(-1, violations)
-
-    model.addConstr(expression, GRB.EQUAL, 0, "sentinelViolationsCtr")
+    model.addConstr(expression, GRB.EQUAL, violations, "sentinelViolationsCtr")
 
     violations
   }
@@ -66,7 +64,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
         val impossible = (!demands(d).periods.contains(t)) ||
           (!possibleWorkersForDemands(d)(t)(p).contains(w))
 
-        if (impossible) null
+        if (impossible) model.addVar(0, 0, 0, GRB.BINARY, s"w[$t][$d][$p][$w]")
         else model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$p][$w]")
       }
     }
@@ -74,14 +72,16 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
   private def createSentinelWorkers (model: GRBModel): SentinelVariables = {
 
-    Array.tabulate(T, D) { (t, d) =>
+    val sentinels = Array.tabulate(T, D) { (t, d) =>
       Array.tabulate(demands(d).requiredWorkers)  {p =>
         if (demands(d).periods.contains(t))
           model.addVar(0, 1, 0.0, GRB.BINARY, s"sentinel[$t][$d][$p]")
         else
-          null
+          model.addVar(0, 0, 0, GRB.BINARY, s"sentinel[$t][$d][$p]")
       }
     }
+
+    sentinels
   }
 
   private def createZoneVariables(model: GRBModel): ZoneVariables = {
@@ -130,9 +130,9 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     for (t <- Periods; w <- Workers) {
       val expression = new GRBLinExpr()
       for (d <- Demands if demands(d).periods.contains(t); p <- demands(d).positions) {
-        if (variables(t)(d)(p)(w) != null) {
+//        if (variables(t)(d)(p)(w) != null) {
           expression.addTerm(1, variables(t)(d)(p)(w))
-        }
+//        }
       }
 
       model.addConstr(expression, GRB.LESS_EQUAL, 1, s"c1[$t][$w]")
@@ -161,9 +161,9 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       val occurrences = new GRBLinExpr()
       for (d <- Demands; t <- demands(d).periods if workers(w).available(t); p <- demands(d).positions) {
         val variable = variables(t)(d)(p)(w)
-        if (variable != null) {
+//        if (variable != null) {
           occurrences.addTerm(1, variable)
-        }
+//        }
       }
 //
 //      val sum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"occurrences[$w]")
@@ -177,8 +177,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
           val expression = new GRBLinExpr()
           expression.addConstant(min)
           expression.multAdd(-1, occurrences)
-          expression.addTerm(-1, difference)
-          model.addConstr(expression, GRB.EQUAL, 0, s"requirementMinDiffCtr[$w]")
+          model.addConstr(expression, GRB.EQUAL, difference, s"requirementMinDiffCtr[$w]")
           model.addGenConstrMin(minimum, Array(difference), 0, s"requirementMinCtr[$w]")
           violations.addTerm(1, minimum)
         case None =>
@@ -191,8 +190,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
           val expression = new GRBLinExpr()
           expression.addConstant(-max)
           expression.add(occurrences)
-          expression.addTerm(-1, difference)
-          model.addConstr(expression, GRB.EQUAL, 0, s"requirementMaxDiffCtr[$w]")
+          model.addConstr(expression, GRB.EQUAL, difference, s"requirementMaxDiffCtr[$w]")
           model.addGenConstrMax(maximum, Array(difference), 0, s"requirementMaxCtr[$w]")
           violations.addTerm(1, maximum)
         case None =>
@@ -376,7 +374,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
       for (w <- Workers) {
         // All the variables for this worker at demand d and position p
-        val vars = demands(d).periods.map(variables(_)(d)(p)(w)).filterNot(_ == null).toArray
+        val vars = demands(d).periods.map(variables(_)(d)(p)(w)).toArray //.filterNot(_ == null).toArray
 
         // Binary variable: is the worker working for that shift at at least one time period ?
         val isWorking = model.addVar(0, 1.0, 0, GRB.BINARY, s"isWorker[$d][$p][$w]")
@@ -386,10 +384,10 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       }
 
       // TODO: verify this
-      val hasSentinel = model.addVar(0, 1, 0, GRB.BINARY, s"hasSentinal[$d][$p]")
+      val hasSentinel = model.addVar(0, 1, 0, GRB.BINARY, s"hasSentinel[$d][$p]")
       model.addGenConstrOr(
         hasSentinel,
-        demands(d).periods.map(sentinels(_)(d)(p)).filterNot(_ == null).toArray,
+        demands(d).periods.map(sentinels(_)(d)(p)).toArray, //.filterNot(_ == null).toArray,
         s"hasSentinalConstr[$d][$p]"
       )
 
@@ -460,9 +458,9 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
   private def initialize(): Unit = {
 
-    if (options.symmetryBreaking) {
-      removeWorkerSymmetries()
-    }
+//    if (options.symmetryBreaking) {
+//      removeWorkerSymmetries()
+//    }
 
     applyConstraints()
 
