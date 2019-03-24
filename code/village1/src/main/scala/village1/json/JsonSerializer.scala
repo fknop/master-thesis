@@ -2,6 +2,7 @@ package village1.json
 
 import play.api.libs.json.{JsNumber, JsObject, Json, OWrites}
 import village1.benchmark._
+import village1.modeling.violations.{AdditionalSkillViolation, WorkerViolation, WorkingRequirementViolation}
 import village1.modeling.{Problem, Solution}
 
 object JsonSerializer {
@@ -9,8 +10,20 @@ object JsonSerializer {
   def serialize (solution: Solution): String => Unit = {
 
     val plannings = solution.plannings
-    val json = Json.toJson(plannings.map { p =>
+    val violations = Json.toJson(solution.violations.map { v =>
+      Json.obj(
+        "type" -> v.toString,
+        "values" -> (v match {
+          case WorkerViolation(d, p, t) => Json.obj("demand" -> d, "position" -> p, "time" -> t)
+          case AdditionalSkillViolation(d, t, s) => Json.obj("demand" -> d, "time" -> t, "skill" -> s.name)
+          case WorkingRequirementViolation(w, _, _, v) => Json.obj("worker" -> w, "occurrences" -> v)
+        }),
+        "description" -> v.description
 
+      )
+    })
+
+    val planning = Json.toJson(plannings.map { p =>
       var demand = Json.obj(
         "demand" -> p.demand,
         "workerAssignments" -> p.workerAssignments.sortBy(_.timeslot).map(w => {
@@ -36,6 +49,11 @@ object JsonSerializer {
 
       demand
     })
+
+    val json = Json.obj(
+      "plannings" -> planning,
+      "violations" -> violations
+    )
 
     path: String => {
       JsonUtils.writeJsonFile(path, json)

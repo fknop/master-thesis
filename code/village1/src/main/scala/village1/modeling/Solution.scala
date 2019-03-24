@@ -12,16 +12,8 @@ final case class InvalidSolution(message: String) extends ValidationResult {
   override def toString: String = s"Solution is invalid:\nReason: $message"
 }
 
-case class SolutionObjective(
-  objective: Int = 0,
-  contiguousShifts: Int = 0,
-  requirementsViolations: Int = 0,
-  sentinelViolations: Int = 0
-)
 
-case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullObjective: SolutionObjective = SolutionObjective()) {
-
-  val objective: Int = fullObjective.objective
+case class Solution(problem: Problem, plannings: Array[DemandAssignment], objective: Int) {
 
   def partial: Boolean = {
     for (planning <- plannings; assignment <- planning.workerAssignments) {
@@ -34,7 +26,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], fullOb
     false
   }
 
-  def violations: List[Violation] = {
+  lazy val violations: List[Violation] = {
 
     var violations = List[Violation]()
     val workers = problem.workers

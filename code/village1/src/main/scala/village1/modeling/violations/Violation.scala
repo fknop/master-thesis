@@ -1,5 +1,7 @@
 package village1.modeling.violations
 
 trait Violation {
-  val name: String
+  val `type`: String
+  val description: String
+  override def toString: String = `type`
 }

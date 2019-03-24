@@ -58,14 +58,15 @@ object Main extends App {
   ).map(f => s"$generatedFolder/$f")
 
 
-  val problem = JsonParser.parse(instance)
+  val problem = JsonParser.parse("data/test/not-enough-workers.json")
   val search = new VillageOneSearch(problem)
-  val stats = search.solve(nSols = 1, timeLimit = 20 * 1000)
+  val stats = search.solve()
 
   println(stats)
   if (search.lastSolution != null) {
-    JsonSerializer.serialize(search.lastSolution)("results/results3.json")
+    JsonSerializer.serialize(search.lastSolution)("data/results/results3.json")
     println(search.lastSolution.valid)
+    println(search.lastSolution.partial)
   }
 
 }

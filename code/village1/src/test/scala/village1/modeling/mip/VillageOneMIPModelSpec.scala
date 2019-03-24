@@ -2,6 +2,7 @@ package village1.modeling.mip
 
 import village1.json.JsonParser
 import village1.modeling._
+import village1.modeling.violations.WorkerViolation
 import village1.search.mip.{MIPSearch, MipSolverResult}
 
 class VillageOneMIPModelSpec extends CommonSpec {
@@ -142,7 +143,12 @@ class VillageOneMIPModelSpec extends CommonSpec {
       search.onSolutionFound { solution =>
         checkValid(solution)
         checkPartial(solution)
-        solution.fullObjective.sentinelViolations should equal(2)
+        val violations = solution.violations.filter { violation => violation match {
+          case WorkerViolation(_, _, _) => true
+          case _ => false
+        }}
+
+        violations.size should equal(2)
       }
 
       search.solve()

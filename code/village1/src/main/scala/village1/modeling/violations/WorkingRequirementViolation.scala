@@ -1,7 +1,7 @@
 package village1.modeling.violations
 
 case class WorkingRequirementViolation(worker: Int, min: Option[Int], max: Option[Int], value: Int) extends Violation {
-  override val name: String = "Working requirement violation"
+  override val `type`: String = "WorkingRequirementViolation"
   private def workingRange: String = {
     val a = min match {
       case Some(v) => v
@@ -16,5 +16,5 @@ case class WorkingRequirementViolation(worker: Int, min: Option[Int], max: Optio
     s"[$a, $b]"
   }
 
-  override def toString: String = s"Worker should work for $workingRange but worked $value instead"
+  override val description = s"Worker should work for $workingRange but worked $value instead"
 }
