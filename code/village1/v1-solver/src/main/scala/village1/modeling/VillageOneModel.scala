@@ -115,7 +115,7 @@ class VillageOneModel(val problem: Problem, model: Option[VillageOneModel] = Non
       // Initial workers that have the skills required to work at that position
       // Does not yet take into account the availability of the workers
       val initialPossibleWorkers = Array.tabulate(demand.requiredWorkers) { position =>
-        val requirements = demand.worker(position)
+        val requirements = demand.requirements(position)
         val skills = requirements.skills
 
         if (skills.nonEmpty) {

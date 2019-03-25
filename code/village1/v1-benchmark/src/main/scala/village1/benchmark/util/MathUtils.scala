@@ -1,18 +1,6 @@
-package village1.util
+package village1.benchmark.util
 
-object BenchmarkUtils {
-
-  /**
-    * Returns the time passed to execute a block of code
-    * @param block block of code
-    * @return the time passed
-    */
-  def time(block: => Unit): Long = {
-    val t0 = System.currentTimeMillis()
-    block
-    System.currentTimeMillis - t0
-  }
-
+object MathUtils {
   import Numeric.Implicits._
 
   /**

@@ -4,9 +4,9 @@ import gurobi.{GRB, GRBCallback}
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.mip.VillageOneMIPModel
 import village1.modeling.{Constants, Solution}
-import village1.search.Search
+import village1.search.SolutionEmitter
 
-class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Search {
+class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with SolutionEmitter {
 
   type WorkerVariablesSolution = Array[Array[Array[Array[Double]]]]
   type SentinelVariablesSolution = Array[Array[Array[Double]]]

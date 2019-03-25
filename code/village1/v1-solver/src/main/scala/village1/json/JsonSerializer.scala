@@ -88,8 +88,8 @@ object JsonSerializer {
           }
         )
       ),
-      "workerWorkerIncompatibilities" -> Json.arr(), // TODO
-      "workerClientIncompatibilities" -> Json.arr(), // TODO
+      "workerWorkerIncompatibilities" -> problem.workerWorkerIncompatibilities,
+      "workerClientIncompatibilities" -> problem.workerClientIncompatibilities,
       "clients" -> problem.clients.map { c =>
         Json.obj(
           "name" -> c.name
@@ -117,7 +117,6 @@ object JsonSerializer {
           )
         )
       }
-
     )
 
     path: String => {

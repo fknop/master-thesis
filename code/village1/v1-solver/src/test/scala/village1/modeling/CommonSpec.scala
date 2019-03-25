@@ -2,7 +2,7 @@ package village1.modeling
 
 import org.scalatest.{FunSpec, Matchers}
 import village1.json.JsonParser
-import village1.search.Search
+import village1.search.SolutionEmitter
 
 abstract class CommonSpec extends FunSpec with Matchers {
   protected def checkValid (solution: Solution): Unit = {
@@ -22,7 +22,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
   }
 
 
-  protected val checkSolution: Map[String, Search => Unit] = Map(
+  protected val checkSolution: Map[String, SolutionEmitter => Unit] = Map(
     "additional-skills.json" -> additionalSkills_1,
     "additional-skills-value.json" -> additionalSkills_2,
     "additional-skills-value-2.json" -> additionalSkills_3,
@@ -30,10 +30,10 @@ abstract class CommonSpec extends FunSpec with Matchers {
     "Iwc.json" -> iwc_1,
     "machines-assignment.json" -> machine_1,
     "locations-assignment.json" -> location_1,
-  "locations-assignment2.json" -> location_2
+    "locations-assignment2.json" -> location_2
   )
 
-  private def machine_1(search: Search): Unit = {
+  private def machine_1(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -59,7 +59,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
     }
   }
 
-  private def location_1(search: Search): Unit = {
+  private def location_1(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -76,7 +76,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
     }
   }
 
-  private def location_2(search: Search): Unit = {
+  private def location_2(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -102,7 +102,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
   }
 
 
-  private def additionalSkills_1(search: Search): Unit = {
+  private def additionalSkills_1(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -121,7 +121,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
     }
   }
 
-  private def additionalSkills_2(search: Search): Unit = {
+  private def additionalSkills_2(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -134,7 +134,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
     }
   }
 
-  private def additionalSkills_3(search: Search): Unit = {
+  private def additionalSkills_3(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -147,7 +147,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
     }
   }
 
-  private def iww_1(search: Search): Unit = {
+  private def iww_1(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)
@@ -188,7 +188,7 @@ abstract class CommonSpec extends FunSpec with Matchers {
   }
 
 
-  private def iwc_1(search: Search): Unit = {
+  private def iwc_1(search: SolutionEmitter): Unit = {
     search.onSolutionFound { solution =>
       checkValid(solution)
       checkNotPartial(solution)

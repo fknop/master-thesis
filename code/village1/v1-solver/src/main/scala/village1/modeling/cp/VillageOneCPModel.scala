@@ -87,7 +87,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     Array.tabulate(T, D)((t, d) => {
       val demand = demands(d)
 
-      if (demand.hasPeriod(t)) {
+      if (demand.occurs(t)) {
         Array.tabulate(demand.requiredWorkers)(i => {
           if (options.allowPartial) CPIntVar(possibleWorkersForDemands(d)(t)(i) + SentinelWorker)
           else CPIntVar(possibleWorkersForDemands(d)(t)(i))

@@ -61,7 +61,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
     Array.tabulate(T, D) { (t, d) =>
       Array.tabulate(demands(d).requiredWorkers, W)  {(p, w) =>
 
-        val impossible = (!demands(d).periods.contains(t)) ||
+        val impossible = (!demands(d).occurs(t)) ||
           (!possibleWorkersForDemands(d)(t)(p).contains(w))
 
         val variable = model.addVar(0, 1, 0.0, GRB.BINARY, s"w[$t][$d][$p][$w]")
@@ -83,7 +83,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       Array.tabulate(demands(d).requiredWorkers)  {p =>
         val variable = model.addVar(0, 1, 0.0, GRB.BINARY, s"sentinel[$t][$d][$p]")
 
-        if (!demands(d).periods.contains(t)) {
+        if (!demands(d).occurs(t)) {
           variable.set(GRB.DoubleAttr.UB, 0)
         }
         else {
@@ -145,7 +145,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
   private def allDifferentWorkers (model: GRBModel, variables: WorkerVariables): Unit = {
     for (t <- Periods; w <- Workers) {
       val expression = new GRBLinExpr()
-      for (d <- Demands if demands(d).periods.contains(t); p <- demands(d).positions) {
+      for (d <- Demands if demands(d).occurs(t); p <- demands(d).positions) {
         expression.addTerm(1, variables(t)(d)(p)(w))
       }
 
@@ -215,7 +215,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       val w0 = incompatibility(0)
       val w1 = incompatibility(1)
 
-      for (t <- Periods; d <- Demands if demands(d).periods.contains(t)) {
+      for (t <- Periods; d <- Demands if demands(d).occurs(t)) {
         val expression = new GRBLinExpr()
         for (p <- demands(d).positions) {
           expression.addTerm(1.0, variables(t)(d)(p)(w0))

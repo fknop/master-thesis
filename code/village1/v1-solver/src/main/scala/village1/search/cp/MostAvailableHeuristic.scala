@@ -30,7 +30,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     var i = 0
     val reverse = Array.fill[(Int, Int, Int)](x.length)(null)
     for (t <- model.Periods) {
-      for (d <- model.Demands if demands(d).hasPeriod(t)) {
+      for (d <- model.Demands if demands(d).occurs(t)) {
         for (p <- demands(d).positions) {
           reverse(i) = (t, d, p)
           i += 1

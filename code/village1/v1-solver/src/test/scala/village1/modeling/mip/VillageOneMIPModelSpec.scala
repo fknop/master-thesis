@@ -4,7 +4,8 @@ import org.scalatest.Inside._
 import village1.json.JsonParser
 import village1.modeling._
 import village1.modeling.violations.{WorkerViolation, WorkingRequirementViolation}
-import village1.search.mip.{MIPSearch, MipSolverResult}
+import village1.search.SearchResult
+import village1.search.mip.MIPSearch
 
 class VillageOneMIPModelSpec extends CommonSpec {
 
@@ -13,7 +14,7 @@ class VillageOneMIPModelSpec extends CommonSpec {
     new MIPSearch(problem, options)
   }
 
-  private def solve(search: MIPSearch): MipSolverResult = {
+  private def solve(search: MIPSearch): SearchResult = {
     search.solve(silent = true)
   }
 
@@ -132,7 +133,7 @@ class VillageOneMIPModelSpec extends CommonSpec {
 
       solve(search)
 
-      val violations = search.lastSolution.violations
+      val violations = search.lastSolution.get.violations
       violations.size should equal(1)
       violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
       inside(violations.head) {
@@ -150,7 +151,7 @@ class VillageOneMIPModelSpec extends CommonSpec {
 
       solve(search)
 
-      val violations = search.lastSolution.violations
+      val violations = search.lastSolution.get.violations
       violations.size should equal(1)
       violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
       inside(violations.head) {

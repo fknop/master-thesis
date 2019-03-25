@@ -2,7 +2,7 @@ package village1.benchmark.api
 
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.{Problem, VillageOneModel}
-import village1.util.BenchmarkUtils._
+import village1.benchmark.util.MathUtils._
 
 import scala.util.Random
 

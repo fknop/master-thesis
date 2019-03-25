@@ -78,7 +78,7 @@ class InstanceGenerator(seed: Long = 0L) {
           if (!workers(i).available(t)) {
             workers(i) = workers(i).copy(availabilities = workers(i).availabilities + t)
 
-            val requirements = demands(d).worker(done).skills
+            val requirements = demands(d).requirements(done).skills
             val skills = requirements.foldLeft(workers(i).skills) {
               (current, skill) => current.updated(skill.name, skill)
             }

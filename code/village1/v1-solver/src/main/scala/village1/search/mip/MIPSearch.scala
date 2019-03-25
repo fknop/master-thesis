@@ -4,18 +4,17 @@ import gurobi.{GRB, GRBException}
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.mip.{MipModelOptions, VillageOneMIPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
-import village1.search.Search
 import village1.search.cp.VillageOneLNS
-import village1.util.BenchmarkUtils.time
-
-trait MipSolverResult {
-  val solution: Solution
-  val optimal: Boolean
-  val solveTime: Long
-}
+import village1.search.{Search, SearchResult}
+import village1.util.SysUtils.time
 
 
-class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneMIPModel(problem, options, base) with Search {
+case class MipSearchOptions(MIPFocus: Int = 1)
+
+class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), base: Option[VillageOneModel] = None)
+  extends VillageOneMIPModel(problem, options, base)
+  with Search[MipSearchOptions] {
+
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
   def this(base: VillageOneModel, options: MipModelOptions) = this(base.problem, options, Some(base))
 
@@ -23,7 +22,7 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
     model = model.presolve()
   }
 
-  def solve(timeLimit: Int = -1, nSols: Int = Int.MaxValue, silent: Boolean = false, MIPFocus: Int = 1): MipSolverResult = {
+  def solve(timeLimit: Int = -1, solutionLimit: Int = Int.MaxValue, silent: Boolean = false, options: Option[MipSearchOptions] = None): SearchResult = {
 
     if (timeLimit > 0) {
       model.set(GRB.DoubleParam.TimeLimit, timeLimit)
@@ -33,9 +32,11 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
       model.set(GRB.IntParam.LogToConsole, 0)
     }
 
+    val opt = if (options.isDefined) options.get else MipSearchOptions()
+
 //    model.set(GRB.IntParam.Symmetry, 2)
-    model.set(GRB.IntParam.MIPFocus, MIPFocus)
-    model.set(GRB.IntParam.SolutionLimit, nSols)
+    model.set(GRB.IntParam.MIPFocus, opt.MIPFocus)
+    model.set(GRB.IntParam.SolutionLimit, solutionLimit)
 
 
     val solutionListener = new SolutionListener(this)
@@ -54,11 +55,7 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
 
     model.dispose()
 
-    new MipSolverResult {
-      lazy val solution: Solution = solutionListener.solution
-      val solveTime: Long = t
-      val optimal: Boolean = status == GRB.OPTIMAL
-    }
+    SearchResult(lastSolution, t, status == GRB.OPTIMAL)
   }
 }
 
@@ -81,24 +78,24 @@ object MipMain extends App {
   )
   val cpSearch = new VillageOneLNS(problem)
 
-  val stat = cpSearch.solve(timeLimit = 10 * 1000)
+  val cp = cpSearch.solve(timeLimit = 10)
 
   val model = new MIPSearch(problem)
 
 
-  if (cpSearch.lastSolution != null) {
-    println(cpSearch.lastSolution.valid)
-    model.setInitialSolution(cpSearch.lastSolution)
+
+  if (cp.solution.isDefined) {
+    println(cp.solution.get.valid)
+    model.setInitialSolution(cp.solution.get)
   }
 
 
   try {
-
-    val solver: MipSolverResult = model.solve(timeLimit = 20)
-    val solution = solver.solution
+    val results = model.solve(timeLimit = 20)
+    val solution = results.solution.get
     println(solution.valid)
-    println(solver.solveTime)
-    println(solver.optimal)
+    println(results.time)
+    println(results.optimal)
 //    JsonSerializer.serialize(solution)(s"data/results/mip-${name}-o=${solution.objective}.json")
   }
   catch {

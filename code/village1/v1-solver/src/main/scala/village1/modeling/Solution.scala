@@ -150,7 +150,7 @@ case class Solution(problem: Problem, plannings: Array[DemandAssignment], object
           return InvalidSolution("The number of required workers is not satisfied")
         }
 
-        if (!demand.periods.contains(t)) {
+        if (!demand.occurs(t)) {
           return InvalidSolution(s"The demand does not contain timeslot $t")
         }
 

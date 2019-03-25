@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "JSON Schema for Village1 Solution",
+  "definitions": {
+    "solution": {
+      "type": "object",
+      "properties": {
+        "plannings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "demand": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "workerAssignments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "t": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "workers": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "required": ["t", "workers"]
+                }
+              }
+            },
+            "required": ["demand", "workerAssignments"]
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "values": {
+                "type": "object"
+              }
+            },
+            "required": ["type"]
+          }
+        }
+      },
+      "required": [
+        "plannings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "solution": {
+    "$ref": "#/definitions/solution"
+  }
+}

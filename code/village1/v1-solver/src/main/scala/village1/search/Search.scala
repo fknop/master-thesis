@@ -1,16 +1,5 @@
 package village1.search
 
-import village1.modeling.Solution
-
-trait Search {
-  private var listeners: List[Solution => Unit] = List()
-  private[this] var solution: Solution = _
-
-  def onSolutionFound(block: Solution => Unit): Unit = listeners = block :: listeners
-  protected def emitSolution(solution: Solution): Unit = {
-    this.solution = solution
-    listeners.foreach(_(solution))
-  }
-
-  def lastSolution: Solution = solution
+trait Search[T] extends SolutionEmitter {
+  def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[T] = None): SearchResult
 }

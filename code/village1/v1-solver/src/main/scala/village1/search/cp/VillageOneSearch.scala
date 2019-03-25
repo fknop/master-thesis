@@ -5,14 +5,21 @@ import oscar.cp._
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
-import village1.search.Search
+import village1.search.{Search, SearchResult}
 
-class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, options, base) with Search {
+case class CPSearchOptions()
+
+class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
+  extends VillageOneCPModel(problem, options, base)
+  with Search[CPSearchOptions] {
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
 
-
-  def solve(nSols: Int = Int.MaxValue, timeLimit: Int = Int.MaxValue, silent: Boolean = false): SearchStatistics = {
+  override def solve(timeLimit: Int = Int.MaxValue,
+                     solutionLimit: Int = Int.MaxValue,
+                     silent: Boolean = false,
+                     options: Option[CPSearchOptions] = None
+                    ): SearchResult = {
 
     solver.silent = silent
 
@@ -42,7 +49,9 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
     }
 
 
-    start(nSols = nSols, timeLimit = timeLimit / 1000)
+    val stats = start(nSols = solutionLimit, timeLimit = timeLimit)
+
+    SearchResult(lastSolution, stats.time, stats.completed)
   }
 }
 
@@ -59,13 +68,17 @@ object Main extends App {
 
   val problem = JsonParser.parse("data/test/not-enough-workers.json")
   val search = new VillageOneSearch(problem)
-  val stats = search.solve()
+  val result = search.solve()
 
-  println(stats)
-  if (search.lastSolution != null) {
-    JsonSerializer.serialize(search.lastSolution)("data/results/results3.json")
-    println(search.lastSolution.valid)
-    println(search.lastSolution.partial)
+
+  val solution = search.lastSolution
+
+  solution match {
+    case Some(s) =>
+      JsonSerializer.serialize(s)(s"data/results/results-cp.json")
+      println(s.valid)
+      println("Partial: " + s.partial)
+    case _ => println("No solution found")
   }
 
 }

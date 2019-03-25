@@ -9,20 +9,18 @@ import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
-import village1.search.Search
-import village1.util.BenchmarkUtils.time
-
-import scala.util.Random
-
-object SearchHeuristic extends Enumeration {
-  val MostAvailable, Default = Value
-}
+import village1.search.{Search, SearchResult}
+import village1.util.SysUtils.time
 
 trait Relaxation {
   def apply(): Unit
 }
 
-class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None) extends VillageOneCPModel(problem, options, base) with Search {
+case class LNSOptions(repeat: Int = Int.MaxValue)
+
+class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
+      extends VillageOneCPModel(problem, options, base)
+      with Search[LNSOptions] {
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
   def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
@@ -49,7 +47,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     val values = Array.tabulate(T, D)((t, d) => {
       val demand = demands(d)
 
-      if (demand.hasPeriod(t)) {
+      if (demand.occurs(t)) {
         Array.fill(demand.requiredWorkers)(0)
       }
       else {
@@ -61,7 +59,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     bestObjective = solution.objective
     objective.updateMax(bestObjective)
-    val rand = new Random(0)
     for (demandAssignment <- solution.plannings) {
       val d = demandAssignment.demand
       val workerAssignments = demandAssignment.workerAssignments
@@ -75,7 +72,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     }
 
     currentSolution = new CPIntSol(values.flatten.flatten, solution.objective, 0L)
-
   }
 
   def relax(relaxation: Relaxation): Unit = {
@@ -86,14 +82,17 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     this.heuristic = branching
   }
 
-  def solve(
-     nSols: Int = Int.MaxValue,
+  override def solve(
      timeLimit: Int = Int.MaxValue,
-     repeat: Int = Int.MaxValue,
-     silent: Boolean = false
-   ): Long = {
+     solutionLimit: Int = Int.MaxValue,
+     silent: Boolean = false,
+     options: Option[LNSOptions] = Some(LNSOptions())
+   ): SearchResult = {
 
     solver.silent = silent
+
+    val opt = if (options.isDefined) options.get else LNSOptions()
+    val repeat = opt.repeat
 
     minimize(objective)
     search {
@@ -116,19 +115,20 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       emitSolution(createSolution())
     }
 
-    time {
+
+    val runningTime = time {
+      val timeLimitMs = timeLimit * 1000
       var limit = 1000
       var totalTime = 0L
       var totalSol = 0
 
       val stat =
         if (currentSolution != null)
-          startSubjectTo(nSols = 1, timeLimit = timeLimit / 1000) {
-            println("test")
+          startSubjectTo(nSols = 1, timeLimit = timeLimit) {
             relaxation()
           }
         else
-          start(nSols = 1, timeLimit = timeLimit / 1000)
+          start(nSols = 1, timeLimit = timeLimit)
 
       totalSol = stat.nSols
       totalTime += stat.time
@@ -137,17 +137,17 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
       var found = true
 
-      while (bestObjective > objective.min && r < repeat && totalTime < timeLimit && totalSol < nSols) {
-        val remainingTime = timeLimit - totalTime
-        val stat = startSubjectTo(nSols = nSols - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
+      while (bestObjective > objective.min && r < repeat && totalTime < timeLimitMs && totalSol < solutionLimit) {
+        val remainingTime = timeLimitMs - totalTime
+        val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
           relaxation()
         }
 
         totalSol += stat.nSols
         totalTime += stat.time
 
-        if (timeLimit - totalTime < 200) {
-          totalTime = timeLimit
+        if (timeLimitMs - totalTime < 200) {
+          totalTime = timeLimitMs
         }
 
         found = stat.nSols > 0
@@ -164,11 +164,13 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       }
 
     }
+
+    // TODO: does oscar return if it's optimal ?
+    SearchResult(lastSolution, runningTime, optimal = false)
   }
 }
 
 object MainLNS extends App {
-
 
   val folder = "data/instances"
   val instance = s"$folder/problem2.json"
@@ -206,13 +208,16 @@ object MainLNS extends App {
 //      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
 //    }
 
-    val stats = search.solve(timeLimit = 3 * 1000)
+    val stats = search.solve(timeLimit = 3)
 
     val solution = search.lastSolution
-    if (solution != null) {
-      JsonSerializer.serialize(solution)(s"data/results/$name-o=${solution.objective}.json")
-      println(solution.valid)
-      println("Partial: " + solution.partial)
+
+    solution match {
+      case Some(s) =>
+        JsonSerializer.serialize(s)(s"data/results/$name-o=${s.objective}.json")
+        println(s.valid)
+        println("Partial: " + s.partial)
+      case _ => println("No solution found")
     }
 }
 

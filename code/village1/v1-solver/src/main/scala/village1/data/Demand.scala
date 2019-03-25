@@ -26,7 +26,8 @@ case class Demand(
     }
   })
 
-  def hasPeriod (t: Int): Boolean = periods.contains(t)
+
+  def occurs (t: Int): Boolean = periods.contains(t)
 
 
   def overlapWith (demand: Demand): Boolean = {
@@ -42,8 +43,6 @@ case class Demand(
 
     overlap
   }
-
-  def worker (w: Int): WorkerRequirement = requirements(w)
 }
 
 
