@@ -55,12 +55,22 @@ the number of sentinel variables assigned to one.
 
 \subsection{Complete Model}
 
+
+
 \begingroup
 \allowdisplaybreaks
+\begin{subequations}
+  \label{obj}
+  \begin{align}
+    \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) & \qquad & \quad \label{obj:1} \\ 
+     & + \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl}  & \qquad &  \quad \label{obj:2} \\ 
+     & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  & \qquad &  \quad \label{obj:3}
+  \end{align}
+\end{subequations}
 \begin{align}
-    \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) &+&  \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl} \nonumber \\
-    & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) &+&   max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj} \\
-    \textrm{s.t} \quad & \sum_{i \in W} w_{ijkl} + s_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \label{wc1} \\
+    % \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) &+&  \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl} \nonumber \\
+    % & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) &+&   max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj} \\
+    \textrm{s.t} \qquad & \sum_{i \in W} w_{ijkl} + s_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \label{wc1} \\
     & \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T \label{wc2} \\
     & t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D \label{wc3} \\
     & t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W \label{wc4} \\ 
@@ -78,18 +88,37 @@ the number of sentinel variables assigned to one.
     & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \label{mc2} \\
     & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \label{mc3} \\
     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k \label{binary1} \\
-    & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k \label{binary4} \\
-    & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D \label{binary2} \\ 
-    & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D \label{binary3} \\ 
+    & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k \label{binary2} \\
+    & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D \label{binary3} \\ 
+    & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D \label{binary4} \\ 
     & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, && \forall i \in W \label{occ}
 \end{align}
 \endgroup
 
     
-The objective function is stated in (\ref{obj}), it minimizes the number of different workers for every position between periods of that demand. $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all worker will be equal to the number of worker for that shift.
+The objective function is stated in (\ref{obj}), it is split in multiple parts, it minimizes 
+\begin{enumerate*}[label=(\roman*)]
+  \item the number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all worker will be equal to the number of worker for that shift;
+  \item the number of \emph{sentinel} worker assigned to demands (\ref{obj:2});
+  \item the number of violations of working requirements (\ref{obj:3}).
+\end{enumerate*}
 
 
-Constraint (\ref{wc1}) ensures that each position is filled by only one worker. Constraint (\ref{wc2}) ensures that no worker works for multiple demands at the same time period. The constraints (\ref{wc3}) and (\ref{wc4}) ensures that no worker is working for a demand that is not occurring or when is himself not available. Constraint (\ref{wc5}) ensures that no incompatible workers work together while (\ref{wc6}) ensures that no incompatible pair of worker and client work together. Constraint (\ref{wc7}) ensures that no worker work for a position in which they are not qualified to work at. 
+
+
+Constraint (\ref{wc1}) ensures that each position is filled by only one worker. The sentinel worker being a valid assignment is also part of the sum.
+
+Constraint (\ref{wc2}) ensures that no worker works for multiple demands at the same time period. 
+
+The constraints (\ref{wc3}) and (\ref{wc4}) ensures that no worker is working for a demand thais not occurring or when is himself not available. 
+
+The constraints (\ref{sc1}) and (\ref{sc2}) fullfil the same role as (\ref{wc3}) and (\ref{wc4}) but for sentinel variables. 
+
+
+
+Constraint (\ref{wc5}) ensures that no incompatible workers work together while (\ref{wc6}) ensures that no incompatible pair of worker and client work together. 
+
+Constraint (\ref{wc7}) ensures that no worker work for a position in which they are not qualified to work at. 
 Constraint (\ref{wc8}) ensures that for each additional skills, at least one worker in the group has that skill.
 
 Constraint (\ref{zc1}) ensures that no zone is assigned to a demand in which this zone is not a possible assignment. (\ref{zc2}) ensures that only one zone is assigned to this demand if this demand is in need of a zone. Constraint (\ref{zc3}) ensures that no zone is assigned to two overlapping demands in time.
@@ -97,7 +126,7 @@ Constraint (\ref{zc1}) ensures that no zone is assigned to a demand in which thi
 Constraint (\ref{mc1}) ensures that no machine is assigned to a demand not in need of that machine. Constraint (\ref{mc2}) ensures that the required number for each machine is satisfied. And again, (\ref{mc3}) ensures that no machine is assigned to two overlapping demands in time.
 
 
-Finally (\ref{binary1}), (\ref{binary2}) and (\ref{binary3}) ensure the variables only takes binary values.
+Finally (\ref{binary1}), (\ref{binary2}), (\ref{binary3}) and (\ref{binary4}) ensure the variables only takes binary values.
 
 
 \end{document}
