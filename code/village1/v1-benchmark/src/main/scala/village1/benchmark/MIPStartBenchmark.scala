@@ -2,7 +2,6 @@ package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
-import village1.json.JsonSerializer
 import village1.util.Utils
 
 object MIPStartBenchmark extends CommandLineBenchmark {

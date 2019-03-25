@@ -2,8 +2,8 @@ package village1.benchmark
 
 import oscar.cp.modeling.Branchings
 import village1.benchmark.BenchmarkSolverFunctions._
+import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
-import village1.json.JsonSerializer
 import village1.util.Utils
 
 
@@ -22,6 +22,6 @@ object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
   val lb = benchmark.lowerBoundSerie()
   val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1), objectiveSeries = Seq(o0, o1, lb))
 
-  val writer = JsonSerializer.serialize(instance)
+  val writer = JsonBenchmark.serialize(instance)
   writer(options.out)
 }

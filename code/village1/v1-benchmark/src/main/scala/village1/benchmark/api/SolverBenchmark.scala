@@ -1,12 +1,10 @@
 package village1.benchmark.api
 
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.modeling.cp.VillageOneCPModel
 import village1.modeling.{Problem, VillageOneModel}
 import village1.util.BenchmarkUtils._
 
 import scala.util.Random
-
 
 
 class SolverBenchmark(

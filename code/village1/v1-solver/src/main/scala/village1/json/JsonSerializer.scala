@@ -1,8 +1,6 @@
 package village1.json
 
 import play.api.libs.json._
-import village1.benchmark._
-import village1.benchmark.api._
 import village1.modeling.violations.{AdditionalSkillViolation, WorkerViolation, WorkingRequirementViolation}
 import village1.modeling.{Problem, Solution}
 
@@ -123,32 +121,6 @@ object JsonSerializer {
     )
 
     path: String => {
-      JsonUtils.writeJsonFile(path, json)
-    }
-  }
-
-
-  implicit private val problemSizeWrites = Json.writes[ProblemSize]
-  implicit private val bennchmarkMeasurementWrites = Json.writes[BenchmarkMeasurement]
-//  implicit private val benchmarkResultWrites = Json.writes[BenchmarkResult]
-
-//  implicit val benchmarkResult: Writes[BenchmarkResult] = new Writes[BenchmarkResult] {
-//    override def writes(o: BenchmarkResult): JsValue = {
-//      println(o)
-//      Json.obj(
-//        "objective" -> (if (o.objective == null) JsNull else Json.toJson(o.objective)),
-//        "time" -> (if (o.time == null) JsNull else Json.toJson(o.time)),
-//        "size" -> Json.toJson(o.size)
-//      )
-//    }
-//  }
-
-  implicit private val benchmarkSerieWrites = Json.writes[BenchmarkSerie]
-  implicit private val benchmarkWrites: OWrites[BenchmarkInstance] = Json.writes[BenchmarkInstance]
-
-  def serialize (benchmark: BenchmarkInstance): String => Unit = {
-    val json = Json.toJson(benchmark)
-    path => {
       JsonUtils.writeJsonFile(path, json)
     }
   }

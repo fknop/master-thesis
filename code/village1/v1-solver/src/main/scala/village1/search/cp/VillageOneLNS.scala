@@ -206,7 +206,7 @@ object MainLNS extends App {
 //      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
 //    }
 
-    val stats = search.solve(timeLimit = 60 * 1000)
+    val stats = search.solve(timeLimit = 3 * 1000)
 
     val solution = search.lastSolution
     if (solution != null) {

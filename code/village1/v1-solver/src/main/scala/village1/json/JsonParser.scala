@@ -3,8 +3,6 @@ package village1.json
 import com.eclipsesource.schema.drafts.Version7
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import play.api.libs.json._
-import village1.benchmark._
-import village1.benchmark.api._
 import village1.data._
 import village1.json.JsonUtils.parseJsonFile
 import village1.modeling.Problem
@@ -225,20 +223,5 @@ object JsonParser {
       workerClientIncompatibilities = parseWorkerClientIncompatibilities(json),
       workingRequirements = parseWorkingRequirements(json)
     )
-  }
-
-
-  implicit private val problemSizeReads = Json.reads[ProblemSize]
-  implicit private val bennchmarkMeasurementReads = Json.reads[BenchmarkMeasurement]
-//  implicit private val benchmarkResultReads = Json.reads[BenchmarkResult]
-  implicit private val benchmarkSeriReads= Json.reads[BenchmarkSerie]
-  implicit private val benchmarkReads = Json.reads[BenchmarkInstance]
-  def parseBenchmark (path: String): BenchmarkInstance = {
-    val json = JsonUtils.parseJsonFile(path)
-    val result = Json.fromJson[BenchmarkInstance](json)
-    result match {
-      case JsSuccess(b: BenchmarkInstance, _) => b
-      case e: JsError => throw JsResultException(e.errors)
-    }
   }
 }

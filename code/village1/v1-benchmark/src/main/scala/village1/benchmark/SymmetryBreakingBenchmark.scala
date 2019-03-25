@@ -1,8 +1,7 @@
 package village1.benchmark
 
-import BenchmarkSolverFunctions._
+import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
-import village1.json.JsonSerializer
 
 object SymmetryBreakingBenchmark extends CommandLineBenchmark {
 

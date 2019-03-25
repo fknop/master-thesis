@@ -1,8 +1,8 @@
 package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
+import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
-import village1.json.JsonSerializer
 import village1.util.Utils
 
 object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
@@ -16,6 +16,6 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
 
   val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1, t2), objectiveSeries = Seq(o0, o1, o2, benchmark.lowerBoundSerie()))
 
-  val writer = JsonSerializer.serialize(instance)
+  val writer = JsonBenchmark.serialize(instance)
   writer(options.out)
 }
