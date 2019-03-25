@@ -3,7 +3,7 @@ package village1.search.mip
 import gurobi.{GRB, GRBException}
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.mip.{MipModelOptions, VillageOneMIPModel}
-import village1.modeling.{Problem, Solution, VillageOneModel}
+import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
 import village1.search.cp.VillageOneLNS
 import village1.search.{Search, SearchResult}
 import village1.util.SysUtils.time
@@ -50,7 +50,7 @@ class MIPSearch(problem: Problem, options: MipModelOptions = MipModelOptions(), 
     val status = model.get(GRB.IntAttr.Status)
 
     if (status == GRB.INFEASIBLE) {
-      // TODO: throw infeasible
+      throw new UnsolvableException("Model is infeasible")
     }
 
     model.dispose()

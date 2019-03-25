@@ -1,7 +1,5 @@
-package village1.modeling.cp
+package village1.modeling.cp.constraints
 
-
-import oscar.algo.Inconsistency
 import oscar.cp.constraints.{AllDiffExceptFWC, GCCFWC, GCCUpperBC}
 import oscar.cp.core._
 import oscar.cp.core.variables.{CPIntVar, CPVar}
@@ -10,6 +8,7 @@ import oscar.cp.core.variables.{CPIntVar, CPVar}
   * Alldifferent constraint
   * @author Pierre Schaus pschaus@gmail.com
   * @author Guillaume Derval guillaume.derval@uclouvain.be
+  * @author Florian Knop (fixed some issues)
   */
 class AllDiffExcept(x: Array[CPIntVar], exclude: Set[Int]) extends Constraint(x(0).store, "AllDiffExcept") {
 

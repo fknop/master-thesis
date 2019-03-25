@@ -5,6 +5,7 @@ import oscar.cp._
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
+import village1.search.cp.heuristic.MostAvailableHeuristic
 import village1.search.{Search, SearchResult}
 
 case class CPSearchOptions()

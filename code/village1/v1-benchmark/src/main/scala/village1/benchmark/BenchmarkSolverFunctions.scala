@@ -2,9 +2,10 @@ package village1.benchmark
 
 import village1.benchmark.api.SolverBenchmark
 import village1.modeling.VillageOneModel
-import village1.modeling.cp.{CPModelOptions, PropagationGuidedRelaxation}
+import village1.modeling.cp.CPModelOptions
 import village1.modeling.mip.MipModelOptions
 import village1.search.SearchResult
+import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 

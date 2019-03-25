@@ -1,8 +1,8 @@
-package village1.modeling.cp
+package village1.search.cp.relaxations
 
 import oscar.algo.Inconsistency
-import oscar.cp.{CPIntVar, CPSolver}
 import oscar.cp.searches.lns.CPIntSol
+import oscar.cp.{CPIntVar, CPSolver}
 
 import scala.collection.mutable
 import scala.util.Random

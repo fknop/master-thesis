@@ -6,6 +6,7 @@ import oscar.cp.core.{CPPropagStrength, NoSolutionException}
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.Constants._
 import village1.modeling._
+import village1.modeling.cp.constraints.AllDiffExcept
 import village1.util.Utils
 
 case class CPModelOptions(symmetryBreaking: Boolean = true, allowPartial: Boolean = true)

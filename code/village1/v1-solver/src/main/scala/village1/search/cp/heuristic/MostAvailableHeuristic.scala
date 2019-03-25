@@ -1,13 +1,11 @@
-package village1.search.cp
+package village1.search.cp.heuristic
 
 import oscar.algo.search.Branching
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.modeling.Branchings
-import oscar.cp.searches.WeightedDegreeHelper
 import village1.modeling.VillageOneModel
-import village1.util.Utils
 
-class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings {
+class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings with Heuristic {
 
   private val demands = model.demands
   private val workers = model.workers

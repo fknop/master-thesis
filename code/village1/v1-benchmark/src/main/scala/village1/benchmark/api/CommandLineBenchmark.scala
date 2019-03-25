@@ -8,7 +8,6 @@ case class BenchmarkArgs(
   override val timeLimit: Int = 20,
   override val repeat: Int = 1,
   override val dryRun: Int = 1,
-  override val noKeep: Boolean = false,
   override val T: Array[Int] = Array(5),
   override val D: Array[Int] = Array(30, 50),
   override val W: Array[Int] = Array(100, 200, 300),
@@ -66,9 +65,6 @@ class CommandLineBenchmark extends App {
         opt[String]('o', "out")
           .action((x, c) => c.copy(out = x))
           .validate(x => if (x.trim().isEmpty) failure("out cannot be empty") else success),
-
-        opt[Unit]("no-keep")
-          .action((_, c) => c.copy(noKeep = true)),
 
         opt[Long]("seed")
           .action((x, c) => c.copy(seed = x))

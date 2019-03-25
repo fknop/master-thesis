@@ -180,7 +180,6 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
 
       r.min match {
         case Some(min) =>
-          println("test")
           val maximum = model.addVar(0, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMinimum[$w]")
           val difference = model.addVar(-workers(w).availabilities.size, workers(w).availabilities.size, 0, GRB.INTEGER, s"requirementMinDiff[$w]")
           val expression = new GRBLinExpr()

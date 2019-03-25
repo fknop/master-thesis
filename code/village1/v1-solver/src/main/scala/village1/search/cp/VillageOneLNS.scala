@@ -1,20 +1,17 @@
 package village1.search.cp
 
-import oscar.algo.search.Branching
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
+import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristic}
+import village1.search.cp.relaxations.{RandomRelaxation, Relaxation}
 import village1.search.{Search, SearchResult}
 import village1.util.SysUtils.time
 
-trait Relaxation {
-  def apply(): Unit
-}
 
 case class LNSOptions(repeat: Int = Int.MaxValue)
 
@@ -38,9 +35,8 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var currentSolution: CPIntSol = _
   var bestObjective: Int = Int.MaxValue
 
-  private var relaxation: Relaxation = () => RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
-  private val defaultHeuristic = new MostAvailableHeuristic(this, flatWorkers)
-  private var heuristic: Branching = defaultHeuristic.branching
+  private var relaxation: Relaxation = new RandomRelaxation(this)
+  private var heuristic: Heuristic = new MostAvailableHeuristic(this, flatWorkers)
 
   def setInitialSolution(solution: Solution): Unit = {
 
@@ -78,8 +74,8 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     this.relaxation = relaxation
   }
 
-  def heuristic(branching: Branching): Unit = {
-    this.heuristic = branching
+  def heuristic(heuristic: Heuristic): Unit = {
+    this.heuristic = heuristic
   }
 
   override def solve(
@@ -96,7 +92,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     minimize(objective)
     search {
-      var branching = heuristic
+      var branching = heuristic.branching
 
       if (flatMachines.nonEmpty) {
         branching ++= binaryFirstFail(flatMachines)
@@ -125,7 +121,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       val stat =
         if (currentSolution != null)
           startSubjectTo(nSols = 1, timeLimit = timeLimit) {
-            relaxation()
+            relaxation.relax()
           }
         else
           start(nSols = 1, timeLimit = timeLimit)
@@ -140,7 +136,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       while (bestObjective > objective.min && r < repeat && totalTime < timeLimitMs && totalSol < solutionLimit) {
         val remainingTime = timeLimitMs - totalTime
         val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
-          relaxation()
+          relaxation.relax()
         }
 
         totalSol += stat.nSols
