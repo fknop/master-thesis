@@ -27,7 +27,6 @@ class PropagationGuidedRelaxation {
     var toFreezeNext = -1 //next var to freeze (most impacted by previous propagation)
     val propagation = Array.fill[Double](varSeq.length){-1.0} //Propagation impact (vars already bound are ignored)
 
-
     while (size > s) {
 
       val next = if (toFreezeNext == -1) varArray(Random.nextInt(boundStart)) //If no var to freeze next, selecting random var
@@ -55,6 +54,7 @@ class PropagationGuidedRelaxation {
         propagation(x) = (prevDomainSize(x) - domSizeX).toDouble / domainSize(x)
         prevDomainSize(x) = domSizeX
         size += math.log(varSeq(x).size)
+
 
         if (varSeq(x).isBound) {
           boundStart -= 1
@@ -99,6 +99,7 @@ class PropagationGuidedRelaxation {
     var size = math.log(avgSize) //Current estimation of the search space obtained
     var subset = closeness.getCloseSubset(next, (math.round(s - size) / avgSize).toInt) //Subset of next
 
+    println(s)
     while (size < s && relaxStart > 0) {
 
       if(subset.isEmpty){ //No more element in subset:

@@ -3,12 +3,13 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
+import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristic}
-import village1.search.cp.relaxations.{RandomRelaxation, Relaxation}
+import village1.search.cp.relaxations.{PropagationGuidedRelaxation, RandomRelaxation, Relaxation}
 import village1.search.{Search, SearchResult}
 import village1.util.SysUtils.time
 
@@ -199,12 +200,14 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-//    search.relax {
-//      val relaxation = new PropagationGuidedRelaxation()
-//      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
-//    }
+    search.relax {
+      val relaxation = new PropagationGuidedRelaxation()
+      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 2)
+    }
 
-    val stats = search.solve(timeLimit = 3)
+
+
+    val stats = search.solve(timeLimit = 60)
 
     val solution = search.lastSolution
 

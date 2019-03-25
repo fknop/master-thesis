@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 1000px;
+      height: 400px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+    <div id="container1"></div>
+
+
+
+  <script>
+    const data = {
+    "repeat": 1,
+    "dryRun": 0,
+    "timeLimit": 60,
+    "solutionLimit": 2147483647,
+    "problems": [
+        {
+            "T": 15,
+            "D": 50,
+            "W": 100
+        },
+        {
+            "T": 15,
+            "D": 50,
+            "W": 200
+        },
+        {
+            "T": 15,
+            "D": 50,
+            "W": 300
+        }
+    ],
+    "timeSeries": [
+        {
+            "name": "CP-Random",
+            "results": [
+                {
+                    "min": 59923,
+                    "max": 59923,
+                    "mean": 59923,
+                    "stdev": 0
+                },
+                {
+                    "min": 60078,
+                    "max": 60078,
+                    "mean": 60078,
+                    "stdev": 0
+                },
+                {
+                    "min": 60459,
+                    "max": 60459,
+                    "mean": 60459,
+                    "stdev": 0
+                }
+            ]
+        },
+        {
+            "name": "CP-Prop",
+            "results": [
+                {
+                    "min": 60270,
+                    "max": 60270,
+                    "mean": 60270,
+                    "stdev": 0
+                },
+                {
+                    "min": 60064,
+                    "max": 60064,
+                    "mean": 60064,
+                    "stdev": 0
+                },
+                {
+                    "min": 60802,
+                    "max": 60802,
+                    "mean": 60802,
+                    "stdev": 0
+                }
+            ]
+        }
+    ],
+    "objectiveSeries": [
+        {
+            "name": "CP-Random",
+            "results": [
+                {
+                    "min": 204,
+                    "max": 204,
+                    "mean": 204,
+                    "stdev": 0
+                },
+                {
+                    "min": 346,
+                    "max": 346,
+                    "mean": 346,
+                    "stdev": 0
+                },
+                {
+                    "min": 465,
+                    "max": 465,
+                    "mean": 465,
+                    "stdev": 0
+                }
+            ]
+        },
+        {
+            "name": "CP-Prop",
+            "results": [
+                {
+                    "min": 169,
+                    "max": 169,
+                    "mean": 169,
+                    "stdev": 0
+                },
+                {
+                    "min": 299,
+                    "max": 299,
+                    "mean": 299,
+                    "stdev": 0
+                },
+                {
+                    "min": 424,
+                    "max": 424,
+                    "mean": 424,
+                    "stdev": 0
+                }
+            ]
+        },
+        {
+            "name": "Lowerbound",
+            "results": [
+                {
+                    "min": 74,
+                    "max": 74,
+                    "mean": 74,
+                    "stdev": 0
+                },
+                {
+                    "min": 119,
+                    "max": 119,
+                    "mean": 119,
+                    "stdev": 0
+                },
+                {
+                    "min": 166,
+                    "max": 166,
+                    "mean": 166,
+                    "stdev": 0
+                }
+            ]
+        }
+    ]
+}
+
+    const categories = data.problems
+    const titles = ['Runtime', 'Objective']
+    const yAxis = ['Runtime (ms)', 'Objective (lower is better)']
+
+    function lineSeries(serie) {
+      return serie.map(s => ({...s, type: 'spline'}))
+    }
+
+    function columnSeries(serie) {
+      return serie.map(s => ({...s, type: 'column'}))
+    }
+
+    function scatterSeries(serie) {
+      return serie.map(s => ({...s, type: 'scatter'}))
+    }
+
+
+    const timeSeries = data.timeSeries.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(t => t.mean)
+    }))
+
+    const objectiveSeries = data.objectiveSeries.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(t => t.mean)
+    }))
+
+ 
+    // const timeErrors = data.series.map(s => ({
+    //   name: `${s.name} error`,
+    //   linkedTo: s.name,
+    //   type: 'errorbar',
+    //   data: s.results.map(r => r.time).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+    //   tooltip: {
+    //     pointFormat: '(error range: {point.low}-{point.high})<br/>'
+    //   }
+    // }))
+
+    // const objectiveErrors = data.series.map(s => ({
+    //   name: `${s.name} error`,
+    //   type: 'errorbar',
+    //   linkedTo: s.name,
+    //   data: s.results.map(r => r.objective).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+    //   tooltip: {
+    //     pointFormat: '(error range: {point.low}-{point.high})<br/>'
+    //   }
+    // }))
+
+
+    const series = [lineSeries(timeSeries), lineSeries(objectiveSeries)]
+    // const errors = [timeErrors, objectiveErrors]
+
+    console.log(categories)
+
+
+    function chart (i) {
+      Highcharts.chart(`container${i}`, {
+        exporting: {
+          sourceWidth: 1920,
+          scale: 1
+        },
+        title: {
+          text: titles[i]
+        },
+
+        tooltip: {
+          shared: true,
+          headerFormat: `<span style="font-size: 10px">T={point.key.T} D={point.key.D} W={point.key.W}</span><br/>`
+        },
+
+        yAxis: {
+          title: {
+            text: yAxis[i]
+          },
+          min: 0
+        },
+
+        legend: {
+          layout: 'vertical',
+          align: 'right',
+          verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+          line: {
+            dataLabels: {
+              enabled: true
+            },
+            enableMouseTracking: false
+          }
+        },
+
+        xAxis: {
+          categories: categories,
+          labels: {
+            formatter: function() {
+              const size = this.value
+              return `T=${size.T} <br /> D=${size.D} <br /> W=${size.W}`
+            }
+          }
+        },
+
+        series: [...series[i], /*..errors[i]*/],
+
+        credits: {
+            enabled: false
+        },
+
+        responsive: {
+          rules: [{
+            condition: {
+              maxWidth: 700
+            },
+            chartOptions: {
+              legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+              }
+            }
+          }]
+        }
+      });
+    }
+
+    chart(0)
+    chart(1)
+  </script>
+</body>
+</html>
