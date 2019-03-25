@@ -85,17 +85,6 @@ the number of sentinel variables assigned to one.
 \end{align}
 \endgroup
 
-% \begin{align}
-%   & z_i \notin d^Z_j \implies z_{ij} = 0, && \forall i \in Z, j \in D \label{zc1}  \\
-%     & |d^Z_j| > 0 \implies \sum_{i \in Z} z_{ij} = 1, && \forall j \in D \label{zc2} \\
-%     & z_{ij} + z_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in Z \label{zc3} \\
-%     & m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D  \label{mc1} \\
-%     & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \label{mc2} \\
-%     & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \label{mc3} \\
-%     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k \label{binary1} \\
-%     & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D \label{binary2} \\ 
-%     & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D \label{binary3}
-% \end{align}
     
 The objective function is stated in (\ref{obj}), it minimizes the number of different workers for every position between periods of that demand. $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all worker will be equal to the number of worker for that shift.
 

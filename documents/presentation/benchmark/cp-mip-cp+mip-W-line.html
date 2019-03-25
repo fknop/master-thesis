@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 1000px;
+      height: 400px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+    <div id="container1"></div>
+
+
+
+  <script>
+    const data = {
+    "repeat": 1,
+    "dryRun": 1,
+    "timeLimit": 60,
+    "solutionLimit": 2147483647,
+    "series": [
+        {
+            "name": "CP",
+            "results": [
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 100
+                    },
+                    "time": {
+                        "min": 59829,
+                        "max": 59829,
+                        "mean": 59829,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 173,
+                        "max": 173,
+                        "mean": 173,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 200
+                    },
+                    "time": {
+                        "min": 60135,
+                        "max": 60135,
+                        "mean": 60135,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 334,
+                        "max": 334,
+                        "mean": 334,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 60446,
+                        "max": 60446,
+                        "mean": 60446,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 455,
+                        "max": 455,
+                        "mean": 455,
+                        "stdev": 0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "MIP",
+            "results": [
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 100
+                    },
+                    "time": {
+                        "min": 60014,
+                        "max": 60014,
+                        "mean": 60014,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 466,
+                        "max": 466,
+                        "mean": 466,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 200
+                    },
+                    "time": {
+                        "min": 60041,
+                        "max": 60041,
+                        "mean": 60041,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1027,
+                        "max": 1027,
+                        "mean": 1027,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 60056,
+                        "max": 60056,
+                        "mean": 60056,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1387,
+                        "max": 1387,
+                        "mean": 1387,
+                        "stdev": 0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "CP+MIP",
+            "results": [
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 100
+                    },
+                    "time": {
+                        "min": 60190,
+                        "max": 60190,
+                        "mean": 60190,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 146,
+                        "max": 146,
+                        "mean": 146,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 200
+                    },
+                    "time": {
+                        "min": 59988,
+                        "max": 59988,
+                        "mean": 59988,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 272,
+                        "max": 272,
+                        "mean": 272,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 60346,
+                        "max": 60346,
+                        "mean": 60346,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 360,
+                        "max": 360,
+                        "mean": 360,
+                        "stdev": 0
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+    const categories = data.series[0].results.map(r => r.size)
+    const titles = ['Runtime', 'Objective']
+    const yAxis = ['Runtime (ms)', 'Objective (lower is better)']
+
+    function lineSeries(serie) {
+      return serie.map(s => ({...s, type: 'spline'}))
+    }
+
+    function columnSeries(serie) {
+      return serie.map(s => ({...s, type: 'column'}))
+    }
+
+    function scatterSeries(serie) {
+      return serie.map(s => ({...s, type: 'scatter'}))
+    }
+
+    const timeSeries = data.series.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(r => r.time).map(t => t.mean)
+    }))
+
+
+    const timeErrors = data.series.map(s => ({
+      name: `${s.name} error`,
+      linkedTo: s.name,
+      type: 'errorbar',
+      data: s.results.map(r => r.time).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+      tooltip: {
+        pointFormat: '(error range: {point.low}-{point.high})<br/>'
+      }
+    }))
+
+    const objectiveSeries = data.series.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(r => r.objective).map(t => t.mean)
+    }))
+
+    const objectiveErrors = data.series.map(s => ({
+      name: `${s.name} error`,
+      type: 'errorbar',
+      linkedTo: s.name,
+      data: s.results.map(r => r.objective).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+      tooltip: {
+        pointFormat: '(error range: {point.low}-{point.high})<br/>'
+      }
+    }))
+
+
+    const series = [lineSeries(timeSeries), lineSeries(objectiveSeries)]
+    const errors = [timeErrors, objectiveErrors]
+
+
+    function chart (i) {
+      Highcharts.chart(`container${i}`, {
+        exporting: {
+          sourceWidth: 1920,
+          scale: 1
+        },
+        title: {
+          text: titles[i]
+        },
+
+        tooltip: {
+          shared: true,
+          headerFormat: `<span style="font-size: 10px">T={point.key.T} D={point.key.D} W={point.key.W}</span><br/>`
+        },
+
+        yAxis: {
+          title: {
+            text: yAxis[i]
+          },
+          min: 0
+        },
+
+        legend: {
+          layout: 'vertical',
+          align: 'right',
+          verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+          line: {
+            dataLabels: {
+              enabled: true
+            },
+            enableMouseTracking: false
+          }
+        },
+
+        xAxis: {
+          categories: categories,
+          labels: {
+            formatter: function() {
+              const size = this.value
+              return `T=${size.T} <br /> D=${size.D} <br /> W=${size.W}`
+            }
+          }
+        },
+
+        series: [...series[i], /*..errors[i]*/],
+
+        credits: {
+            enabled: false
+        },
+
+        responsive: {
+          rules: [{
+            condition: {
+              maxWidth: 700
+            },
+            chartOptions: {
+              legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+              }
+            }
+          }]
+        }
+      });
+    }
+
+    chart(0)
+    chart(1)
+  </script>
+</body>
+</html>

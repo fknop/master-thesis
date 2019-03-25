@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 1000px;
+      height: 400px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+    <div id="container1"></div>
+
+
+
+  <script>
+    const data = {
+    "repeat": 1,
+    "dryRun": 1,
+    "timeLimit": 20,
+    "solutionLimit": 1,
+    "series": [
+        {
+            "name": "CP-MA",
+            "results": [
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 892,
+                        "max": 892,
+                        "mean": 892,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 463,
+                        "max": 463,
+                        "mean": 463,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 1170,
+                        "max": 1170,
+                        "mean": 1170,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 577,
+                        "max": 577,
+                        "mean": 577,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 1281,
+                        "max": 1281,
+                        "mean": 1281,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 553,
+                        "max": 553,
+                        "mean": 553,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 1157,
+                        "max": 1157,
+                        "mean": 1157,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 529,
+                        "max": 529,
+                        "mean": 529,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 1039,
+                        "max": 1039,
+                        "mean": 1039,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 447,
+                        "max": 447,
+                        "mean": 447,
+                        "stdev": 0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "CP-FF",
+            "results": [
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 1868,
+                        "max": 1868,
+                        "mean": 1868,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1613,
+                        "max": 1613,
+                        "mean": 1613,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 2415,
+                        "max": 2415,
+                        "mean": 2415,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1783,
+                        "max": 1783,
+                        "mean": 1783,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 2576,
+                        "max": 2576,
+                        "mean": 2576,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1848,
+                        "max": 1848,
+                        "mean": 1848,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 2314,
+                        "max": 2314,
+                        "mean": 2314,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1765,
+                        "max": 1765,
+                        "mean": 1765,
+                        "stdev": 0
+                    }
+                },
+                {
+                    "size": {
+                        "T": 15,
+                        "D": 50,
+                        "W": 300
+                    },
+                    "time": {
+                        "min": 2097,
+                        "max": 2097,
+                        "mean": 2097,
+                        "stdev": 0
+                    },
+                    "objective": {
+                        "min": 1680,
+                        "max": 1680,
+                        "mean": 1680,
+                        "stdev": 0
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+    const categories = data.series[0].results.map(r => r.size)
+    const titles = ['Runtime', 'Objective']
+    const yAxis = ['Runtime (ms)', 'Objective (lower is better)']
+
+    function lineSeries(serie) {
+      return serie.map(s => ({...s, type: 'spline'}))
+    }
+
+    function columnSeries(serie) {
+      return serie.map(s => ({...s, type: 'column'}))
+    }
+
+    function scatterSeries(serie) {
+      return serie.map(s => ({...s, type: 'scatter'}))
+    }
+
+    const timeSeries = data.series.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(r => r.time).map(t => t.mean)
+    }))
+
+
+    const timeErrors = data.series.map(s => ({
+      name: `${s.name} error`,
+      linkedTo: s.name,
+      type: 'errorbar',
+      data: s.results.map(r => r.time).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+      tooltip: {
+        pointFormat: '(error range: {point.low}-{point.high})<br/>'
+      }
+    }))
+
+    const objectiveSeries = data.series.map(s => ({
+      name: s.name,
+      id: s.name,
+      data: s.results.map(r => r.objective).map(t => t.mean)
+    }))
+
+    const objectiveErrors = data.series.map(s => ({
+      name: `${s.name} error`,
+      type: 'errorbar',
+      linkedTo: s.name,
+      data: s.results.map(r => r.objective).map(t => [t.mean - t.stdev, t.mean + t.stdev]),
+      tooltip: {
+        pointFormat: '(error range: {point.low}-{point.high})<br/>'
+      }
+    }))
+
+
+    const series = [lineSeries(timeSeries), lineSeries(objectiveSeries)]
+    const errors = [timeErrors, objectiveErrors]
+
+
+    function chart (i) {
+      Highcharts.chart(`container${i}`, {
+        exporting: {
+          sourceWidth: 1920,
+          scale: 1
+        },
+        title: {
+          text: titles[i]
+        },
+
+        tooltip: {
+          shared: true,
+          headerFormat: `<span style="font-size: 10px">T={point.key.T} D={point.key.D} W={point.key.W}</span><br/>`
+        },
+
+        yAxis: {
+          title: {
+            text: yAxis[i]
+          },
+          min: 0
+        },
+
+        legend: {
+          layout: 'vertical',
+          align: 'right',
+          verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+          line: {
+            dataLabels: {
+              enabled: true
+            },
+            enableMouseTracking: false
+          }
+        },
+
+        xAxis: {
+          categories: categories,
+          labels: {
+            formatter: function() {
+              const size = this.value
+              return `T=${size.T} <br /> D=${size.D} <br /> W=${size.W}`
+            }
+          }
+        },
+
+        series: [...series[i], /*..errors[i]*/],
+
+        credits: {
+            enabled: false
+        },
+
+        responsive: {
+          rules: [{
+            condition: {
+              maxWidth: 700
+            },
+            chartOptions: {
+              legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+              }
+            }
+          }]
+        }
+      });
+    }
+
+    chart(0)
+    chart(1)
+  </script>
+</body>
+</html>
