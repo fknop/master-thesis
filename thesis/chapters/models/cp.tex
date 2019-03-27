@@ -42,6 +42,13 @@ The same reasoning is used for zones and machines:
 Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
 per demand.
 
+As explained in the problem description and in the mathematical model section. 
+We need to allow partial solutions where we have a fictitious worker that can work at any time.
+We will add this value to every worker variable domain but ignore it during the constraint propagation. We define 
+this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it's not a 
+value in $W$ but for simplicity, we will define $\sigma = -1$.
+
+
 % \subsection{Constraints}
 
 % \subsubsection{A worker can only work for one demand at a time}
@@ -108,6 +115,7 @@ per demand.
 % The objective can be expressed by $\sum_{j, k} N_{jk}$ which is the sum of different workers over all shifts. 
 
 
+
 \subsection{Complete Model}
 
 For this model, we define additional notations:
@@ -124,13 +132,16 @@ For this model, we define additional notations:
 \begin{align}
   \textrm{min} \quad & \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} & \label{cpobj} \\ 
   \textrm{s.t} \quad & \texttt{atLeastNValue}(W_{jk}, N_{jk}), && \forall j \in D, k \in d^P_j \label{cpobjctr} \\
-                     & \texttt{allDifferent}(X_i), && \forall i \in T \label{cpw1} \\
+                     & \texttt{allDifferentExcept}(X_i, \{ \sigma \}), && \forall i \in T \label{cpw1} \\
+                     & \texttt{softGcc}(X, \sigma \rightarrow \sigma, 0, 0, v_{\sigma}) && \\
+                     & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) && \forall \\
+                    %  & \texttt{lexLeq}()                            , && \forall j \in D, i \in d^T_j, (a, b) \in P_{ij} \\
                      & \texttt{allDifferent}(Z^O_i), && \forall i \in D \label{cpz1} \\
                      & \texttt{allDifferent}(M^O_i), && \forall i \in D \label{cpm1} \\ 
                      & \texttt{notEqual}(w_{ijk}, w), && \forall (w, c) \in I_{wc}, \label{cpw2} \\ 
                      & && i \in T, j \in D_c, k \in d^P_j \nonumber \\ 
                      & \texttt{negativeTable}(a, b, I_{ww}), && \forall (a, b) \in P_{ij} \label{cpw3} \\ 
-                     & w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \}, && \forall j \in D, i \in d^T_j, k \in d^P_j \label{cpvw} \\ 
+                     & w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, && \forall j \in D, i \in d^T_j, k \in d^P_j \label{cpvw} \\ 
                      & z_{i} \in d_i^Z, && \forall i \in D \label{cpvz} \\ 
                      & m_{ij} \in \{ m \mid m \in W \land m = d^{M_j}_i \}, && \forall i \in D, j \in d^M_i \label{cpvm}
 \end{align}
@@ -138,7 +149,8 @@ For this model, we define additional notations:
 
 This model is simpler than the mathematical one described \autoref{section:mipmodel}. It 
 needs less constraints to express the same problem. For example, (\ref{cpvw}) expresses multiple constraints (i.e. workers are restricted to positions with respect to their skills and to their availabilities)
-in only one step which is the initialization of the variable. Hence, no constraints will run during the solving process.
+in only one step which is the initialization of the variable. Hence, no constraints will run during the solving process. (\ref{cpvw}) also states that we add a 
+fictitious worker $\sigma \notin W$ to every worker variables.
 
 (\ref{cpvz}) expresses that the domain of zone variables are limited to the possible zones of a demand and (\ref{cpvm}) states that 
 the domain of each machine variables for a demand are limited to the possible machines for that need.
@@ -152,6 +164,37 @@ Constraint (\ref{cpz1}) and (\ref{cpm1}) state that no zones and machines should
 Finally, for the objective, constraint (\ref{cpobjctr}) states that $N_{jk}$ will be equal to the number of different workers for the same position 
 throughout time periods. The objective itself (\ref{cpobj}) is the minimization of the sum of all $N_{jk}$, hence minimizing the number of change between 
 shifts.
+
+
+\subsection{Search}
+
+We define a heuristic that allows:
+\begin{enumerate*}[label=(\roman*)]
+  \item the fictitious worker to never be selected if there is another value available in the domain of the variable;
+  \item the worker chosen for a variable is the most available for that demand but is also the less available for other demands.
+\end{enumerate*}
+
+\subsubsection{Variable Heuristic}
+
+The variable heuristic used for the search is a first-fail heuristic. In other words, the heuristic 
+will chose the variable will the smallest domain. This allows variable with only one value alongside the 
+fictitious value $\sigma$ to always be selected first.
+
+\subsubsection{Value Heuristic}
+
+We define a value heuristic that we call the \emph{most available heuristic}. 
+This heuristic consists of two value ordering.
+\begin{enumerate}
+  \item The first ordering orders the workers from most available to least available throughout the duration of the demand.
+        This allows the search to select workers that are more likely to work for that demand throughout all periods.
+  \item If workers have the same availabilities for a demand, they are ordering in respect to their remaining availabilities in other demands. This 
+        second ordering is important for smaller demands, the search will choose workers that are less likely to be needed in other demands.
+\end{enumerate}
+
+It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
+for most available worker.
+
+This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
 
 \end{document}
 
