@@ -39,8 +39,8 @@ Each worker has:
 \begin{itemize}
   \item[$-$] Some skills and restrictions (e.g. package lifter, supervisor, etc.)
   \item[$-$] A list of availabilities at which the worker can work.
-  \item[$-$] A list of incompatibilities with other workers (i.e. workers that can't work together).
-  \item[$-$] A list of incompatibilities with clients (i.e. workers that can't work for clients).
+  \item[$-$] A list of incompatibilities with other workers (i.e. workers that cannot work together).
+  \item[$-$] A list of incompatibilities with clients (i.e. workers that cannot work for clients).
 \end{itemize}
 
 The goal is to assign workers, machines and locations to a list of demands over the set of all time slots.
@@ -56,7 +56,7 @@ The sub-goal is to also assign workers in such a way that they work for the long
 A worker has a set of availabilities and should not be assigned to a 
 shift when not available.
 
-\subsubsection{Respect demand occurences}
+\subsubsection{Respect demand occurrences}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
@@ -64,7 +64,7 @@ occuring.
 
 \subsubsection{No worker should be assigned twice for the same period}
 
-A worker obviously can't work at two positions at the same time. 
+A worker obviously cannot work at two positions at the same time. 
 
 \subsubsection{Required number of workers}
 
@@ -79,7 +79,7 @@ To be assigned to that position, a worker must have the required skills.
 
 \subsubsection{Worker-worker incompatibilities}
 
-Workers might be incompatible with each other. Such workers can't 
+Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
 
 \subsubsection{Worker-client incompatibilities}

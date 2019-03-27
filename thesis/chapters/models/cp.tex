@@ -26,11 +26,7 @@ First, we need to express the set of workers for each demand at each time period
 \end{equation}
 
 (\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k^{\text{th}}$ position 
-with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. This is done by using a 3-dimensional array of variables. The first dimension being the indices of the 
-time periods, the second dimension is the indices of the demands while the last dimension is the list of worker variables. 
-This last dimension has the size of the number of required workers for that demand.
-
-The same reasoning is used for zones and machines:
+with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reasoning is used for zones and machines:
 
 \begin{align}
     m_{ij} &\in M \label{cpmachinevariable} \\ 
@@ -39,56 +35,116 @@ The same reasoning is used for zones and machines:
 
 (\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the zone used for demand $i$
 
-Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
-per demand.
+
 
 As explained in the problem description and in the mathematical model section. 
 We need to allow partial solutions where we have a fictitious worker that can work at any time.
 We will add this value to every worker variable domain but ignore it during the constraint propagation. We define 
-this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it's not a 
-value in $W$ but for simplicity, we will define $\sigma = -1$.
+this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we will define $\sigma = -1$.
 
 
-% \subsection{Constraints}
+Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
+per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
+possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy skill (set of skills) $k$ of demand $d_j$.
 
-% \subsubsection{A worker can only work for one demand at a time}
+\begin{equation}
+  w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
+\end{equation}
 
-% Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of worker variables 
-% for all the demands accross time period $i$. The constraint $\texttt{allDifferent}(X_i)$ states that all workers working at time $i$ need to be different.
-% For each time period $i$ and set $X_i$, we need an \texttt{allDifferent} constraint.
+Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
 
-% \subsubsection{All workers can only work when they’re available}
+\subsection{Constraints}
 
-% Let $W_i = \{w \mid t_i \notin w^T \}$ be the set of workers not available at $t_i$. 
-% The constraint \texttt{notEqual} can be used to remove values from the worker variables $w_{ijk}$.
-% For each time period $i$ and demand, remove the values contained in the set $W_i$.
-% This can however be done at the domain initialization time by omitting those values instead of having an
-% additional constraint.
+\subsubsection{All workers for one period must be different}
 
-% \subsubsection{Incompatibilities between workers}
+All the worker variables for a given time period must be different. 
+The \texttt{alldifferent} (\autoref{sota:alldifferent}) constraint is well suited to express this. 
+However, as our model has the fictitious worker $\sigma$ in the domain of all worker variables and this value 
+can appear as many times as possible, we will need a slight variant of the \texttt{alldifferent} called \texttt{alldifferent\_except}. 
+This constraint is the same as the original except that we can specify values that will be ignored from 
+the constraint.
 
-% We can solve this constraint using a \texttt{negativeTable} constraint. 
-% For each pair of variables $(a, b)$ in the set $\{w_{ij0}, \dots, w_{ijn \mid n = d^w_j - 1}\}$, we add $\texttt{negativeTable}(a, b, I_{ww})$.
-% This prevents workers to work with incompatible other workers. Note that we need to cover the two directions of incompatibilities from $I_ww$. 
-% We can do this by adding another $\texttt{negativeTable}(b, a, I_{ww})$ or simply by appending the reversed direction to the $I_{ww}$ table.
+\begin{equation*}
+   \texttt{alldifferent\_except} (X, v) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), d_i \neq d_j \ \land \ d_i \notin v \ \land \ d_j \ \notin v \  \forall i \neq j \}
+\end{equation*}
 
-% \subsubsection{Incompatibilities between workers and clients}
+We will use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of all worker variables for period $i$. For each period, we define:
 
-% This constraint is much simpler than the one described above. Contrary to the worker-worker incompatibilities,
-% the clients are fixed values. 
-% We simply need to remove values 
-% from the domain of worker variables. For each $(w, c) \in I_{wc}$, we remove the value $w$ to each variable on 
-% demand $d$ where $d^c = c$. This can be done by a \texttt{notEqual} constraint or by removing the value at initialization.
+\begin{equation}
+  \texttt{alldifferent\_except}(X_i, \{ \sigma \}), \forall i \in T
+\end{equation}
 
-% \subsubsection{Skill requirements}
+\subsubsection{Incompatibilities between workers and clients}
 
-% The variable modeling makes this constraint simple. Each position is described by one worker variable.
-% Each position is assigned a set of skills needed by one worker. Again, we need to remove values 
-% from the domain of the worker variables when those workers do not meet the skill requirements of that position. 
+A worker might have an incompatibility with a client or a set of clients. 
+Clients are statically assigned to demands, we can solve this constraint by adding 
+a series of \texttt{not\_equal} constraints for each incompatible worker - client pair.
 
-% For example, if a demand has a requirement of two workers, one \texttt{lifter} and another one with no particular skill. 
-% The first worker variable for that demand will remove all workers that do not have the \texttt{lifter} skill while the second variable will remain untouched.
+\begin{equation}
+  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, \forall \ i, j, k
+\end{equation}
 
+\subsubsection{Incompatibilities between workers}
+
+A worker might have an incompatibility with a worker or a set of workers. This constraint cannot be solved 
+with a series of \texttt{not\_equal} like the worker - client incompatibilities. We will use a constraint 
+called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
+express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
+The forbidden combinations of values is expressed by the table $I_{ww}$. 
+We will add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
+be the permutations of worker variables for demand $j$ at period $i$:
+
+\begin{equation}
+  \texttt{negative\_table}(x, y, I_{ww}),  \forall (x, y) \in P_{ij}
+\end{equation}
+
+\subsubsection{Minimizing violations of working requirements}
+
+A worker might have working requirements. He has to work a minimum (maximum) number of times, hence the total 
+occurrences of this worker must be above (below) or equal the requirement. As a solution cannot always be 
+achieved with these requirements, we use a soft constraint and minimize the number of violations. In this case,
+we use the \texttt{softgcc} constraint introduced in \autoref{sota:gcc}. Let $X$ be the entire set of variables and 
+$v_r$ the total number of violations.
+
+\begin{equation}
+  \texttt{softgcc}(X, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) 
+\end{equation}
+
+Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ will be 0 and $r_{max}$ will be $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
+
+\subsubsection{Minimizing the number of fictitious worker}
+
+A solution might not always be possible, leading to a partial solution containing fictitious workers.
+We defined this fictitious worker by the value $\sigma$. This is again a case of soft constraint where 
+we will use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations.
+
+
+\begin{equation}
+  \texttt{softgcc}(X, \sigma \rightarrow \sigma, [0], [0], v_{\sigma})
+\end{equation}
+
+This syntax is a little bit different than what was introduced before. We specify $\sigma \rightarrow \sigma$ to check only the occurrences of values 
+in that range, hence only $\sigma$ in our case.
+
+
+\subsubsection{Objective Function}
+
+We already defined violations $v_r$ and $v_{\sigma}$ as our working requirements and fictitious worker violations.
+We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
+of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
+constraint called \texttt{at\_least\_nvalue} to count this number.
+Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ accross all time periods of that demand:
+
+\begin{equation}
+  \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in d^P_j
+\end{equation}
+
+We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations.
+The final objective is:
+
+\begin{equation}
+  \text{min} \quad \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + v_r + v_{\sigma}
+\end{equation}
 % \subsubsection{Additional skill requirement}
 
 % Additionnal skills are the skills that can be satisfied by any worker in the group.
@@ -134,7 +190,7 @@ For this model, we define additional notations:
   \textrm{s.t} \quad & \texttt{atLeastNValue}(W_{jk}, N_{jk}), && \forall j \in D, k \in d^P_j \label{cpobjctr} \\
                      & \texttt{allDifferentExcept}(X_i, \{ \sigma \}), && \forall i \in T \label{cpw1} \\
                      & \texttt{softGcc}(X, \sigma \rightarrow \sigma, 0, 0, v_{\sigma}) && \\
-                     & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) && \forall \\
+                     & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) &&\\
                     %  & \texttt{lexLeq}()                            , && \forall j \in D, i \in d^T_j, (a, b) \in P_{ij} \\
                      & \texttt{allDifferent}(Z^O_i), && \forall i \in D \label{cpz1} \\
                      & \texttt{allDifferent}(M^O_i), && \forall i \in D \label{cpm1} \\ 

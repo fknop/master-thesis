@@ -24,11 +24,11 @@ The author also define three types of constraint globality, we are mostly intere
 Those constraints can be decomposed into multiple simpler constraints but the filtering quality of the decomposition
 is often worse than its global counterpart. 
 
-There also exists soft variants of global constraints where those constraints are associated with 
-a number of violations which is usually minimized afterwards. This is particularely useful for problems with impossible 
-solution while using the hard constraints version.
-
-\subsubsection{\texttt{alldifferent} constraint}
+There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
+a number of violations. This is particularely useful for over-constrained problems which cannot be solved by a CSP.
+Instead the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
+\subsubsection{AllDifferent Cconstraint}
+\label{sota:alldifferent}
 
 The \texttt{allddifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
 Programming.
@@ -46,6 +46,7 @@ $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decom
 
 
 \subsubsection{Global Cardinality Constraint}
+\label{sota:gcc}
 
 The global cardility constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
 \texttt{alldifferent} constraint. It does not enforces (although it can) the uniqueness of values of its variables
@@ -59,7 +60,7 @@ between a lowerbound and a upperbound, respectively $l_i$ and $u_i$.
 As stated above, we can express the \texttt{alldifferent} constraint with this definition:
 
 \begin{equation*}
-\texttt{gcc}(\{ x_1, \dots, x_n \}, [1, \dots, 1], [1, \dots, 1])
+\texttt{gcc}(\{ x_1, \dots, x_n \}, [1, \dots, 1], [1, \dots, 1]) = \texttt{alldifferent}(x_1, \dots, x_n)
 \end{equation*}
 
 
