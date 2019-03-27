@@ -1,7 +1,7 @@
 package village1.modeling.cp
 
 import oscar.cp._
-import oscar.cp.constraints._
+import oscar.cp.constraints.AtLeastNValue
 import oscar.cp.core.{CPPropagStrength, NoSolutionException}
 import village1.data.{DemandAssignment, WorkerAssignment}
 import village1.modeling.Constants._
@@ -34,23 +34,18 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   val locationVariables: LocationVariables = generateLocationVariables()
 
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
+  val contiguousWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(0 until demands(d).periods.size)))
   var workingRequirementsViolations: CPIntVar = _
   val sentinelViolations = CPIntVar(0, CPIntVar.MaxValue)
 
   initialize()
 
-  private[this] var objectiveList: List[CPIntVar] = List(shiftNWorkers.flatten: _*)
+  val objective1: CPIntVar = sum(shiftNWorkers.flatten)
+  val objective2: CPIntVar = if (options.allowPartial) sentinelViolations else CPIntVar(Set(0))
+  val objective3: CPIntVar = if (workingRequirementsViolations != null) workingRequirementsViolations else CPIntVar(Set(0))
+  val objective4: CPIntVar = sum(contiguousWorkers.flatten)
 
-  if (options.allowPartial) {
-    objectiveList ::= sentinelViolations
-  }
-
-  if (workingRequirementsViolations != null) {
-    objectiveList ::= workingRequirementsViolations
-  }
-
-  val objective: CPIntVar = sum(objectiveList)
-
+  val objective: CPIntVar = objective1 //sum(List(objective1, objective4)) //sum(List(objective1, objective2, objective3, objective4))
 
   def initialize (): Unit = {
 
@@ -121,30 +116,6 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   }
 
   private def removeWorkerSymmetries (): Unit = {
-
-//      for (d <- Demands) {
-//        for (t <- demands(d).periods) {
-//
-//          val all = possibleWorkersForDemands(d)(t).foldLeft(Set[Int]())( (acc, s) => acc.union(s))
-//          if (all.size < demands(d).requiredWorkers) {
-//            return
-//          }
-//
-//          val symmetries = Utils.groupByEquality(possibleWorkersForDemands(d)(t))
-//          if (symmetries.nonEmpty) {
-//            val possibleWithoutSymmetries = Utils.removeSymmetries(possibleWorkersForDemands(d)(t), symmetries)
-//            for (symmetry <- symmetries) {
-//              for (p <- symmetry) {
-//                val possible = possibleWithoutSymmetries(p)
-//                for (value <- possible) {
-//                  workerVariables(t)(d)(p).removeValue(value)
-//                }
-//              }
-//            }
-//          }
-//        }
-//      }
-
 
 
     var x = Array[CPIntVar]()
@@ -342,6 +313,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
         if (workersForDemand.length > 1) {
+//          add(new SoftContiguousFWC(workersForDemand, contiguousWorkers(d)(w)))
           add(new AtLeastNValue(workersForDemand, shiftNWorkers(d)(w)), CPPropagStrength.Weak)
         }
       }

@@ -63,15 +63,15 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
     mostAvailable
   }
 
-  def varHeuristic(i: Int): (Int, Int, Int) = {
+  def varHeuristic(i: Int): (Int) = {
     val (t, d, p) = reverseMap(i)
 
    // Choose this variable if domain is 2: meaning it has one value and the sentinel value.
     if (x(i).size == 2) {
-      (Int.MinValue, demands(d).requiredWorkers, -demands(d).periods.size)
+      Int.MinValue //, demands(d).requiredWorkers, -demands(d).periods.size)
     }
     else {
-      (maxDegree(x(i)) - demands(d).requirements(p).skills.length, demands(d).requiredWorkers, -demands(d).periods.size)
+      maxDegree(x(i)) - demands(d).requirements(p).skills.length //, demands(d).requiredWorkers, -demands(d).periods.size)
     }
   }
 
@@ -98,5 +98,5 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   }
 
 
-  def branching: Branching = binaryFirstFailIdx(x, valueHeuristic)
+  def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
 }

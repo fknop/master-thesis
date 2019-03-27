@@ -40,7 +40,7 @@ lazy val v1Solver = project.in(file("v1-solver"))
     name := "v1-solver",
     assemblySettings,
     libraryDependencies ++= Seq(
-      dependencies.oscar,
+      dependencies.oscar.withSources(),
       dependencies.playJson,
       dependencies.jsonValidator,
       dependencies.scalactic,
