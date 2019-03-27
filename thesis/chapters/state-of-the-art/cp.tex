@@ -5,11 +5,72 @@
 \begin{document}
 
 A \emph{Constraint Satisfaction Problem} (CSP) consists of a set of $n$ variable, 
-$\{x_1, \dots, x_n \}$; a domain $D_i$ of possible values for each variable $x_i$, 
+$\{x_1, \dots, x_n \}$; a domain $D(x_i)$ of possible values for each variable $x_i$, 
 $1 \leq i \leq n$; and a collection of $m$ constraints $\{ C_1, \dots, C_m \}$. 
 Each constraint $C_j$, $1 \leq j \leq m$, is a constraint over some set of variables called the scheme 
 of the constraint. The size of this set is known as the arity of the constraint. 
 A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all of the constraints. \cite{cp-definition}
+
+\subsection{Global Constraints}
+
+As described in more depth in \cite{Hentenryck:2003}:
+
+\begin{quotation}
+  [\dots] a constraint $C$ is often called “global” when “processing” $C$ as a whole gives better results than “processing” any conjunction
+  of constraints that is “semantically equivalent” to $C$.
+\end{quotation}
+
+The author also define three types of constraint globality, we are mostly interested in what he refers to \emph{operatinal globality}. 
+Those constraints can be decomposed into multiple simpler constraints but the filtering quality of the decomposition
+is often worse than its global counterpart. 
+
+There also exists soft variants of global constraints where those constraints are associated with 
+a number of violations which is usually minimized afterwards. This is particularely useful for problems with impossible 
+solution while using the hard constraints version.
+
+\subsubsection{\texttt{alldifferent} constraint}
+
+The \texttt{allddifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
+Programming.
+This constraint is defined over a subset of variables for which values must be different. More formally:
+
+\begin{equation*}
+  \texttt{alldifferent}(x_1, \dots, x_n) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), d_i \neq d_j \forall i \neq j \}
+\end{equation*}
+
+This constraint can be decomposed into multiple binary inequalities. It makes \texttt{alldifferent} an operational global constraint.
+It can be proven that the filtering of the global constraint cannot be achieved with a decomposition. As 
+an example, let's define three variables $x_1$, $x_2$ and $x_3$ respectively taking domains $\{1,2\}$, $\{1,2\}$, $\{1,2,3,4\}$. 
+The global constraint would be able to successfuly filter $1$ and $2$ from the domain of 
+$x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decomposition is not able to filter those values.
+
+
+\subsubsection{Global Cardinality Constraint}
+
+The global cardility constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
+\texttt{alldifferent} constraint. It does not enforces (although it can) the uniqueness of values of its variables
+but instead enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
+between a lowerbound and a upperbound, respectively $l_i$ and $u_i$. 
+
+\begin{equation*}
+  \texttt{gcc}(X, l, u) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), l_d \leq |\{ d_i \mid d_i = d \}| \leq u_d, \forall d \in D(X) \}
+\end{equation*}
+
+As stated above, we can express the \texttt{alldifferent} constraint with this definition:
+
+\begin{equation*}
+\texttt{gcc}(\{ x_1, \dots, x_n \}, [1, \dots, 1], [1, \dots, 1])
+\end{equation*}
+
+
+We are also interested in a soft variant of \texttt{gcc} called \texttt{softgcc} \cite{VanHoeve2006}. 
+The violation associated with this constraint is the sum of excess or shortage \cite{schaus:softgcc} for each value.
+
+\begin{align*}
+  \texttt{softgcc}(X, l, u, Z) &= \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), d_z \in D(Z), viol(d_1, \dots, d_n) \leq d_z \} \\
+  \text{with} \quad viol(d_1, \dots, d_n) &= \sum_{d \in D(X)} \text{max}(0, |\{ d_i \mid d_i = d \}| - u_d, l_d - |\{ d_i \mid d_i = d \}|)
+\end{align*}
+
 
 
 \end{document}
