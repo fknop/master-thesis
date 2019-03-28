@@ -199,7 +199,7 @@ This heuristic consists of two value ordering.
 It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
 for most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
 
-Let's take an example to show how this heuristic works in practice, let us define 
+Let us take an example to show how this heuristic works in practice, let us define 
 $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ that only need one worker each.
 The availabilities are defined as
 $w_1^T = \{ 0, 1, 2 \}$, $w_2^T = \{ 0, 2 \}$, $w_3^T = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
@@ -211,7 +211,7 @@ $w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is
   \texttt{mostavailable}(d_2) &= [w_3 = (5, 0), w_3 = (3, 0), w_2 = (2, 0)] \\ 
 \end{align*}
 
-First we can see that $w_2$ will never be considered in this case as it's not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
+First we can see that $w_2$ will never be considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
 $w_3$ has two remaining availabilities. This heuristic guess that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
 The search will always consider $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
 

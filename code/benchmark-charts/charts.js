@@ -6,12 +6,19 @@ function readTemplate (template) {
   return fs.readFileSync(template).toString()
 }
 
-function replace (template, data) {
-  return template.replace('{ /** DATA **/ }', JSON.stringify(data, null, 4))
+
+function replace (from, template, data) {
+  return template.replace(from, JSON.stringify(data, null, 4))
 }
 
+function replaceData (template, data) {
+  return replace('{ /** DATA **/ }', template, data)
+}
+
+
+
 function chart (template, data) {
-  return replace(readTemplate(template), data)
+  return replaceData(readTemplate(template), data)
 }
 
 module.exports.lineChart = function (data) {
@@ -20,6 +27,10 @@ module.exports.lineChart = function (data) {
 
 module.exports.columnChart = function (data) {
   return chart('templates/column-chart.html', data)
+}
+
+module.exports.ppChart = function(data, xTitle) {
+  return chart('templates/performance-profile.html', data).replace("X_AXIS_TITLE", xTitle)
 }
 
 module.exports.writeResult = function (path, result, cb) {

@@ -45,7 +45,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   val objective3: CPIntVar = if (workingRequirementsViolations != null) workingRequirementsViolations else CPIntVar(Set(0))
   val objective4: CPIntVar = sum(contiguousWorkers.flatten)
 
-  val objective: CPIntVar = objective1 //sum(List(objective1, objective4)) //sum(List(objective1, objective2, objective3, objective4))
+  val objective: CPIntVar = sum(List(objective1, objective2, objective3)) //sum(List(objective1, objective2, objective3, objective4))
 
   def initialize (): Unit = {
 

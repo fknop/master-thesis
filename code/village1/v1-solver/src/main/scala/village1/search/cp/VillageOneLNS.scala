@@ -3,7 +3,6 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
-import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
@@ -160,7 +159,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-      println("obj1: " + objective1.value)
+//      println("obj1: " + objective1.value)
 //      println("ob4: " + objective4.value)
       bestObjective = objective.value
 //      bestObjective1 = math.min(objective1.value, bestObjective1)
@@ -194,6 +193,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       var percentage = 50
       val maxPercentage = 70
       val minPercentage = 20
+      val propagationRelax = new PropagationGuidedRelaxation()
 
       while (bestObjective > objective.min && r < repeat && totalTime < timeLimitMs && totalSol < solutionLimit) {
         val remainingTime = timeLimitMs - totalTime
@@ -214,8 +214,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
           val size = (flatWorkers.length / 100) * percentage
 
           relaxShifts(currentSolution, percentage)
-
-          RelaxationFunctions.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
+          propagationRelax.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
 //          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length - size)
 
 //          if (bestObjective2 <= 0) {
@@ -258,7 +257,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
         percentage = math.max(math.min(percentage, maxPercentage), minPercentage)
 
-        println(percentage)
 
 //        limit =
 //          if (stat.completed || found)

@@ -69,17 +69,3 @@ lazy val assemblySettings = Seq(
     case x => MergeStrategy.first
   }
 )
-//libraryDependencies += "oscar" %% "oscar-cp" % "4.1.0-SNAPSHOT" withSources()
-//libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
-//libraryDependencies += "com.eclipsesource"  %% "play-json-schema-validator" % "0.9.5-M4"
-//
-//libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
-//libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
-
-//libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
-
-
-
-
-
-

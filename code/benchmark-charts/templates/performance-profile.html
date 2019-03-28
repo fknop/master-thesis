@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 800px;
+      height: 600px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+
+  <script>
+
+    const data = { /** DATA **/ }
+
+    const series = data.series
+	  const container  = document.getElementById('container0');
+
+    const minX = 0
+    const minY = 0
+
+    const maxX = Math.max(...series.map(s => s.x).map(x => x[x.length - 1]))
+    const maxY = 1
+
+    const layout = {
+      xaxis: {
+        title: "X_AXIS_TITLE",
+        zeroline: false
+      },
+      yaxis: {
+        title: 'Instances (%)',
+        zeroline: false
+      }
+    }
+
+    Plotly.plot(container, series.map(serie => ({
+      name: serie.name,
+      x: [minX, ...serie.x, maxX],
+      y: [minY, ...serie.y, maxY],
+      mode: 'lines',
+      line: {shape: 'hv'},
+    })), layout)
+  </script>
+</body>
+</html>
