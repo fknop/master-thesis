@@ -1,0 +1,130 @@
+@InProceedings{Alan:Lex,
+author="Frisch, Alan
+and Hnich, Brahim
+and Kiziltan, Zeynep
+and Miguel, Ian
+and Walsh, Toby",
+editor="Van Hentenryck, Pascal",
+title="Global Constraints for Lexicographic Orderings",
+booktitle="Principles and Practice of Constraint Programming - CP 2002",
+year="2002",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="93--108",
+abstract="We propose some global constraints for lexicographic orderings on vectors of variables. These constraints are very useful for breaking a certain kind of symmetry arising in matrices of decision variables. We show that decomposing such constraints carries a penalty either in the amount or the cost of constraint propagation. We therefore present a global consistency algorithm which enforces a lexicographic ordering between two vectors of n variables in O(nb) time, where b is the cost of adjusting the bounds of a variable. The algorithm can be modified very slightly to enforce a strict lexicographic ordering. Our experimental results on a number of domains (balanced incomplete block design, social golfer, and sports tournament scheduling) confirm the efficiency and value of these new global constraints.",
+isbn="978-3-540-46135-7"
+}
+
+@InProceedings{Henteryck:Table,
+author="Mairy, Jean-Baptiste
+and Van Hentenryck, Pascal
+and Deville, Yves",
+editor="Milano, Michela",
+title="An Optimal Filtering Algorithm for Table Constraints",
+booktitle="Principles and Practice of Constraint Programming",
+year="2012",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="496--511",
+abstract="Filtering algorithms for table constraints are constraint-based, which means that the propagation queue only contains information on the constraints that must be reconsidered. This paper proposes four efficient value-based algorithms for table constraints, meaning that the propagation queue also contains information on the removed values. One of these algorithms (AC5TC-Tr) is proved to have an optimal time complexity of O(r{\textperiodcentered}t{\thinspace}+{\thinspace}r {\textperiodcentered}d) per table constraint. Experimental results show that, on structured instances, all our algorithms are two or three times faster than the state of the art STR2+ and MDDcalgorithms.",
+isbn="978-3-642-33558-7"
+}
+
+
+@Article{VanHoeve2006,
+author="Van Hoeve, Willem-Jan
+and Pesant, Gilles
+and Rousseau, Louis-Martin",
+title="On global warming: Flow-based soft global constraints",
+journal="Journal of Heuristics",
+year="2006",
+month="Sep",
+day="01",
+volume="12",
+number="4",
+pages="347--373",
+abstract="In case a CSP is over-constrained, it is natural to allow some constraints, called soft constraints, to be violated. We propose a generic method to soften global constraints that can be represented by a flow in a graph. Such constraints are softened by adding violation arcs to the graph and then computing a minimum-weight flow in the extended graph to measure the violation. We present efficient propagation algorithms, based on different violation measures, achieving domain consistency for the alldifferent constraint, the global cardinality constraint, the regular constraint and the same constraint.",
+issn="1572-9397",
+doi="10.1007/s10732-006-6550-4",
+url="https://doi.org/10.1007/s10732-006-6550-4"
+}
+
+@inproceedings{schaus:softgcc,
+author = {Schaus, Pierre and Van Hentenryck, Pascal and Zanarini, Alessandro},
+year = {2010},
+month = {06},
+pages = {307-312},
+title = {Revisiting the Soft Global Cardinality Constraint},
+volume = {6140},
+doi = {10.1007/978-3-642-13520-0_33}
+}
+
+
+@inproceedings{Rgin1994AFA,
+  title={A Filtering Algorithm for Constraints of Difference in CSPs},
+  author={Jean-Charles R{\'e}gin},
+  booktitle={AAAI},
+  year={1994}
+}
+
+@inproceedings{Regin:1996,
+ author = {R{\'e}gin, Jean-Charles},
+ title = {Generalized Arc Consistency for Global Cardinality Constraint},
+ booktitle = {Proceedings of the Thirteenth National Conference on Artificial Intelligence - Volume 1},
+ series = {AAAI'96},
+ year = {1996},
+ isbn = {0-262-51091-X},
+ location = {Portland, Oregon},
+ pages = {209--215},
+ numpages = {7},
+ url = {http://dl.acm.org/citation.cfm?id=1892875.1892906},
+ acmid = {1892906},
+ publisher = {AAAI Press},
+} 
+
+@inproceedings{Regin:2000,
+author = {Régin, Jean-Charles and Petit, Thierry and Bessiere, Christian and Puget, Jean-Francois},
+year = {2000},
+month = {01},
+pages = {543-548},
+title = {An Original Constraint Based Approach for Solving over Constrained Problems.}
+}
+
+
+@inproceedings{Hentenryck:2003,
+author = {Bessière, Christian and Van Hentenryck, Pascal},
+year = {2003},
+month = {11},
+pages = {789-794},
+title = {To Be or Not to Be ... a Global Constraint},
+volume = {2833},
+doi = {10.1007/978-3-540-45193-8_54}
+}
+
+
+@inproceedings{Schaus:VOLNS,
+author = {Schaus, Pierre},
+year = {2013},
+month = {11},
+pages = {971-978},
+title = {Variable Objective Large Neighborhood Search: A Practical Approach to Solve Over-Constrained Problems},
+journal = {Proceedings - International Conference on Tools with Artificial Intelligence, ICTAI},
+doi = {10.1109/ICTAI.2013.147}
+}
+
+
+@InProceedings{Propagation:LNS,
+author="Perron, Laurent
+and Shaw, Paul
+and Furnon, Vincent",
+editor="Wallace, Mark",
+title="Propagation Guided Large Neighborhood Search",
+booktitle="Principles and Practice of Constraint Programming -- CP 2004",
+year="2004",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="468--481",
+abstract="In this article, we explore how neighborhoods for the Large Neighborhood Search (LNS) framework can be automatically defined by the volume of propagation of our Constraint Programming (CP) solver. Thus we can build non trivial neighborhoods which will not be reduced to zero by propagation and whose size will be close to a parameter of the search. Furthermore, by looking at the history of domain reductions, we are able to deduce even better neighborhoods. This idea is validated by numerous experiments with the car sequencing problem. The result is a powerful and completely automatic method that is able to beat our hand-written neighborhoods both in term of performance and of stability. This is in fact the first time for us that a completely generic code is better than a hand-written one.",
+isbn="978-3-540-30201-8"
+}
+

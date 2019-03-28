@@ -167,83 +167,8 @@ We now have the number of different workers for each shift and we need to minimi
 The final objective is:
 
 \begin{equation}
-  \text{min} \quad \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + v_r + v_{\sigma}
+  \text{min} \quad \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + v_r + v_{\sigma} \label{cp:objective}
 \end{equation}
-% \subsubsection{Additional skill requirement}
-
-% Additionnal skills are the skills that can be satisfied by any worker in the group.
-% TODO: explain gcc + sum occurences
-
-% \subsubsection{No zone should be used by two overlapping demands}
-
-% Let $Z^O_i = \{ z_j \mid j \in d^O_i \}$ be the set of zone variables for demands that overlap in time with demand $i$.
-% The constraint $\texttt{allDifferent}(Z^O_i)$ states that all zones for overlapping demands 
-% should be different. For each demand $i$ and set $Z^O_i$, we add an \texttt{allDifferent} constraint.
-
-% \subsubsection{No machine should be used by two overlapping demands}
-
-% Let $M^O_i = \left\{ m_{jk} \mid j \in d^O_i, k \in \{0, \dots, |d^M_j| - 1 \} \right\}$ be the set of machine variables for demands that overlap in time 
-% with demand $i$. The constraint $\texttt{allDifferent}(M^O_i)$ states that all machines for overlapping demands 
-% should be different. For each demand $i$ and set $M^O_i$, we add an \texttt{allDifferent} constraint.
-
-% \subsubsection{Objective function}
-
-% The objective function expresses the minimization of the sum of different worker for each shift.
-% Let $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of all worker variables for demand $j$ at position $k$ accross all time periods for that demand.
-% We use this set to compute the number of different workers for a given shift with the constraint
-% $\texttt{atLeastNValue}(W_{jk}, N_{jk})$ with $N_{jk}$ being the number of different workers for shift $k$ of demand $j$.
-% The objective can be expressed by $\sum_{j, k} N_{jk}$ which is the sum of different workers over all shifts. 
-
-
-
-% \subsection{Complete Model}
-
-% For this model, we define additional notations:
-
-% \begin{itemize}
-%   \item[--] $N_{jk}$ denotes the number of different workers for shift $k$ of demand $j$, these are variables added separete to the decision variables.
-%   \item[--] $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ denotes the set of worker variables for demand $j$ at position $k$ accross all time periods of that demand.
-%   \item[--] $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ denotes the set of worker variables for all the demands accross time period $t_i$
-%   \item[--] $Z^O_i = \{ z_{j} \mid j \in d^O_i \}$ denotes the set of zone variables for demands that overlap in time with $d_i$
-%   \item[--] $M^O_i = \left\{ m_{jk} \mid j \in d^O_i, k \in \{0, \dots, |d^M_j| - 1 \} \right\}$ denotes the set of machine variables for demands that overlap in time with $d_i$ 
-%   \item[--] $P_{ij}$ denotes the set of permutations of pairs of worker variables for a demand $j$ at time $i$.
-% \end{itemize}
-
-% \begin{align}
-%   \textrm{min} \quad & \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} & \label{cpobj} \\ 
-%   \textrm{s.t} \quad & \texttt{atLeastNValue}(W_{jk}, N_{jk}), && \forall j \in D, k \in d^P_j \label{cpobjctr} \\
-%                      & \texttt{allDifferentExcept}(X_i, \{ \sigma \}), && \forall i \in T \label{cpw1} \\
-%                      & \texttt{softGcc}(X, \sigma \rightarrow \sigma, 0, 0, v_{\sigma}) && \\
-%                      & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) &&\\
-%                     %  & \texttt{lexLeq}()                            , && \forall j \in D, i \in d^T_j, (a, b) \in P_{ij} \\
-%                      & \texttt{allDifferent}(Z^O_i), && \forall i \in D \label{cpz1} \\
-%                      & \texttt{allDifferent}(M^O_i), && \forall i \in D \label{cpm1} \\ 
-%                      & \texttt{notEqual}(w_{ijk}, w), && \forall (w, c) \in I_{wc}, \label{cpw2} \\ 
-%                      & && i \in T, j \in D_c, k \in d^P_j \nonumber \\ 
-%                      & \texttt{negativeTable}(a, b, I_{ww}), && \forall (a, b) \in P_{ij} \label{cpw3} \\ 
-%                      & w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, && \forall j \in D, i \in d^T_j, k \in d^P_j \label{cpvw} \\ 
-%                      & z_{i} \in d_i^Z, && \forall i \in D \label{cpvz} \\ 
-%                      & m_{ij} \in \{ m \mid m \in W \land m = d^{M_j}_i \}, && \forall i \in D, j \in d^M_i \label{cpvm}
-% \end{align}
-
-
-% This model is simpler than the mathematical one described \autoref{section:mipmodel}. It 
-% needs less constraints to express the same problem. For example, (\ref{cpvw}) expresses multiple constraints (i.e. workers are restricted to positions with respect to their skills and to their availabilities)
-% in only one step which is the initialization of the variable. Hence, no constraints will run during the solving process. (\ref{cpvw}) also states that we add a 
-% fictitious worker $\sigma \notin W$ to every worker variables.
-
-% (\ref{cpvz}) expresses that the domain of zone variables are limited to the possible zones of a demand and (\ref{cpvm}) states that 
-% the domain of each machine variables for a demand are limited to the possible machines for that need.
-
-% (\ref{cpw1}) states that no workers should work for two positions at the same time. Constraint (\ref{cpw2}) states
-% the incompatibilities between clients and workers and restricts workers to work for incompatible clients while 
-% (\ref{cpw3}) prevent incompatible workers to work together.
-
-% Constraint (\ref{cpz1}) and (\ref{cpm1}) state that no zones and machines should be used for two overlapping demands.
-
-% Finally, for the objective, constraint (\ref{cpobjctr}) states that $N_{jk}$ will be equal to the number of different workers for the same position 
-% throughout time periods. The objective itself (\ref{cpobj}) is the minimization of the sum of all $N_{jk}$, hence minimizing the number of change between 
-% shifts.
 
 
 \subsection{Search}
@@ -348,7 +273,29 @@ $x_1$ is assigned the value $2$, we will ignore the permutation $x_1 = 2, x_2 = 
   \label{tree:symmetry}
 \end{figure}
 
+\subsubsection{Large Neighorhood Search}
 
+We use LNS to ensure that we explore as much of the search space as possible. 
+We use the Propagation Guided Relaxation \cite{Propagation:LNS} to relax our best solutions.
+We discuss and compare more relaxations options in a future chapter.
+
+\subsubsection{Variable Objective LNS}
+
+Our problem uses a multi-objective (\ref{cp:objective}) model. 
+Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in D^P_j} N_{jk}}$
+and $o_4 = \text{min} \ o_1 + o_2 + o_3$.
+
+
+It seems obvious that we want 
+to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial solutions and unmet requirements respectively. 
+
+\begin{enumerate}
+  \item First set $o_1$ to \emph{Strong-Filtering} while others are set to \emph{No-Filtering}.
+  \item Once optimized, set $o_2$ to \emph{Strong-Filtering}, $o_1$ to \emph{Weak-Filtering} and others to \emph{No-Filtering}.
+  \item Once $o_2$ is optimized, keep it in \emph{Weak-Filtering} for the rest of the search and switch $o_3$ to \emph{Strong-Filtering}.
+\end{enumerate}
+
+Note that $o_4$ is kept in \emph{Strong-Filtering} mode for the entire duration of the search.
 
 \end{document}
 
