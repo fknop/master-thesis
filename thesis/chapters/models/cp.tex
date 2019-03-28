@@ -37,15 +37,15 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
 
 
 
-As explained in the problem description and in the mathematical model section. 
-We need to allow partial solutions where we have a fictitious worker that can work at any time.
+As explained in the problem description and in the mathematical model section,
+we need to allow partial solutions where we have a fictitious worker that can work at any time.
 We will add this value to every worker variable domain but ignore it during the constraint propagation. We define 
 this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we will define $\sigma = -1$.
 
 
 Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
 per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
-possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy skill (set of skills) $k$ of demand $d_j$.
+possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
 
 \begin{equation}
   w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
@@ -64,9 +64,10 @@ can appear as many times as possible, we will need a slight variant of the \text
 This constraint is the same as the original except that we can specify values that will be ignored from 
 the constraint.
 
-\begin{equation*}
-   \texttt{alldifferent\_except} (X, v) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), d_i \neq d_j \ \land \ d_i \notin v \ \land \ d_j \ \notin v \  \forall i \neq j \}
-\end{equation*}
+\begin{align*}
+   \texttt{alldifferent\_except} (X, v) = \{& (d_1, \dots, d_n) \mid d_i \in D(x_i), \\ 
+   & d_i \notin v \ \land \ d_j \ \notin v \implies d_i \neq d_j \ \forall i \neq j \}
+\end{align*}
 
 We will use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of all worker variables for period $i$. For each period, we define:
 
@@ -98,6 +99,29 @@ be the permutations of worker variables for demand $j$ at period $i$:
   \texttt{negative\_table}(x, y, I_{ww}),  \forall (x, y) \in P_{ij}
 \end{equation}
 
+\subsubsection{Additional skills must be satisfied}
+
+A demand can have what we call \emph{additional skills}. Those skills can be 
+satisfied by any of the workers in the demand. Unlike required skills by different workers,
+we cannot pre-assign possible values to domain of variables. The worker can be assigned to any number of variables in the demand.
+We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
+The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
+the sum will state that at least one worker need to be assigned.
+
+Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
+
+\begin{align}
+  &\texttt{gcc}(\{ w_{ijk} \mid k \in d^P_j \}, o_{ijs}) \\ 
+  &\texttt{sum}(o_{ijs}) \geq 1 \\
+  \text{with} \quad & o_{ijs} \in \{ 0, 1 \} \\
+  & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j
+\end{align}
+
+This is a different syntax for \texttt{gcc} that we introduced before. This variant takes 
+variables and assign the occurrences of values to them. In this case, the \texttt{gcc} will assign 
+occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint will ensure that 
+these occurrences sum to at least one.
+
 \subsubsection{Minimizing violations of working requirements}
 
 A worker might have working requirements. He has to work a minimum (maximum) number of times, hence the total 
@@ -107,7 +131,7 @@ we use the \texttt{softgcc} constraint introduced in \autoref{sota:gcc}. Let $X$
 $v_r$ the total number of violations.
 
 \begin{equation}
-  \texttt{softgcc}(X, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) 
+  \texttt{softgcc}(X, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) \label{cp:wrequirements} 
 \end{equation}
 
 Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ will be 0 and $r_{max}$ will be $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
@@ -120,7 +144,7 @@ we will use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violatio
 
 
 \begin{equation}
-  \texttt{softgcc}(X, \sigma \rightarrow \sigma, [0], [0], v_{\sigma})
+  \texttt{softgcc}(X, \sigma \rightarrow \sigma, [0], [0], v_{\sigma}) \label{cp:fictitious}
 \end{equation}
 
 This syntax is a little bit different than what was introduced before. We specify $\sigma \rightarrow \sigma$ to check only the occurrences of values 
@@ -129,7 +153,7 @@ in that range, hence only $\sigma$ in our case.
 
 \subsubsection{Objective Function}
 
-We already defined violations $v_r$ and $v_{\sigma}$ as our working requirements and fictitious worker violations.
+We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:fictitious}) as our working requirements and fictitious worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
 of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
 constraint called \texttt{at\_least\_nvalue} to count this number.
@@ -172,54 +196,54 @@ The final objective is:
 
 
 
-\subsection{Complete Model}
+% \subsection{Complete Model}
 
-For this model, we define additional notations:
+% For this model, we define additional notations:
 
-\begin{itemize}
-  \item[--] $N_{jk}$ denotes the number of different workers for shift $k$ of demand $j$, these are variables added separete to the decision variables.
-  \item[--] $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ denotes the set of worker variables for demand $j$ at position $k$ accross all time periods of that demand.
-  \item[--] $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ denotes the set of worker variables for all the demands accross time period $t_i$
-  \item[--] $Z^O_i = \{ z_{j} \mid j \in d^O_i \}$ denotes the set of zone variables for demands that overlap in time with $d_i$
-  \item[--] $M^O_i = \left\{ m_{jk} \mid j \in d^O_i, k \in \{0, \dots, |d^M_j| - 1 \} \right\}$ denotes the set of machine variables for demands that overlap in time with $d_i$ 
-  \item[--] $P_{ij}$ denotes the set of permutations of pairs of worker variables for a demand $j$ at time $i$.
-\end{itemize}
+% \begin{itemize}
+%   \item[--] $N_{jk}$ denotes the number of different workers for shift $k$ of demand $j$, these are variables added separete to the decision variables.
+%   \item[--] $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ denotes the set of worker variables for demand $j$ at position $k$ accross all time periods of that demand.
+%   \item[--] $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ denotes the set of worker variables for all the demands accross time period $t_i$
+%   \item[--] $Z^O_i = \{ z_{j} \mid j \in d^O_i \}$ denotes the set of zone variables for demands that overlap in time with $d_i$
+%   \item[--] $M^O_i = \left\{ m_{jk} \mid j \in d^O_i, k \in \{0, \dots, |d^M_j| - 1 \} \right\}$ denotes the set of machine variables for demands that overlap in time with $d_i$ 
+%   \item[--] $P_{ij}$ denotes the set of permutations of pairs of worker variables for a demand $j$ at time $i$.
+% \end{itemize}
 
-\begin{align}
-  \textrm{min} \quad & \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} & \label{cpobj} \\ 
-  \textrm{s.t} \quad & \texttt{atLeastNValue}(W_{jk}, N_{jk}), && \forall j \in D, k \in d^P_j \label{cpobjctr} \\
-                     & \texttt{allDifferentExcept}(X_i, \{ \sigma \}), && \forall i \in T \label{cpw1} \\
-                     & \texttt{softGcc}(X, \sigma \rightarrow \sigma, 0, 0, v_{\sigma}) && \\
-                     & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) &&\\
-                    %  & \texttt{lexLeq}()                            , && \forall j \in D, i \in d^T_j, (a, b) \in P_{ij} \\
-                     & \texttt{allDifferent}(Z^O_i), && \forall i \in D \label{cpz1} \\
-                     & \texttt{allDifferent}(M^O_i), && \forall i \in D \label{cpm1} \\ 
-                     & \texttt{notEqual}(w_{ijk}, w), && \forall (w, c) \in I_{wc}, \label{cpw2} \\ 
-                     & && i \in T, j \in D_c, k \in d^P_j \nonumber \\ 
-                     & \texttt{negativeTable}(a, b, I_{ww}), && \forall (a, b) \in P_{ij} \label{cpw3} \\ 
-                     & w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, && \forall j \in D, i \in d^T_j, k \in d^P_j \label{cpvw} \\ 
-                     & z_{i} \in d_i^Z, && \forall i \in D \label{cpvz} \\ 
-                     & m_{ij} \in \{ m \mid m \in W \land m = d^{M_j}_i \}, && \forall i \in D, j \in d^M_i \label{cpvm}
-\end{align}
+% \begin{align}
+%   \textrm{min} \quad & \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} & \label{cpobj} \\ 
+%   \textrm{s.t} \quad & \texttt{atLeastNValue}(W_{jk}, N_{jk}), && \forall j \in D, k \in d^P_j \label{cpobjctr} \\
+%                      & \texttt{allDifferentExcept}(X_i, \{ \sigma \}), && \forall i \in T \label{cpw1} \\
+%                      & \texttt{softGcc}(X, \sigma \rightarrow \sigma, 0, 0, v_{\sigma}) && \\
+%                      & \texttt{softGcc}(X, 0 \rightarrow |W| -1, r_{min}, r_{max}, v_{r}) &&\\
+%                     %  & \texttt{lexLeq}()                            , && \forall j \in D, i \in d^T_j, (a, b) \in P_{ij} \\
+%                      & \texttt{allDifferent}(Z^O_i), && \forall i \in D \label{cpz1} \\
+%                      & \texttt{allDifferent}(M^O_i), && \forall i \in D \label{cpm1} \\ 
+%                      & \texttt{notEqual}(w_{ijk}, w), && \forall (w, c) \in I_{wc}, \label{cpw2} \\ 
+%                      & && i \in T, j \in D_c, k \in d^P_j \nonumber \\ 
+%                      & \texttt{negativeTable}(a, b, I_{ww}), && \forall (a, b) \in P_{ij} \label{cpw3} \\ 
+%                      & w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, && \forall j \in D, i \in d^T_j, k \in d^P_j \label{cpvw} \\ 
+%                      & z_{i} \in d_i^Z, && \forall i \in D \label{cpvz} \\ 
+%                      & m_{ij} \in \{ m \mid m \in W \land m = d^{M_j}_i \}, && \forall i \in D, j \in d^M_i \label{cpvm}
+% \end{align}
 
 
-This model is simpler than the mathematical one described \autoref{section:mipmodel}. It 
-needs less constraints to express the same problem. For example, (\ref{cpvw}) expresses multiple constraints (i.e. workers are restricted to positions with respect to their skills and to their availabilities)
-in only one step which is the initialization of the variable. Hence, no constraints will run during the solving process. (\ref{cpvw}) also states that we add a 
-fictitious worker $\sigma \notin W$ to every worker variables.
+% This model is simpler than the mathematical one described \autoref{section:mipmodel}. It 
+% needs less constraints to express the same problem. For example, (\ref{cpvw}) expresses multiple constraints (i.e. workers are restricted to positions with respect to their skills and to their availabilities)
+% in only one step which is the initialization of the variable. Hence, no constraints will run during the solving process. (\ref{cpvw}) also states that we add a 
+% fictitious worker $\sigma \notin W$ to every worker variables.
 
-(\ref{cpvz}) expresses that the domain of zone variables are limited to the possible zones of a demand and (\ref{cpvm}) states that 
-the domain of each machine variables for a demand are limited to the possible machines for that need.
+% (\ref{cpvz}) expresses that the domain of zone variables are limited to the possible zones of a demand and (\ref{cpvm}) states that 
+% the domain of each machine variables for a demand are limited to the possible machines for that need.
 
-(\ref{cpw1}) states that no workers should work for two positions at the same time. Constraint (\ref{cpw2}) states
-the incompatibilities between clients and workers and restricts workers to work for incompatible clients while 
-(\ref{cpw3}) prevent incompatible workers to work together.
+% (\ref{cpw1}) states that no workers should work for two positions at the same time. Constraint (\ref{cpw2}) states
+% the incompatibilities between clients and workers and restricts workers to work for incompatible clients while 
+% (\ref{cpw3}) prevent incompatible workers to work together.
 
-Constraint (\ref{cpz1}) and (\ref{cpm1}) state that no zones and machines should be used for two overlapping demands.
+% Constraint (\ref{cpz1}) and (\ref{cpm1}) state that no zones and machines should be used for two overlapping demands.
 
-Finally, for the objective, constraint (\ref{cpobjctr}) states that $N_{jk}$ will be equal to the number of different workers for the same position 
-throughout time periods. The objective itself (\ref{cpobj}) is the minimization of the sum of all $N_{jk}$, hence minimizing the number of change between 
-shifts.
+% Finally, for the objective, constraint (\ref{cpobjctr}) states that $N_{jk}$ will be equal to the number of different workers for the same position 
+% throughout time periods. The objective itself (\ref{cpobj}) is the minimization of the sum of all $N_{jk}$, hence minimizing the number of change between 
+% shifts.
 
 
 \subsection{Search}
@@ -248,9 +272,83 @@ This heuristic consists of two value ordering.
 \end{enumerate}
 
 It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
-for most available worker.
+for most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
 
-This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
+Let's take an example to show how this heuristic works in practice, let us define 
+$w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ that only need one worker each.
+The availabilities are defined as
+$w_1^T = \{ 0, 1, 2 \}$, $w_2^T = \{ 0, 2 \}$, $w_3^T = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
+$d_1^T = \{ 0, 1, 2 \}$, $d_2^T = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can see that worker 
+$w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand will be as follow:
+
+\begin{align*}
+  \texttt{mostavailable}(d_1) &= [w_1 = (3, 0), w_3 = (3, 2), w_2 = (2, 0)] \\ 
+  \texttt{mostavailable}(d_2) &= [w_3 = (5, 0), w_3 = (3, 0), w_2 = (2, 0)] \\ 
+\end{align*}
+
+First we can see that $w_2$ will never be considered in this case as it's not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
+$w_3$ has two remaining availabilities. This heuristic guess that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
+The search will always consider $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
+
+\subsubsection{Breaking symmetries}
+
+It is fairly easy to see that our problem contains a lot of symmetries between different positions within the same demand. 
+Two positions might require no skill and thus have the same possible workers. We want to avoid as much as possible to consider every permutations of those workers.
+For this, we use the \texttt{lexleq} constraint \cite{Alan:Lex}. This constraints takes two vectors of variables $X$ and $Y$. It ensures that 
+$x_i \leq y_i \ \forall i$. As we already have an \texttt{alldifferent} constraint applied, it ensures $x_i < y_i \ \forall i$.
+Let $x_i \in X$ be a variable symmetric to $y_i \in Y$ where $x_i$ and $y_i$ are two variables from the same demand occuring at the same time period.
+
+
+\begin{equation}
+  \texttt{lexleq}(X, Y)
+\end{equation}
+
+As a simple example, let us define $x_1 = x_2 = \{ 1, 2, 3 \}$ with $x_1 < x_2$ for symmetry breaking. If 
+$x_1$ is assigned the value $2$, we will ignore the permutation $x_1 = 2, x_2 = 1$ because it is symmetric to $x_1 = 1, x_2 = 2$. $x_2$ will be instead directly assigned to the value $3$ and thus reducing the search space.
+\autoref{tree:symmetry} shows the search trees with and without symmetry breaking. We can see that the search tree with the \texttt{lexleq} constraint is reduced.
+
+\forestset{qtree/.style={for tree={draw, parent anchor=south, 
+           rounded corners,
+           align=center, l sep=40pt, s sep=20pt}}}
+
+\begin{figure}
+  \begin{adjustbox}{valign=t, center}
+  \begin{forest}, baseline, qtree
+    % for tree={l sep=20pt}
+    [{\footnotesize$x = \{1, 2, 3\}$\\\footnotesize$y = \{ 1, 2, 3 \}$}
+      [{\footnotesize$x = 1$\\\footnotesize$y = \{ 2, 3 \}$}, edge label={node[midway,left] {$x=1$}} 
+      [{\footnotesize$x = 1$\\\footnotesize$y = 2$}, edge label={node[midway,left] {$y=2$}} ]
+      [{\footnotesize$x = 1$\\\footnotesize$y = 3$}, edge label={node[midway,right] {$y=3$}} ]
+      ]
+      [{\footnotesize$x = 2$\\\footnotesize$y = 3$}, edge label={node[midway,right] {$x\neq1$}} ]
+    ]
+  \end{forest}
+  
+  \begin{forest}, baseline, qtree
+    % for tree={l sep=20pt}
+    [{\footnotesize$x = \{1, 2, 3\}$\\\footnotesize$y = \{ 1, 2, 3 \}$}
+      [{\footnotesize$x = \{1\}$\\\footnotesize$y = \{ 2, 3 \}$}, edge label={node[midway,left] {$x=1$}} 
+        [{\footnotesize$x = 1$\\\footnotesize$y = 2$}, draw={blue}, edge label={node[midway,left] {$y=2$}} ]
+        [{\footnotesize$x = 1$\\\footnotesize$y = 3$}, draw={red}, edge label={node[midway,right] {$y=3$}} ]
+      ]
+      [{\footnotesize$x = \{ 2, 3 \}$\\\footnotesize$y = \{ 1, 2, 3 \}$}, edge label={node[midway,right] {$x\neq1$}} 
+        [{\footnotesize$x = 2$\\\footnotesize$y = \{ 1, 3 \}$}, edge label={node[midway,left] {$x = 2$}} 
+          [{\footnotesize$x = 2$\\\footnotesize$y = 1$}, draw={blue}, edge label={node[midway,left] {$y=1$}} ]
+          [{\footnotesize$x = 2$\\\footnotesize$y = 3$}, draw={green}, edge label={node[midway,right] {$y=3$}} ]
+        ]
+        [{\footnotesize$x = 3$\\\footnotesize$y = \{ 1, 2 \}$}, edge label={node[midway,right] {$x = 3$}} 
+          [{\footnotesize$x = 3$\\\footnotesize$y = 1$}, draw={red}, edge label={node[midway,left] {$y=1$}} ]
+          [{\footnotesize$x = 3$\\\footnotesize$y = 2$}, draw={green}, edge label={node[midway,right] {$y=2$}} ]
+        ]  
+      ]
+    ]
+  \end{forest}
+  \end{adjustbox}
+  \caption{Search tree with symmetry breaking (left) and without (right)}
+  \label{tree:symmetry}
+\end{figure}
+
+
 
 \end{document}
 

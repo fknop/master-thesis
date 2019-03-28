@@ -73,6 +73,58 @@ The violation associated with this constraint is the sum of excess or shortage \
 \end{align*}
 
 
+\subsection{Large Neighorhood Search}
+
+A Constraint Programming solver can often get stuck in a search tree that do not lead to good solutions.
+We want instead to explore as much of the search space as possible. 
+
+Large Neighborhood Search (LNS) is a technique that makes use of the principles of \emph{Local Search}.
+LNS uses Constraint Programming as a tool to find solutions and local search to expand the exploration of the search space. 
+The LNS framework often goes as follow:
+
+\begin{enumerate}
+  \item Use Constraint Programming to find a solution 
+  \item Relax last best solution: we fix some variables to the last value in the best solutions. This is the 
+        step that can change the most for different types of problems. Most of the time, a simple random relaxation is used (i.e. fix a percentage of variable).
+  \item Restart
+\end{enumerate}
+
+The entire search might be limited with a time limit, number of solutions or number of restarts. Each independant search 
+is often limited with a number of backtracks or a time limit.
+
+\subsection{Variable Objective Search}
+
+A multi-objective problem is often modeled by having a weighted sum of sub-objectives to form a 
+single objective.
+
+\begin{align*}
+  \text{min} \quad & obj = \sum_{i} w_i o_i \\
+  \text{s.t.} \quad & constraints
+\end{align*}
+
+Variable Objective Large Neighborhood Search (VO-LNS) \cite{Schaus:VOLNS} is an extension of LNS for multi-objective 
+problems which offers
+\begin{enumerate*}[label=(\roman*)]
+  \item Prioritization of sub-objectives;
+  \item Better pruning.
+\end{enumerate*}
+VO-LNS consists of three types of filtering for each objective
+\begin{enumerate}
+  \item \emph{No-Filtering}: The objective has no impact.
+  \item \emph{Weak-Filtering}: When a solution is found, it has to be better or equal to the bound of the objective. 
+  \item \emph{Strong-Filtering}: When a solution is found, it has to be strictly improving the bound of the objective.
+\end{enumerate}
+
+The VO-LNS formulation is expressed as follows:
+
+\begin{align*}
+  \text{min} \quad & obj = (obj_1, \dots, obj_n, obj_{n+1}) \\
+  \text{s.t.} \quad & constraints 
+\end{align*}
+
+$obj_1, \dots, obj_n$ are the sub-objectives while $obj_{n+1}$ is the sum of all sub-objectives. We keep $obj_{n+1}$ in 
+\emph{Strong-Filtering} during the search such that the formulation is at least as strong as a sum of sub-objectives.
+We can change the filtering dynamically during the search before each restart depending on the problem and prioritization of sub-objectives.
 
 \end{document}
 
