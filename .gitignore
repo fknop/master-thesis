@@ -13,7 +13,8 @@ thesis/**/*.out
 code/**/**/target
 code/village1/results
 code/village1/data/results
-code/village1/data/benchmark
+code/village1/data/benchmark/*
+!code/village1/data/benchmark/html
 code/village1/data/instances/generated
 code/village1/**/lib
 code/benchmark-charts/result*

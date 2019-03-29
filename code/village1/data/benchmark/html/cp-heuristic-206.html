@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 800px;
+      height: 600px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+
+  <script>
+
+    const data = {
+  "series" : [ {
+    "name" : "CP-MA",
+    "x" : [ 1, 1, 1, 1, 1, 1 ],
+    "y" : [ 1, 1, 1, 1, 1, 1 ]
+  }, {
+    "name" : "CP-FF",
+    "x" : [ 1.8545454545454545, 2.0542168674698793, 2.057142857142857, 2.366120218579235, 2.376146788990826, 2.4741379310344827 ],
+    "y" : [ 0.16666666666666666, 0.3333333333333333, 0.5, 0.6666666666666666, 0.8333333333333334, 1 ]
+  } ]
+}
+
+    const series = data.series
+	  const container  = document.getElementById('container0');
+
+    const minX = 0
+    const minY = 0
+
+    const maxX = Math.max(...series.map(s => s.x).map(x => x[x.length - 1]))
+    const maxY = 1
+
+    const layout = {
+      xaxis: {
+        title: "Objective ratio (lower the better)",
+        zeroline: false
+      },
+      yaxis: {
+        title: 'Instances (%)',
+        zeroline: false
+      }
+    }
+
+    Plotly.plot(container, series.map(serie => ({
+      name: serie.name,
+      x: [minX, ...serie.x, maxX],
+      y: [minY, ...serie.y, maxY],
+      mode: 'lines',
+      line: {shape: 'hv'},
+    })), layout)
+  </script>
+</body>
+</html>
