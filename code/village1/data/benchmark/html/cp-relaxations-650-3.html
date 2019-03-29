@@ -23,7 +23,17 @@
 
   <script>
 
-    const data = { /** DATA **/ }
+    const data = {
+  "series" : [ {
+    "name" : "CP-Random",
+    "x" : [ 1, 1, 1, 1, 1.0763888888888888, 1.1481481481481481 ],
+    "y" : [ 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 1 ]
+  }, {
+    "name" : "CP-Prop",
+    "x" : [ 1, 1, 1, 1, 1, 1 ],
+    "y" : [ 1, 1, 1, 1, 1, 1 ]
+  } ]
+}
 
     const series = data.series
 	  const container  = document.getElementById('container0');
@@ -36,14 +46,12 @@
 
     const layout = {
       xaxis: {
-        title: "X_AXIS_TITLE",
-        zeroline: false,
-        dtick: 0.2
+        title: "Objective ratio (lower the better)",
+        zeroline: false
       },
       yaxis: {
         title: 'Instances (%)',
-        zeroline: false,
-        dtick: 0.1
+        zeroline: false
       }
     }
 

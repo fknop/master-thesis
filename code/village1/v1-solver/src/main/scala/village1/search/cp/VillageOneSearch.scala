@@ -1,6 +1,5 @@
 package village1.search.cp
 
-import oscar.algo.search.SearchStatistics
 import oscar.cp._
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
@@ -28,7 +27,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
     val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
-    val heuristic = new MostAvailableHeuristic(this, flatWorkers)
+    val heuristic = new MostAvailableHeuristic(this, flatWorkers, workerVariables)
 
     minimize(objective)
     search {

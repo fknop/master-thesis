@@ -33,14 +33,16 @@ object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
 
   def m(s: BenchmarkSerie) = s.results.map(_.mean)
 
-
   val values = Array(m(o0), m(o1))
 
+  val profile = PerformanceProfile.generate(values, values, Array("CP-MA", "CP-FF"))
+  val profile2 = PerformanceProfile.generate(Array(values(0)), values, Array("CP-MA", "CP-FF"))
+  val profile3 = PerformanceProfile.generate(Array(values(1)), values, Array("CP-MA", "CP-FF"))
 
-  val json = PerformanceProfile.generate(values, values, Array("CP-MA", "CP-FF"))
-
-  FileUtils.writeFile(s"data/benchmark/profile/$name.json", json)
-  PerformanceProfileChart.generate(json)(s"data/benchmark/html/$name.html")
+  FileUtils.writeFile(s"data/benchmark/profile/$name.json", profile)
+  PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name.html")
+  PerformanceProfileChart.generate(profile2)(s"data/benchmark/html/$name-CP-MA.html")
+  PerformanceProfileChart.generate(profile3)(s"data/benchmark/html/$name-CP-FF.html")
   val writer = JsonBenchmark.serialize(instance)
   writer(options.out)
 }

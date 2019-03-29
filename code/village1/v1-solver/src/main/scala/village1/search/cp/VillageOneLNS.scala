@@ -42,7 +42,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var bestObjective3: Int = Int.MaxValue
 
   private var relaxation: Relaxation = new RandomRelaxation(this)
-  private var heuristic: Heuristic = new MostAvailableHeuristic(this, flatWorkers)
+  private var heuristic: Heuristic = new MostAvailableHeuristic(this, flatWorkers, workerVariables)
 
   def setInitialSolution(solution: Solution): Unit = {
 
@@ -135,13 +135,14 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     val opt = if (options.isDefined) options.get else LNSOptions()
     val repeat = opt.repeat
 
-    solver.minimize(objective) //1,**/ objective2, objective3, objective)
+//    solver.minimize(objective)
+    solver.minimize(objective1, objective2, objective3,/* objective4,*/ objective) //1,**/ objective2, objective3, objective)
 
-//    updateTightenMode(objective1, TightenType.StrongTighten)
-////    updateTightenMode(objective2, TightenType.StrongTighten)
-////    updateTightenMode(objective3, TightenType.NoTighten)
-//    updateTightenMode(objective4, TightenType.WeakTighten)
-//    updateTightenMode(objective, TightenType.StrongTighten)
+    updateTightenMode(objective1, TightenType.NoTighten)
+    updateTightenMode(objective2, TightenType.StrongTighten)
+    updateTightenMode(objective3, TightenType.NoTighten)
+//    updateTightenMode(objective4, TightenType.NoTighten)
+    updateTightenMode(objective, TightenType.StrongTighten)
 
     search {
       var branching = heuristic.branching
@@ -159,12 +160,12 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-//      println("obj1: " + objective1.value)
+      println("obj1: " + objective1.value)
 //      println("ob4: " + objective4.value)
       bestObjective = objective.value
-//      bestObjective1 = math.min(objective1.value, bestObjective1)
-//      bestObjective2 = math.min(objective2.value, bestObjective2)
-//      bestObjective3 = math.min(objective3.value, bestObjective3)
+      bestObjective1 = math.min(objective1.value, bestObjective1)
+      bestObjective2 = math.min(objective2.value, bestObjective2)
+      bestObjective3 = math.min(objective3.value, bestObjective3)
       emitSolution(createSolution())
     }
 
@@ -198,47 +199,34 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       while (bestObjective > objective.min && r < repeat && totalTime < timeLimitMs && totalSol < solutionLimit) {
         val remainingTime = timeLimitMs - totalTime
         val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
-//          relaxation.relax()
+
+          if (bestObjective2 <= 0) {
+            updateTightenMode(objective2, TightenType.NoTighten)
+            updateTightenMode(objective3, TightenType.StrongTighten)
+          }
+
+          if (bestObjective3 <= 0) {
+            updateTightenMode(objective3, TightenType.NoTighten)
+          }
+
+          if (bestObjective2 <= 0 && bestObjective3 <= 0) {
+            if (Random.nextDouble() < 0.5) {
+              updateTightenMode(objective1, TightenType.StrongTighten)
+//              updateTightenMode(objective4, TightenType.WeakTighten)
+            }
+//            else {
+//              updateTightenMode(objective4, TightenType.StrongTighten)
+//              updateTightenMode(objective1, TightenType.WeakTighten)
+//            }
+          }
 
 
-
-//          if (Random.nextDouble() < 0.50) {
-//            updateTightenMode(objective1, TightenType.StrongTighten)
-//            updateTightenMode(objective4, TightenType.WeakTighten)
-//          }
-//          else {
-//            updateTightenMode(objective4, TightenType.StrongTighten)
-//            updateTightenMode(objective1, TightenType.WeakTighten)
-//          }
 
           val size = (flatWorkers.length / 100) * percentage
 
           relaxShifts(currentSolution, percentage)
           propagationRelax.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
 //          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length - size)
-
-//          if (bestObjective2 <= 0) {
-//            updateTightenMode(objective2, TightenType.NoTighten)
-//            updateTightenMode(objective3, TightenType.StrongTighten)
-//          }
-//
-//          if (bestObjective3 <= 0) {
-//            updateTightenMode(objective3, TightenType.NoTighten)
-//          }
-
-
-//          if (bestObjective2 <= 0 && bestObjective3 <= 0) {
-//            updateTightenMode(objective4, TightenType.StrongTighten)
-
-//            if (Random.nextDouble() < 0.50) {
-//              updateTightenMode(objective1, TightenType.StrongTighten)
-//              updateTightenMode(objective4, TightenType.NoTighten)
-//            }
-//            else {
-//              updateTightenMode(objective4, TightenType.StrongTighten)
-//              updateTightenMode(objective1, TightenType.NoTighten)
-//            }
-//          }
         }
 
         totalSol += stat.nSols
@@ -297,7 +285,7 @@ object MainLNS extends App {
 
   val problem = generator.generate(
     InstanceOptions(
-      t = 10,
+      t = 15,
       clients = 10,
       demands = 50,
       workers = 300,

@@ -5,13 +5,14 @@ import oscar.cp.core.variables.CPIntVar
 import oscar.cp.modeling.Branchings
 import village1.modeling.VillageOneModel
 
-class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends Branchings with Heuristic {
+class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
 
   private val demands = model.demands
   private val workers = model.workers
   private val mostAvailable: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkers()
   private val reverseMap = buildReverseMap()
   private val demandsAtTime: Array[Int] = buildDemandsAtTime()
+  private val previous = buildPreviousPeriod()
 
   private def buildDemandsAtTime(): Array[Int] = {
     val demandsAtTime = Array.fill(model.T)(0)
@@ -36,6 +37,19 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
       }
     }
     reverse
+  }
+
+  private def buildPreviousPeriod(): Array[Array[Int]] = {
+    val previous = Array.fill(model.D, model.T)(-1)
+
+    for (d <- model.Demands) {
+      val periods = demands(d).periods.toArray.sorted
+      for (i <- periods.length - 1 until 0 by -1) {
+        previous(d)(periods(i)) = periods(i - 1)
+      }
+    }
+
+    previous
   }
 
   private def generateMostAvailableWorkers(): Array[Array[Array[Array[Int]]]] = {
@@ -66,20 +80,20 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
   def varHeuristic(i: Int): (Int) = {
     val (t, d, p) = reverseMap(i)
 
-   // Choose this variable if domain is 2: meaning it has one value and the sentinel value.
+//    Choose this variable if domain is 2: meaning it has one value and the sentinel value.
     if (x(i).size == 2) {
       Int.MinValue //, demands(d).requiredWorkers, -demands(d).periods.size)
     }
     else {
       maxDegree(x(i)) - demands(d).requirements(p).skills.length //, demands(d).requiredWorkers, -demands(d).periods.size)
     }
+//    i
   }
 
-  def valueHeuristic(i: Int): Int = {
+  def mostAvailableHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
     val mostAvailableWorkers = mostAvailable(d)(p)(t)
 
-    // If x(i) has one value and the sentinel value
     if (x(i).size == 2 && x(i).hasValue(-1)) {
       x(i).max
     }
@@ -96,6 +110,18 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar]) extends
       x(i).min
     }
   }
+
+  def valueHeuristic(i: Int): Int = {
+    val (t, d, p) = reverseMap(i)
+    val prev = previous(d)(t)
+    if (prev != -1 && variables(prev)(d)(p).isBound && x(i).hasValue(variables(prev)(d)(p).value)) {
+        variables(prev)(d)(p).value
+    }
+    else {
+      mostAvailableHeuristic(i)
+    }
+  }
+
 
 
   def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
