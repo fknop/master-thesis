@@ -5,13 +5,16 @@ import oscar.cp.modeling.Branchings
 import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.api._
+import village1.benchmark.charts.PerformanceProfileChart
 import village1.search.cp.heuristic.Heuristic
 import village1.util.{FileUtils, Utils}
 
 
 object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
 
-  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/cp-heuristic${Utils.randomInt(0, 1000)}.json"))
+  val name = s"cp-heuristic-${Utils.randomInt(0, 1000)}"
+
+  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
 
   val benchmark = new SolverBenchmark(options = options)
   val (t0, o0) = benchmark.run("CP-MA", solveCP(benchmark))
@@ -33,12 +36,11 @@ object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
 
   val values = Array(m(o0), m(o1))
 
-  println(m(o0).mkString(" "))
-  println(m(o1).mkString(" "))
 
   val json = PerformanceProfile.generate(values, values, Array("CP-MA", "CP-FF"))
-  FileUtils.writeFile(s"data/benchmark/profile/cp-heuristic${Utils.randomInt(0, 1000)}.json", json)
 
+  FileUtils.writeFile(s"data/benchmark/profile/$name.json", json)
+  PerformanceProfileChart.generate(json)(s"data/benchmark/html/$name.html")
   val writer = JsonBenchmark.serialize(instance)
   writer(options.out)
 }
