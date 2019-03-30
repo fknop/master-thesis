@@ -18,7 +18,9 @@ case class ProblemSize(T: Int, D: Int, W: Int) extends Comparable[ProblemSize] {
 }
 
 //case class BenchmarkResult(time: BenchmarkMeasurement, objective: BenchmarkMeasurement)
-case class BenchmarkSerie(name: String, results: Array[BenchmarkMeasurement])
+case class BenchmarkSerie(name: String, results: Array[BenchmarkMeasurement]) {
+  def means: Array[Double] = results.map(_.mean)
+}
 case class BenchmarkInstance(
     repeat: Int,
     dryRun: Int,

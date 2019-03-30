@@ -15,7 +15,7 @@ import village1.util.SysUtils.time
 import scala.util.Random
 
 
-case class LNSOptions(repeat: Int = Int.MaxValue)
+case class LNSOptions(repeat: Int = Int.MaxValue, limit: Int = 2500)
 
 class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
       extends VillageOneCPModel(problem, options, base)
@@ -136,7 +136,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     val repeat = opt.repeat
 
 //    solver.minimize(objective)
-    solver.minimize(objective1, objective2, objective3,/* objective4,*/ objective) //1,**/ objective2, objective3, objective)
+    solver.minimize(objective1, objective2, objective3, /* objective4, */ objective) //1,**/ objective2, objective3, objective)
 
     updateTightenMode(objective1, TightenType.NoTighten)
     updateTightenMode(objective2, TightenType.StrongTighten)
@@ -172,7 +172,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     val runningTime = time {
       val timeLimitMs = timeLimit * 1000
-      var limit = 2500
+      var limit = opt.limit
       var totalTime = 0L
       var totalSol = 0
 
@@ -210,10 +210,13 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
           }
 
           if (bestObjective2 <= 0 && bestObjective3 <= 0) {
-            if (Random.nextDouble() < 0.5) {
-              updateTightenMode(objective1, TightenType.StrongTighten)
+//            updateTightenMode(objective4, TightenType.StrongTighten)
+            updateTightenMode(objective1, TightenType.StrongTighten)
+
+//            if (Random.nextDouble() < 0.5) {
+//              updateTightenMode(objective1, TightenType.StrongTighten)
 //              updateTightenMode(objective4, TightenType.WeakTighten)
-            }
+//            }
 //            else {
 //              updateTightenMode(objective4, TightenType.StrongTighten)
 //              updateTightenMode(objective1, TightenType.WeakTighten)

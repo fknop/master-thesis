@@ -43,7 +43,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   val objective1: CPIntVar = sum(shiftNWorkers.flatten)
   val objective2: CPIntVar = if (options.allowPartial) sentinelViolations else CPIntVar(Set(0))
   val objective3: CPIntVar = if (workingRequirementsViolations != null) workingRequirementsViolations else CPIntVar(Set(0))
-  val objective4: CPIntVar = sum(contiguousWorkers.flatten)
+//  val objective4: CPIntVar = sum(contiguousWorkers.flatten)
 
   val objective: CPIntVar = sum(List(objective1, objective2, objective3/*, objective4*/)) //sum(List(objective1, objective2, objective3, objective4))
 
@@ -313,7 +313,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       for (w <- 0 until demand.requiredWorkers) {
         val workersForDemand = demand.periods.map(t => workerVariables(t)(d)(w)).toArray
         if (workersForDemand.length > 1) {
-//          add(new SoftContiguousFWC(workersForDemand, contiguousWorkers(d)(w)))
+//          add(new SoftContiguous(workersForDemand, contiguousWorkers(d)(w)))
           add(new AtLeastNValue(workersForDemand, shiftNWorkers(d)(w)), CPPropagStrength.Weak)
         }
       }

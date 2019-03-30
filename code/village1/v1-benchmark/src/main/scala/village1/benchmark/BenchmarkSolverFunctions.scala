@@ -5,7 +5,7 @@ import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
 import village1.search.SearchResult
 import village1.search.cp.relaxations.PropagationGuidedRelaxation
-import village1.search.cp.{VillageOneLNS, VillageOneSearch}
+import village1.search.cp.{LNSOptions, VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 
 object BenchmarkSolverFunctions {
@@ -29,11 +29,11 @@ object BenchmarkSolverFunctions {
 //    }
 //  }
 
-  def solveCP (b: SolverBenchmark, options: CPModelOptions = CPModelOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}): VillageOneModel => (Long, Int) = {
+  def solveCP (b: SolverBenchmark, options: CPModelOptions = CPModelOptions(), lnsOptions: LNSOptions = LNSOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base, options)
       applyToSearch(search)
-      val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
+      val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true, options = Some(lnsOptions))
       if (results.solution.isEmpty) null
       else (results.time, results.solution.get.objective)
     }
