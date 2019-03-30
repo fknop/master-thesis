@@ -89,25 +89,31 @@ class SolverBenchmark(
     val timeMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
     val objectiveMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
 
-    log("Start run")
+    log("Start Dry Runs")
+    for (_ <- 0 until DryRun) {
+      val model = baseModels(0)(0)(0)
+      solve(model)
+    }
+    log("End Dry Run")
 
-    for (r <- -DryRun until Repeat) {
-      val measure = r >= 0
+    log("Start Runs")
+
+    for (r <- 0 until Repeat) {
+      log(s"Start Run $r")
+
       for (i <- T.indices) {
         for (j <- D.indices) {
           for (k <- W.indices) {
             val baseModel = baseModels(i)(j)(k)
             val result = solve(baseModel)
-            if (measure) {
-              if (result == null) {
-                timeMeasurements(i)(j)(k)(r) = -1
-                objectiveMeasurements(i)(j)(k)(r) = -1
-              }
-              else {
-                val (time, objective) = result
-                timeMeasurements(i)(j)(k)(r) = time
-                objectiveMeasurements(i)(j)(k)(r) = objective
-              }
+            if (result == null) {
+              timeMeasurements(i)(j)(k)(r) = -1
+              objectiveMeasurements(i)(j)(k)(r) = -1
+            }
+            else {
+              val (time, objective) = result
+              timeMeasurements(i)(j)(k)(r) = time
+              objectiveMeasurements(i)(j)(k)(r) = objective
             }
           }
         }
@@ -116,7 +122,7 @@ class SolverBenchmark(
       log(s"End run: $r")
     }
 
-    log("End run")
+    log("End Runs")
     log("Start measurements")
 
     val timeSerie = Array.fill[BenchmarkMeasurement](T.length * D.length * W.length)(null)

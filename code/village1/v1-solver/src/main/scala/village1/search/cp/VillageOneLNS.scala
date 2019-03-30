@@ -160,7 +160,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     onSolution {
       currentSolution = new CPIntSol(flatWorkers.map(_.value), objective.value, 0L)
-      println("obj1: " + objective1.value)
+//      println("obj1: " + objective1.value)
 //      println("ob4: " + objective4.value)
       bestObjective = objective.value
       bestObjective1 = math.min(objective1.value, bestObjective1)

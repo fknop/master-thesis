@@ -3,7 +3,6 @@ package village1.benchmark
 import village1.benchmark.api.SolverBenchmark
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
-import village1.modeling.mip.MipModelOptions
 import village1.search.SearchResult
 import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.search.cp.{VillageOneLNS, VillageOneSearch}
@@ -72,8 +71,8 @@ object BenchmarkSolverFunctions {
         val nSols = if (cpResults.solution.isDefined) 1 else 0
 
         val results = mip.solve(silent = true, timeLimit = remaining, solutionLimit = math.max(b.SolutionLimit - nSols, 1))
-        if (mip.lastSolution == null && cp.lastSolution == null) null
-        else if (mip.lastSolution == null && cp.lastSolution != null) (cpResults.time + results.time, cp.lastSolution.get.objective)
+        if (mip.lastSolution.isEmpty && cp.lastSolution.isEmpty) null
+        else if (mip.lastSolution.isEmpty && cp.lastSolution.isDefined) (cpResults.time + results.time, cp.lastSolution.get.objective)
         else (cpResults.time + results.time, mip.lastSolution.get.objective)
       }
     }
