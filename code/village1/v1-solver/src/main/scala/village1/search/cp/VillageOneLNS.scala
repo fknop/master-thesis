@@ -3,6 +3,7 @@ package village1.search.cp
 import oscar.cp._
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.searches.lns.CPIntSol
+import oscar.cp.searches.lns.operators.RelaxationFunctions
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
@@ -171,7 +172,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
 
     val runningTime = time {
-      val timeLimitMs = timeLimit * 1000
+      val timeLimitMs: Long = timeLimit.toLong * 1000l
       var limit = opt.limit
       var totalTime = 0L
       var totalSol = 0
@@ -184,12 +185,13 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
         else
           start(nSols = 1, timeLimit = timeLimit)
 
+      println("test")
       totalSol = stat.nSols
       totalTime += stat.time
 
       var r = 0
 
-      var found = true
+      var found = totalSol > 0
 
       var percentage = 50
       val maxPercentage = 70
@@ -198,15 +200,15 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
       while (bestObjective > objective.min && r < repeat && totalTime < timeLimitMs && totalSol < solutionLimit) {
         val remainingTime = timeLimitMs - totalTime
-        val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
 
+        val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
           if (bestObjective2 <= 0) {
-            updateTightenMode(objective2, TightenType.NoTighten)
+            updateTightenMode(objective2, TightenType.WeakTighten)
             updateTightenMode(objective3, TightenType.StrongTighten)
           }
 
           if (bestObjective3 <= 0) {
-            updateTightenMode(objective3, TightenType.NoTighten)
+            updateTightenMode(objective3, TightenType.WeakTighten)
           }
 
           if (bestObjective2 <= 0 && bestObjective3 <= 0) {
@@ -227,9 +229,14 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
           val size = (flatWorkers.length / 100) * percentage
 
-          relaxShifts(currentSolution, percentage)
-          propagationRelax.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
-//          RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, flatWorkers.length - size)
+//          relaxShifts(currentSolution, percentage)
+          if (bestObjective3 <= 0) {
+            propagationRelax.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
+          }
+          else {
+            println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
+            RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
+          }
         }
 
         totalSol += stat.nSols
@@ -288,10 +295,10 @@ object MainLNS extends App {
 
   val problem = generator.generate(
     InstanceOptions(
-      t = 15,
+      t = 10,
       clients = 10,
-      demands = 50,
-      workers = 300,
+      demands = 30,
+      workers = 200,
       skills = 10
     )
   )

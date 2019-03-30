@@ -11,7 +11,8 @@ case class Problem(
   machines: Array[Machine] = Array(),
   workerWorkerIncompatibilities: Array[Array[Int]] = Array(),
   workerClientIncompatibilities: Array[Array[Int]] = Array(),
-  workingRequirements: Array[WorkingRequirement] = Array()
+  workingRequirements: Array[WorkingRequirement] = Array(),
+  initialSolution: Option[Solution] = None
 ) {
 
   for (i <- demands.indices) {

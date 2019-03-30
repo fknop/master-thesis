@@ -168,7 +168,7 @@ class InstanceGenerator(seed: Long = 0L) {
 
   private def generateWorkingRequirements(options: InstanceOptions, workers: Array[Worker]): Array[WorkingRequirement] = {
     var requirements = List[WorkingRequirement]()
-    val assignRequirement = 0.012
+    val assignRequirement = 0.3
     val assignBoth = 0.05
     val assignMin = 0.9
 

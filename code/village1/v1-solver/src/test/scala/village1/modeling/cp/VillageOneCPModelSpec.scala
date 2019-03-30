@@ -2,6 +2,7 @@ package village1.modeling.cp
 
 import org.scalatest.Inside.inside
 import oscar.cp.core.NoSolutionException
+import village1.data.Worker
 import village1.json.JsonParser
 import village1.modeling._
 import village1.modeling.violations.{WorkerViolation, WorkingRequirementViolation}
@@ -42,34 +43,43 @@ class VillageOneCPModelSpec extends CommonSpec {
       val search = getSearch(JsonParser.parse("data/test/additional-skills-value.json"))
 
       search.onSolutionFound { solution =>
-        checkValid(solution)
-        checkNotPartial(solution)
-
-        val plannings = solution.plannings
-        val p = plannings(0)
-
-        val workers = p.workerAssignments.head.workers
-        workers should have size 3
+        println("sol")
+//        checkValid(solution)
+//        checkNotPartial(solution)
+//
+//        val plannings = solution.plannings
+//        val p = plannings(0)
+//
+//        val workers = p.workerAssignments.head.workers
+//        workers should have size 3
       }
 
       search.solve()
+
+      val solution = search.lastSolution.get
+      checkValid(solution)
+      checkNotPartial(solution)
+
+      val plannings = solution.plannings
+      val p = plannings(0)
+
+      val workers = p.workerAssignments.head.workers
+      workers should have size 3
     }
 
     it("Should return the correct workers assigned with additional skills (with special Min value)") {
       val search = getSearch(JsonParser.parse("data/test/additional-skills-value-2.json"))
 
-      search.onSolutionFound { solution =>
-        checkValid(solution)
-        checkNotPartial(solution)
-
-        val plannings = solution.plannings
-        val p = plannings(0)
-
-        val workers = p.workerAssignments.head.workers
-        workers should have size 3
-      }
-
       search.solve()
+      val solution = search.lastSolution.get
+      checkValid(solution)
+      checkNotPartial(solution)
+
+      val plannings = solution.plannings
+      val p = plannings(0)
+
+      val workers = p.workerAssignments.head.workers
+      workers should have size 3
     }
 
     it("Should be unsolvable") {
@@ -324,5 +334,34 @@ class VillageOneCPModelSpec extends CommonSpec {
         getSearch(problem, CPModelOptions().copy(allowPartial = false))
       }
     }
+  }
+
+  describe("Initial Partial solution") {
+
+    val problem = JsonParser.parse("data/test/not-enough-workers.json")
+
+    it("Should have the sentinel values replaced with additional workers") {
+      val search = getSearch(problem)
+
+      search.solve()
+      val solution = search.lastSolution
+
+      checkPartial(solution.get)
+
+      val newProblem = problem.copy(
+        workers = problem.workers ++ Array(Worker(1, availabilities = Set(0)), Worker(2, availabilities = Set(0))),
+        initialSolution = solution
+      )
+
+      val search2 = getSearch(newProblem)
+      search2.solve()
+
+
+      val solution2 = search2.lastSolution.get
+
+      checkNotPartial(solution2)
+      checkValid(solution2)
+    }
+
   }
 }
