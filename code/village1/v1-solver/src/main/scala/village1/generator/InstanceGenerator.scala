@@ -20,6 +20,11 @@ class InstanceGenerator(seed: Long = 0L) {
     skills(randomInt(random, 0, skills.length - 1))
   }
 
+
+  private def takeSkills(skills: Array[Skill], n: Int): Array[Skill] = {
+    random.shuffle(skills.toList).take(n).toArray
+  }
+
   private def generateDemands(
       options: InstanceOptions,
       maxWorkers: Int,
@@ -37,8 +42,9 @@ class InstanceGenerator(seed: Long = 0L) {
 
       for (_ <- 0 until requiredWorkers) {
         if (isTrue(options.probabilities.getOrElse("assignSkill", 0.5))) {
-          val skill = takeSkill(skills)
-          requiredSkills :+= Array(skill)
+          val n = randomInt(random, 0, math.min(skills.length, 3))
+          val s = takeSkills(skills, n)
+          requiredSkills :+= s
         }
       }
 
@@ -159,6 +165,37 @@ class InstanceGenerator(seed: Long = 0L) {
 
   }
 
+
+  private def generateWorkingRequirements(options: InstanceOptions, workers: Array[Worker]): Array[WorkingRequirement] = {
+    var requirements = List[WorkingRequirement]()
+    val assignRequirement = 0.012
+    val assignBoth = 0.05
+    val assignMin = 0.9
+
+    for (w <- workers.indices if isTrue(assignRequirement)) {
+      val availabilities = workers(w).availabilities
+      val size = availabilities.size
+      val prob = random.nextDouble()
+      var min: Option[Int] = None
+      var max: Option[Int]  = None
+      if (assignBoth <= prob) {
+        min = Some(randomInt(random, 0, size - 1))
+        max = Some(randomInt(random, min.get, size - 1))
+      }
+      else if (assignMin <= prob) {
+        min = Some(randomInt(random, 0, size - 1))
+      }
+      else {
+        max = Some(randomInt(random, 0, size - 1))
+      }
+
+      requirements = WorkingRequirement(w, min, max) :: requirements
+    }
+
+    println(requirements)
+    requirements.toArray
+  }
+
   // Only generate simple skills for now (does not change much in the solver)
   private def generateSkills(options: InstanceOptions) = Array.tabulate(options.skills)(i => Skill(name = s"Skill $i"))
   private def generateClients(options: InstanceOptions) = Array.tabulate(options.clients)(i => Client(name = s"Client $i"))
@@ -189,6 +226,8 @@ class InstanceGenerator(seed: Long = 0L) {
     val workforce = generateWorkforce(options)
     val workers = generateWorkersAvailabilities(options, workforce, demands, skills)
 
+    val requirements = generateWorkingRequirements(options, workers)
+
 
     Problem(
       T = options.t,
@@ -196,7 +235,8 @@ class InstanceGenerator(seed: Long = 0L) {
       demands = demands,
       clients = clients,
       locations = locations,
-      machines = machines
+      machines = machines,
+      workingRequirements = requirements
     )
   }
 }
