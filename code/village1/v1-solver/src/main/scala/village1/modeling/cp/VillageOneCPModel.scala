@@ -36,9 +36,9 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
 
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
-  val contiguousWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(0 until demands(d).periods.size)))
-  var workingRequirementsViolations: CPIntVar = _
-  val sentinelViolations = CPIntVar(0, CPIntVar.MaxValue)
+//  val contiguousWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(0 until demands(d).periods.size)))
+  var workingRequirementsViolations: CPIntVar = CPIntVar(0, CPIntVar.MaxValue)
+  val sentinelViolations = CPIntVar(0, workerVariables.flatten.flatten.length)
 
   initialize()
 
@@ -334,12 +334,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
         add(softGcc(variables.filter(_.hasValue(r.worker)), r.worker to r.worker, Array(low(r.worker)), Array(up(r.worker)), violations(i)), CPPropagStrength.Weak)
       }
 
-      if (workingRequirementsViolations == null) {
-        workingRequirementsViolations = CPIntVar(0, 10000)
-      }
-//      workingRequirementsViolations = sum(violations) //CPIntVar(0, CPIntVar.MaxValue)
       add(sum(violations, workingRequirementsViolations))
-//      add(softGcc(variables, values, low, up, workingRequirementsViolations), CPPropagStrength.Weak)
     }
   }
 
@@ -351,20 +346,12 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
       val low = Array.fill(W)(0)
       val up = Array.tabulate(W)(workers(_).availabilities.size)
-      val values = workers.indices
-//
-//      val violations = Array.tabulate(requirements.length) { i =>
-//        val r = requirements(i)
-//        val size = workers(r.worker).availabilities.size
-//        val min = r.min.getOrElse(0)
-//        val max = r.max.getOrElse(size)
-//        CPIntVar(0, math.max(min, size - max))
-//      }
 
       val violations: Array[CPIntVar] = Array.fill(requirements.length)(null)
 
       val occurrences = requirements.map(_.worker).map(w => (w, CPIntVar(0, workers(w).availabilities.size)))
-      add(gcc(variables, occurrences), CPPropagStrength.Weak)
+      val set = requirements.map(_.worker).toSet
+      add(gcc(variables.filter(v => set.count(v.hasValue) > 0), occurrences), CPPropagStrength.Weak)
       for (i <- requirements.indices) {
         val r = requirements(i)
         r.min match {
@@ -385,16 +372,10 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
         )
 
         violations(i) = violation
-//        add(softGcc(variables.filter(_.hasValue(r.worker)), r.worker to r.worker, Array(low(r.worker)), Array(up(r.worker)), violations(i)), CPPropagStrength.Strong)
       }
 
-      if (workingRequirementsViolations == null) {
-        workingRequirementsViolations = CPIntVar(0, 10000)
-      }
+
       add(sum(violations, workingRequirementsViolations))
-
-//      workingRequirementsViolations = sum(violations) //CPIntVar(0, CPIntVar.MaxValue)
-
     }
   }
 

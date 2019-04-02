@@ -285,12 +285,12 @@ object MainLNS extends App {
     t = 15,
     clients = 10,
     demands = 50,
-    workers = 300,
+    workers = 100,
     skills = 10
   )
 
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.1))
+    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.3))
   )
 
 
