@@ -4,7 +4,6 @@ import village1.benchmark.api.SolverBenchmark
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
 import village1.search.SearchResult
-import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.search.cp.{LNSOptions, VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 
@@ -43,10 +42,10 @@ object BenchmarkSolverFunctions {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
 
-      search.relax {
-        val relaxation = new PropagationGuidedRelaxation()
-        () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
-      }
+//      search.relax {
+//        val relaxation = new PropagationGuidedRelaxation()
+//        () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
+//      }
 
       val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
       assert(search.lastSolution != null)

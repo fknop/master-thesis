@@ -168,9 +168,9 @@ class InstanceGenerator(seed: Long = 0L) {
 
   private def generateWorkingRequirements(options: InstanceOptions, workers: Array[Worker]): Array[WorkingRequirement] = {
     var requirements = List[WorkingRequirement]()
-    val assignRequirement = 0.3
-    val assignBoth = 0.05
-    val assignMin = 0.9
+    val assignRequirement = options.probabilities.getOrElse("assignWorkingRequirements", 0.2)
+    val assignBoth = 0.01
+    val assignMin = 0.98
 
     for (w <- workers.indices if isTrue(assignRequirement)) {
       val availabilities = workers(w).availabilities
@@ -178,15 +178,15 @@ class InstanceGenerator(seed: Long = 0L) {
       val prob = random.nextDouble()
       var min: Option[Int] = None
       var max: Option[Int]  = None
-      if (assignBoth <= prob) {
-        min = Some(randomInt(random, 0, size - 1))
+      if (prob <= assignBoth) {
+        min = Some(randomInt(random, 1, math.max(1, size / 2)))
         max = Some(randomInt(random, min.get, size - 1))
       }
-      else if (assignMin <= prob) {
-        min = Some(randomInt(random, 0, size - 1))
+      else if (prob <= assignMin) {
+        min = Some(randomInt(random, 1, math.max(1, size / 2)))
       }
       else {
-        max = Some(randomInt(random, 0, size - 1))
+        max = Some(randomInt(random, 1, size - 1))
       }
 
       requirements = WorkingRequirement(w, min, max) :: requirements

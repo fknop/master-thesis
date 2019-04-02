@@ -279,6 +279,7 @@ class VillageOneCPModelSpec extends CommonSpec {
       search.solve()
 
       val violations = search.lastSolution.get.violations
+      println(violations.mkString(" "))
       violations.size should equal(1)
       violations.head should matchPattern { case WorkingRequirementViolation(_, _, _, v) => }
       inside(violations.head) {

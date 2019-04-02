@@ -4,7 +4,6 @@ import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api._
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.charts.PerformanceProfileChart
-import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.util.{FileUtils, Utils}
 
 object CPRelaxationsBenchmark extends CommandLineBenchmark {
@@ -16,10 +15,10 @@ object CPRelaxationsBenchmark extends CommandLineBenchmark {
   val benchmark = new SolverBenchmark(options = options)
   val (t0, o0) = benchmark.run("CP-Random", solveCP(benchmark))
   val (t1, o1) = benchmark.run("CP-Prop", solveCP(benchmark, applyToSearch = search => {
-    search.relax {
-      val relaxation = new PropagationGuidedRelaxation()
-      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 2)
-    }
+//    search.relax {
+//      val relaxation = new PropagationGuidedRelaxation()
+//      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 2)
+//    }
   }))
 
   def m(s: BenchmarkSerie) = s.results.map(_.mean)

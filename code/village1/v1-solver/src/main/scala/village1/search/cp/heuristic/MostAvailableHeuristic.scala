@@ -3,9 +3,9 @@ package village1.search.cp.heuristic
 import oscar.algo.search.Branching
 import oscar.cp.core.variables.CPIntVar
 import oscar.cp.modeling.Branchings
-import village1.modeling.VillageOneModel
+import village1.modeling.cp.VillageOneCPModel
 
-class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
+class MostAvailableHeuristic(model: VillageOneCPModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
 
   private val demands = model.demands
   private val workers = model.workers
@@ -13,6 +13,8 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variabl
   private val reverseMap = buildReverseMap()
   private val demandsAtTime: Array[Int] = buildDemandsAtTime()
   private val previous = buildPreviousPeriod()
+
+
 
   private def buildDemandsAtTime(): Array[Int] = {
     val demandsAtTime = Array.fill(model.T)(0)
@@ -67,6 +69,13 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variabl
           val sorted = possibleWorkers.toArray.sortBy(w => {
             val size = workers(w).availabilities.intersect(demands(d).periods).size
             val remaining = workers(w).availabilities.size - size
+//            val requirement = model.problem.workingRequirements.find(_.worker == w)
+//            var min = 0
+//            var max = size
+//            if (requirement.isDefined) {
+//              max = requirement.get.max.getOrElse(0)
+//              min = requirement.get.min.getOrElse(0)
+//            }
             (-size, remaining, w)
           })(Ordering[(Int, Int, Int)])
 
@@ -91,7 +100,9 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variabl
   }
 
   def mostAvailableHeuristic(i: Int): Int = {
+
     val (t, d, p) = reverseMap(i)
+
     val mostAvailableWorkers = mostAvailable(d)(p)(t)
 
     if (x(i).size == 2 && x(i).hasValue(-1)) {
@@ -110,6 +121,7 @@ class MostAvailableHeuristic(model: VillageOneModel, x: Array[CPIntVar], variabl
       x(i).min
     }
   }
+
 
   def valueHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
