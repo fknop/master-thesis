@@ -8,7 +8,7 @@ import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
-import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristic}
+import village1.search.cp.heuristic.MostAvailableHeuristicDynamic
 import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.search.{Search, SearchResult}
 import village1.util.SysUtils.time
@@ -41,9 +41,10 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var bestObjective1: Int = Int.MaxValue
   var bestObjective2: Int = Int.MaxValue
   var bestObjective3: Int = Int.MaxValue
+  var bestWorkingViolations: Int = 0
 
 //  private var relaxation: Relaxation = new RandomRelaxation(this)
-  private val heuristic: Heuristic = new MostAvailableHeuristic(this, flatWorkers, workerVariables)
+  private val heuristic = new MostAvailableHeuristicDynamic(this, flatWorkers, workerVariables)
   private val relaxation = new PropagationGuidedRelaxation()
 
   search {
@@ -61,10 +62,10 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   }
 
   onSolution {
-    bestObjective =  best(objective, bestObjective)
-    bestObjective1 = best(objective1, bestObjective1)
-    bestObjective2 = best(objective2, bestObjective2)
-    bestObjective3 = best(objective3, bestObjective3)
+    bestObjective =  objective1.value
+    bestObjective1 = objective1.value
+    bestObjective2 = objective2.value
+    bestObjective3 = objective3.value
     currentSolution = new CPIntSol(flatWorkers.map(_.value), bestObjective, 0L)
     emitSolution(createSolution())
   }
@@ -134,7 +135,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     val opt = if (options.isDefined) options.get else LNSOptions()
     val repeat = opt.repeat
-    val bestWorkingViolations = opt.bestWorkingViolations
+    bestWorkingViolations = opt.bestWorkingViolations
 
     solver.minimize(objective1, objective2, objective3, objective)
 
@@ -153,7 +154,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       val stat =
         if (currentSolution != null)
           startSubjectTo(nSols = 1, timeLimit = timeLimit) {
-            relax(bestWorkingViolations)
+            relax()
           }
         else
           start(nSols = 1, timeLimit = timeLimit)
@@ -169,8 +170,8 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
         val remainingTime = timeLimitMs - totalTime
 
         val stat = startSubjectTo(nSols = solutionLimit - totalSol, failureLimit = limit, timeLimit = (remainingTime / 1000.0).round.toInt) {
-          tightenObjectives(bestWorkingViolations)
-          relax(bestWorkingViolations)
+          tightenObjectives()
+          relax()
         }
 
         totalSol += stat.nSols
@@ -195,29 +196,37 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     solver.obj(objective).tightenMode = tightenMode
   }
 
-  private def tightenObjectives (bestWorkingViolations: Int): Unit = {
+  private def tightenObjectives (): Unit = {
     if (bestObjective2 <= 0)
       updateTightenMode(objective2, TightenType.WeakTighten)
     else
       updateTightenMode(objective2, TightenType.StrongTighten)
 
     if (bestObjective3 > bestWorkingViolations) {
+      heuristic.useRequirements = true
       updateTightenMode(objective3, TightenType.StrongTighten)
       updateTightenMode(objective1, TightenType.NoTighten)
+      updateTightenMode(objective, TightenType.NoTighten)
     }
     else {
+      heuristic.useRequirements = false
       updateTightenMode(objective3, TightenType.WeakTighten)
       updateTightenMode(objective1, TightenType.StrongTighten)
+      updateTightenMode(objective, TightenType.StrongTighten)
     }
   }
 
-  private def relax(bestWorkingViolations: Int): Unit = {
+  private def relax(): Unit = {
     if (bestObjective3 <= bestWorkingViolations) {
-      relaxShifts(currentSolution, 80)
+      relaxShifts(currentSolution, 60)
       relaxation.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
+//      val percentage = 80
+//      val size = (flatWorkers.length / 100) * percentage
+//      println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
+//      RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
     }
     else {
-      val percentage = 10
+      val percentage = 20
       val size = (flatWorkers.length / 100) * percentage
       println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
       RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
@@ -238,8 +247,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       }
     }
   }
-
-  private def best(objective: CPIntVar, current: Int) = math.min(objective.value, current)
 }
 
 
@@ -285,12 +292,12 @@ object MainLNS extends App {
     t = 15,
     clients = 10,
     demands = 50,
-    workers = 100,
+    workers = 300,
     skills = 10
   )
 
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.3))
+    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.0))
   )
 
 
@@ -298,17 +305,8 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-//    search.relax {
-//      val relaxation = new PropagationGuidedRelaxation()
-//      () => {
-//        relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 2)
-//      }
-//    }
 
-
-
-
-    val stats = search.solve(timeLimit = 60)
+    val stats = search.solve(timeLimit = 60, options = Some(LNSOptions().copy(bestWorkingViolations = 0)))
 
     val solution = search.lastSolution
 

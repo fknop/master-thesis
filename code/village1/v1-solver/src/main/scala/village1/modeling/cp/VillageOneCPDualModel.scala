@@ -28,12 +28,12 @@ class VillageOneCPDualModel(primalModel: VillageOneCPModel) extends VillageOneMo
     var position = 0
     for (t <- Periods) {
 
-      for (w <- Workers if variables(t)(w) != null) {
-        val z = CPIntVar(Set(-1, w))
-        add(elementVar(sentinel +: flatPrimal, variables(t)(w) + 1, z), CPPropagStrength.Strong)
-        val withoutNull = variables(t).map(v => if (v == null) sentinel else v)
-        add(elementVar(sentinel +: withoutNull, z + 1, variables(t)(w)))
-      }
+//      for (w <- Workers if variables(t)(w) != null) {
+//        val z = CPIntVar(Set(-1, w))
+//        add(elementVar(sentinel +: flatPrimal, variables(t)(w) + 1, z), CPPropagStrength.Strong)
+//        val withoutNull = variables(t).map(v => if (v == null) sentinel else v)
+//        add(elementVar(sentinel +: withoutNull, z + 1, variables(t)(w)), CPPropagStrength.Strong)
+//      }
 
       for (d <- Demands if demands(d).occurs(t)) {
         for (p <- demands(d).positions) {
@@ -46,7 +46,8 @@ class VillageOneCPDualModel(primalModel: VillageOneCPModel) extends VillageOneMo
       }
     }
 
-    applyAllDifferent()
+//    applyAllDifferent()
+    add(gcc(variables.flatten.filter(_ != null), 0 until nPositions, 1, 1))
   }
 
   private def applyAllDifferent() = {

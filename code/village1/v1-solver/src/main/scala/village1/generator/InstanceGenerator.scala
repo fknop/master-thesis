@@ -192,7 +192,6 @@ class InstanceGenerator(seed: Long = 0L) {
       requirements = WorkingRequirement(w, min, max) :: requirements
     }
 
-    println(requirements)
     requirements.toArray
   }
 
