@@ -5,6 +5,7 @@ import oscar.algo.search.Branching
 import oscar.cp.core.variables.{CPIntVar, CPVar}
 import oscar.cp.core.{CPPropagStrength, Constraint}
 import oscar.cp.modeling.Branchings
+import village1.modeling.Constants
 import village1.modeling.cp.VillageOneCPModel
 
 class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
@@ -28,9 +29,11 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     private def updateCounters(i: Int): Unit = {
       val (t, d, p) = reverseMap(i)
       val w = x(i).value
-      occurrences(w) += 1
-      _occurrencesForPosition(w)(d)(p) += 1
-      _availabilities(w).removeValue(t)
+      if (w != Constants.SentinelWorker) {
+        occurrences(w) += 1
+        _occurrencesForPosition(w)(d)(p) += 1
+        _availabilities(w).removeValue(t)
+      }
       _periods(d)(p).removeValue(t)
     }
   }
@@ -240,7 +243,7 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
       else mostAvailable(d)(p)
 
 
-    if (x(i).size == 2 && x(i).hasValue(-1)) {
+    if (x(i).size == 2 && x(i).hasValue(Constants.SentinelWorker)) {
       x(i).max
     }
     else {
