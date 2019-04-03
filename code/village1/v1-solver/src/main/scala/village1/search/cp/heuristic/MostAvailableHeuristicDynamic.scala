@@ -61,9 +61,21 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
 
   private val _tmp = Array.fill(model.T)(0)
 
-  var mostAvailable: Array[Array[Array[Int]]] = generateMostAvailableWorkers()
+  private val _requirements: Array[(Int, Int)] = Array.tabulate(model.W) { w =>
+    val requirement = model.problem.workingRequirements.find(_.worker == w)
+    if (requirement.isDefined) {
+      val min = requirement.get.min.getOrElse(0)
+      val max = requirement.get.max.getOrElse(workers(w).availabilities.size)
+      (min, max)
+    }
+    else {
+      (0, workers(w).availabilities.size)
+    }
+  }
 
-  private val mostAvailableWithRequirements: Array[Array[Array[Int]]] = generateMostAvailableWorkersWithRequirements()
+  var mostAvailable: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkers()
+//  private val mostAvailableWithRequirements: Array[Array[Array[Array[Int]]]] = generateMostAvailableWorkersWithRequirements()
+
   private val reverseMap = buildReverseMap()
   private val previous = buildPreviousPeriod()
   var useRequirements: Boolean = false
@@ -119,37 +131,44 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     previous
   }
 
-  private def generateMostAvailableWorkers(): Array[Array[Array[Int]]] = {
+  private def generateMostAvailableWorkers(): Array[Array[Array[Array[Int]]]] = {
     val possible = model.possibleWorkersForDemands
     val mostAvailable = Array.tabulate(model.D) { d =>
-      Array.fill[Array[Int]](model.demands(d).requiredWorkers)(null)
+      Array.tabulate(model.demands(d).requiredWorkers) { p =>
+        Array.fill[Array[Int]](model.T)(null)
+      }
     }
 
     for (d <- model.Demands) {
       for (p <- demands(d).positions) {
-          val possibleWorkers = demands(d).periods.map(t => possible(d)(t)(p)).reduce((a,b) => a.union(b))
-          mostAvailable(d)(p) = possibleWorkers.toArray
+        for (t <- demands(d).periods) {
+          mostAvailable(d)(p)(t) = possible(d)(t)(p).toArray
+        }
       }
     }
+
     mostAvailable
   }
-
-
-  private def generateMostAvailableWorkersWithRequirements(): Array[Array[Array[Int]]] = {
-    val possible = model.possibleWorkersForDemands
-    val mostAvailable = Array.tabulate(model.D) { d =>
-      Array.fill[Array[Int]](model.demands(d).requiredWorkers)(null)
-    }
-
-    for (d <- model.Demands) {
-      for (p <- demands(d).positions) {
-        val possibleWorkers = demands(d).periods.map(t => possible(d)(t)(p)).reduce((a,b) => a.union(b))
-        val sorted = possibleWorkers.toArray
-        mostAvailable(d)(p) = sorted
-      }
-    }
-    mostAvailable
-  }
+//
+//
+//  private def generateMostAvailableWorkersWithRequirements(): Array[Array[Array[Array[Int]]]] = {
+//    val possible = model.possibleWorkersForDemands
+//    val mostAvailable = Array.tabulate(model.D) { d =>
+//      Array.tabulate(model.demands(d).requiredWorkers) { p =>
+//        Array.fill[Array[Int]](model.T)(null)
+//      }
+//    }
+//
+//    for (d <- model.Demands) {
+//      for (p <- demands(d).positions) {
+//        for (t <- demands(d).periods) {
+//          mostAvailable(d)(p)(t) = possible(d)(t)(p).toArray
+//        }
+//      }
+//    }
+//
+//    mostAvailable
+//  }
 
   def varHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
@@ -194,70 +213,43 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     }
   }
 
+  import scala.math.Ordering.Implicits._
   def mostAvailableHeuristic(i: Int): Int = {
 
     val (t, d, p) = reverseMap(i)
 
-    if (!useRequirements) {
-      mostAvailable(d)(p) = mostAvailable(d)(p).sortBy(w => {
-        val requirement = model.problem.workingRequirements.find(_.worker == w)
-        var min = 0
-        var max = workers(w).availabilities.size - occurrences(w).value
-        if (requirement.isDefined) {
-          max = requirement.get.max.getOrElse(max) - occurrences(w).value
-          min = requirement.get.min.getOrElse(min)
+    var j = 0
+    var minWorker = Constants.SentinelWorker
+    var minValue: (Int, Int, Int, Int, Int) = null
+    val possible = mostAvailable(d)(p)(t)
+    while (j < possible.length) {
+      val w = possible(j)
+      val (min, max) = _requirements(w)
+      val remainingMax = max - occurrences(w).value
+
+      val intersection = intersectionSize(_availabilities(w), demands(d).periods)
+      val size = math.min(intersection, remainingMax)
+      val remaining = remainingMax - size
+      val occ = _occurrencesForPosition(w)(d)(p)
+      val impossible = max == occurrences(w).value || !x(i).hasValue(w)
+
+      if (!impossible) {
+        val value =
+          if (useRequirements)
+            (math.max(-(min - occurrences(w).value), 0), -occ, -size, remaining, w)
+          else
+            (-occ, -size, remaining, w, 0)
+
+        if (minValue == null || value < minValue) {
+          minValue = value
+          minWorker = w
         }
-
-        val intersection = intersectionSize(_availabilities(w), demands(d).periods)
-        val size = math.min(intersection, max)
-        val remaining = max - size
-        val occ = _occurrencesForPosition(w)(d)(p)
-        val tooMany = if (occurrences(w).value == max) Int.MaxValue else 0
-
-        (tooMany, -occ, -size, remaining, w)
-      })(Ordering[(Int, Int, Int, Int, Int)])
-    }
-    else {
-      mostAvailableWithRequirements(d)(p) = mostAvailableWithRequirements(d)(p).sortBy(w => {
-        val requirement = model.problem.workingRequirements.find(_.worker == w)
-        var min = 0
-        var max = workers(w).availabilities.size - occurrences(w).value
-        if (requirement.isDefined) {
-          max = requirement.get.max.getOrElse(max) - occurrences(w).value
-          min = requirement.get.min.getOrElse(min)
-        }
-
-        val intersection = intersectionSize(_availabilities(w), demands(d).periods)
-        val size = math.min(intersection, max)
-        val remaining = max - size
-        val occ = _occurrencesForPosition(w)(d)(p)
-
-        val tooMany = if (occurrences(w).value == max) Int.MaxValue else 0
-
-        (tooMany, math.max(-(min - occurrences(w).value), 0), -occ, -size, remaining, w)
-      })(Ordering[(Int, Int, Int, Int, Int, Int)])
-    }
-
-    val mostAvailableWorkers =
-      if (useRequirements) mostAvailableWithRequirements(d)(p)
-      else mostAvailable(d)(p)
-
-
-    if (x(i).size == 2 && x(i).hasValue(Constants.SentinelWorker)) {
-      x(i).max
-    }
-    else {
-      // Hot code, use while loop instead of for
-      var j = 0
-      while (j < mostAvailableWorkers.length) {
-        if (x(i).hasValue(mostAvailableWorkers(j))) {
-          return mostAvailableWorkers(j)
-        }
-        j += 1
       }
 
-      x(i).min
+      j += 1
     }
+
+    if (x(i).hasValue(minWorker)) minWorker else x(i).max
   }
 
 

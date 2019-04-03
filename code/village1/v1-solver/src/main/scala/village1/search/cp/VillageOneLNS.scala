@@ -214,21 +214,21 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       heuristic.useRequirements = true
       updateTightenMode(objective3, TightenType.StrongTighten)
       updateTightenMode(objective1, TightenType.NoTighten)
-      updateTightenMode(objective, TightenType.NoTighten)
+//      updateTightenMode(objective, TightenType.StrongTighten)
     }
     else {
       heuristic.useRequirements = false
       updateTightenMode(objective3, TightenType.WeakTighten)
       updateTightenMode(objective1, TightenType.StrongTighten)
-      updateTightenMode(objective, TightenType.StrongTighten)
+//      updateTightenMode(objective, TightenType.StrongTighten)
     }
   }
 
   private def relax(): Unit = {
     if (bestObjective3 <= bestWorkingViolations) {
-      relaxShifts(currentSolution, 50)
+      relaxShifts(currentSolution, 100)
       relaxation.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
-//      val percentage = 20
+//      val percentage = 50
 //      val size = (flatWorkers.length / 100) * percentage
 //      println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
 //      RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
@@ -306,7 +306,7 @@ object MainLNS extends App {
   )
 
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0))
+    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.0))
   )
 
 
@@ -314,7 +314,7 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-    val stats = search.solve(timeLimit = 60, options = Some(LNSOptions().copy(limit = 10000, bestWorkingViolations = 0)))
+    val stats = search.solve(timeLimit = 10, options = Some(LNSOptions().copy(limit = 10000, bestWorkingViolations = 0)))
 
     val solution = search.lastSolution
 
@@ -323,6 +323,9 @@ object MainLNS extends App {
         JsonSerializer.serialize(s)(s"data/results/$name-o=${s.objective}.json")
         println(s.valid)
         println("Partial: " + s.partial)
+        println("Objective 1: " + search.bestObjective1)
+        println("Objective 2: " + search.bestObjective2)
+        println("Objective 3: " + search.bestObjective3)
       case _ => println("No solution found")
     }
 }
