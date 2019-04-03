@@ -36,7 +36,7 @@ class InstanceGenerator(seed: Long = 0L) {
       var requiredSkills = Array[Array[Skill]]()
 
       for (_ <- 0 until requiredWorkers) {
-        if (isTrue(options.probabilities.getOrElse("assignSkill", 0.5))) {
+        if (options.skills > 0 && isTrue(options.probabilities.getOrElse("assignSkill", 0.5))) {
           val skill = takeSkill(skills)
           requiredSkills :+= Array(skill)
         }
@@ -105,7 +105,7 @@ class InstanceGenerator(seed: Long = 0L) {
 
       // Add random skills to particular workers with random probability
       for (i <- workers.indices) {
-        if (isTrue(assignWorkerSkill)) {
+        if (options.skills > 0 && isTrue(assignWorkerSkill)) {
           val skill = takeSkill(skills)
           workers(i) = workers(i).copy(skills = workers(i).skills.updated(skill.name, skill))
         }
