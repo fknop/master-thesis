@@ -119,6 +119,20 @@ class InstanceGenerator(seed: Long = 0L) {
 
     }
 
+    // In the case workers has no availabilities
+    for (i <- workers.indices) {
+      val availabilities = workers(i).availabilities
+      if (availabilities.isEmpty) {
+        val size = randomInt(random, 1, options.t)
+        var set = Set[Int]()
+        for (_ <- 0 until size) {
+          set += randomInt(random, 0, options.t - 1)
+        }
+
+        workers(i) = workers(i).copy(availabilities = set)
+      }
+    }
+
     workers
   }
 

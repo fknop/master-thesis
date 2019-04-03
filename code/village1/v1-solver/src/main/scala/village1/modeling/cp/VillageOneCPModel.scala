@@ -72,7 +72,7 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 //    workingRequirementsViolations = dual.applyWorkingRequirements()
 
 
-    applyWorkingRequirements2()
+//    applyWorkingRequirements2()
     applyWorkingRequirements()
 
 
@@ -383,9 +383,14 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
 
   private def minimizeSentinelWorker(): Unit = {
     val variables = workerVariables.flatten.flatten
-    add(
-      softGcc(variables, SentinelWorker to SentinelWorker, Array(0), Array(0), sentinelViolations), CPPropagStrength.Strong
-    )
+    val w = Constants.SentinelWorker
+    add(gcc(variables, Array((w, sentinelViolations))))
+
+
+
+//    add(
+//      softGcc(variables, SentinelWorker to SentinelWorker, Array(0), Array(0), sentinelViolations), CPPropagStrength.Strong
+//    )
   }
 
   /**

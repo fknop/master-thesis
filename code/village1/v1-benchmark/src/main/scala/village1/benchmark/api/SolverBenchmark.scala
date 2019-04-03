@@ -33,8 +33,7 @@ class SolverBenchmark(
   }
 
   private def generate(t: Int, d: Int, w: Int): Problem = {
-    generator.generate(
-      InstanceOptions(
+    val instanceOptions = InstanceOptions(
         t = T(t),
         clients = D(d), // This parameter doesn't really matter
         demands = D(d),
@@ -43,6 +42,9 @@ class SolverBenchmark(
         machines = 20,
         locations = 20
       )
+
+    generator.generate(
+      instanceOptions.copy(probabilities = instanceOptions.probabilities ++ options.probabilities)
     )
   }
 

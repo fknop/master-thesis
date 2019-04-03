@@ -12,6 +12,7 @@ case class BenchmarkArgs(
   override val D: Array[Int] = Array(30, 50),
   override val W: Array[Int] = Array(100, 200, 300),
   override val seed: Long = -1L,
+  override val probabilities: Map[String, Double] = Map(),
   out: String = "") extends BenchmarkOptions {
   override def toString: String = super.toString
 }

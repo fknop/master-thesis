@@ -123,6 +123,9 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     array
   }
 
+  private def log(message: String): Unit = {
+    if (!solver.silent) println(message)
+  }
 
   override def solve(
      timeLimit: Int = Int.MaxValue,
@@ -147,7 +150,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     val runningTime = time {
       val timeLimitMs: Long = timeLimit.toLong * 1000l
-      val limit = opt.limit
+      var limit = opt.limit
       var totalTime = 0L
       var totalSol = 0
 
@@ -182,6 +185,11 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
         }
 
         found = stat.nSols > 0
+
+//        if (found)
+//          limit /= 2
+//        else
+//          limit = math.min(limit * 2, opt.limit * 8)
 
         r += 1
       }
@@ -218,9 +226,9 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
   private def relax(): Unit = {
     if (bestObjective3 <= bestWorkingViolations) {
-      relaxShifts(currentSolution, 60)
-      relaxation.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 3)
-//      val percentage = 80
+      relaxShifts(currentSolution, 50)
+      relaxation.propagationGuidedRelax(solver, flatWorkers, currentSolution, flatWorkers.length / 2)
+//      val percentage = 20
 //      val size = (flatWorkers.length / 100) * percentage
 //      println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
 //      RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
@@ -228,10 +236,11 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     else {
       val percentage = 20
       val size = (flatWorkers.length / 100) * percentage
-      println(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
+      log(s"Percentage: $percentage, totalSize: ${flatWorkers.length}, size: $size")
       RelaxationFunctions.randomRelax(solver, flatWorkers, currentSolution, size)
     }
-    println(flatWorkers.count(_.isBound) + " / " + flatWorkers.length)
+
+    log(flatWorkers.count(_.isBound) + " / " + flatWorkers.length)
   }
 
   private def relaxShifts(solution: CPIntSol, percentage: Int): Unit = {
@@ -297,7 +306,7 @@ object MainLNS extends App {
   )
 
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.0))
+    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0))
   )
 
 
@@ -305,8 +314,7 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-
-    val stats = search.solve(timeLimit = 60, options = Some(LNSOptions().copy(bestWorkingViolations = 0)))
+    val stats = search.solve(timeLimit = 60, options = Some(LNSOptions().copy(limit = 10000, bestWorkingViolations = 0)))
 
     val solution = search.lastSolution
 

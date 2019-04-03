@@ -1,5 +1,6 @@
 package village1.benchmark.api
 
+
 trait BenchmarkOptions {
   val solutionLimit: Int = Int.MaxValue
   val timeLimit: Int = 20
@@ -8,6 +9,7 @@ trait BenchmarkOptions {
   val T: Array[Int] = Array(5)
   val D: Array[Int] = Array(30, 50)
   val W: Array[Int] = Array(100, 200, 300)
+  val probabilities: Map[String, Double] = Map()
   val seed: Long = -1L
 
   private def printArray(array: Array[Int]): String = s"(${array.mkString(", ")})"

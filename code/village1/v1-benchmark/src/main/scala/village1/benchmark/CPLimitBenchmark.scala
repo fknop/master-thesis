@@ -7,15 +7,16 @@ import village1.benchmark.charts.PerformanceProfileChart
 import village1.search.cp.LNSOptions
 import village1.util.{FileUtils, Utils}
 
-
+// --T=15,15,15,15,15 --D=50,50,50 --W=300,300,300
 object CPLimitBenchmark extends CommandLineBenchmark with Branchings {
 
   val name = s"cp-limit-${Utils.randomInt(0, 1000)}"
 
-  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
+  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json").copy(probabilities = Map("assignWorkingRequirements" -> 0)))
 
-  val limits = Array(1000, 1500, 2000, 2500, 3000)
-  val lnsOptions = limits.map(l => LNSOptions().copy(limit = l))
+  val base = LNSOptions()
+  val limits = Array(2500, 5000, 7500, 10000, 15000, 20000)
+  val lnsOptions = limits.map(l => base.copy(limit = l))
   val names = limits.map(l => s"L=$l")
 
   val benchmark = new SolverBenchmark(options = options)

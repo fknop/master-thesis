@@ -1,20 +1,62 @@
 package village1.search.cp.heuristic
 
-import oscar.algo.reversible.ReversibleInt
+import oscar.algo.reversible.{ReversibleInt, ReversibleSparseSet}
 import oscar.algo.search.Branching
-import oscar.cp.core.{CPPropagStrength, Constraint}
 import oscar.cp.core.variables.{CPIntVar, CPVar}
+import oscar.cp.core.{CPPropagStrength, Constraint}
 import oscar.cp.modeling.Branchings
 import village1.modeling.cp.VillageOneCPModel
 
 class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
 
+  class OnBindConstraint(x: Array[CPIntVar]) extends Constraint(x(0).store) {
+    override def associatedVars(): Iterable[CPVar] = x
+
+    override def setup(l: CPPropagStrength): Unit = {
+      for (i <- x.indices) {
+        if (x(i).isBound)
+          updateCounters(i)
+        else
+          x(i).callValBindIdxWhenBind(this, i)
+      }
+    }
+
+    override def valBindIdx(variable: CPIntVar, i: Int) {
+      updateCounters(i)
+    }
+
+    private def updateCounters(i: Int): Unit = {
+      val (t, d, p) = reverseMap(i)
+      val w = x(i).value
+      occurrences(w) += 1
+      _occurrencesForPosition(w)(d)(p) += 1
+      _availabilities(w).removeValue(t)
+      _periods(d)(p).removeValue(t)
+    }
+  }
+
   private val demands = model.demands
   private val workers = model.workers
 
-  private val possiblePositions: Array[Array[(Int, Int)]] = generatePossiblePositions()
-
   private val occurrences = Array.fill[ReversibleInt](model.W)(new ReversibleInt(x(0).store, 0))
+  private val _availabilities = Array.tabulate[ReversibleSparseSet](model.W)(w => new ReversibleSparseSet(x(0).store,
+    workers(w).availabilities.min, workers(w).availabilities.max
+  ))
+
+  private val _periods = Array.tabulate(model.D) { d =>
+    Array.tabulate(demands(d).requiredWorkers) { p =>
+      val periods = demands(d).periods
+      new ReversibleSparseSet(x(0).store, periods.min, periods.max)
+    }
+  }
+
+  private val _occurrencesForPosition = Array.tabulate(model.W, model.D) { (w, d) =>
+    Array.tabulate(demands(d).requiredWorkers) { p =>
+      new ReversibleInt(x(0).store, 0)
+    }
+  }
+
+  private val _tmp = Array.fill(model.T)(0)
 
   var mostAvailable: Array[Array[Array[Int]]] = generateMostAvailableWorkers()
 
@@ -24,59 +66,28 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
   var useRequirements: Boolean = false
 
 
-
-
-  for (i <- x.indices) {
-    if (x(i).isBound) {
-      occurrences(x(i).value) += 1
-    }
-    else {
-      x(i).callPropagateWhenBind(new Constraint(x(i).store) {
-        override def associatedVars(): Iterable[CPVar] = Array(x(i))
-
-        override def setup(l: CPPropagStrength): Unit = {}
-
-        override def propagate(): Unit = {
-          val w = x(i).value
-          occurrences(w) += 1
-//          val (t, d, p) = reverseMap(i)
-//          if (demands(d).periods.size < 5 && occurrences(w).value < workers(w).availabilities.size) {
-//            for ((d, p) <- possiblePositions(w)) {
-//              mostAvailable(d)(p) = mostAvailable(d)(p).sortBy(w => {
-//                val requirement = model.problem.workingRequirements.find(_.worker == w)
-//                var min = 0
-//                var max = workers(w).availabilities.size
-//                if (requirement.isDefined) {
-//                  max = requirement.get.max.getOrElse(max)
-//                  min = requirement.get.min.getOrElse(min)
-//                }
-//                val size = math.min(workers(w).availabilities.intersect(demands(d).periods).size, max) - occurrences(w).value
-//                val remaining = max - size
-//                (-size, remaining, w)
-//              })(Ordering[(Int, Int, Int)])
-//            }
-//          }
-        }
-      })
-    }
-  }
-
-  private def generatePossiblePositions(): Array[Array[(Int, Int)]] = {
-    val results = Array.fill[Array[(Int, Int)]](model.W)(null)
-
-    val possibleWorkers = model.possibleWorkersForDemands
-    for (w <- model.Workers) {
-      var set = Set[(Int, Int)]()
-      for ((d, v) <- possibleWorkers; (t, v2) <- v; p <- v2.indices) {
-        if (v2(p).contains(w)) {
-          set += ((d, p))
-        }
+  for (w <- model.Workers) {
+    for (v <- _availabilities(w).min to _availabilities(w).max) {
+      if (!workers(w).availabilities.contains(v)) {
+        _availabilities(w).removeValue(v)
       }
-      results(w) = set.toArray
+
+    }
+    assert(_availabilities(w).size == workers(w).availabilities.size)
+  }
+
+  for (d <- model.Demands; p <- demands(d).positions) {
+    for (v <- _periods(d)(p).min to _periods(d)(p).max) {
+      if (!demands(d).periods.contains(v)) {
+        _periods(d)(p).removeValue(v)
+      }
     }
 
-    results
+    assert(_periods(d)(p).size == demands(d).periods.size)
   }
+
+  x(0).store.add(new OnBindConstraint(x))
+
 
   private def buildReverseMap(): Array[(Int, Int, Int)] = {
     var i = 0
@@ -114,21 +125,7 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     for (d <- model.Demands) {
       for (p <- demands(d).positions) {
           val possibleWorkers = demands(d).periods.map(t => possible(d)(t)(p)).reduce((a,b) => a.union(b))
-          val sorted = possibleWorkers.toArray.sortBy(w => {
-            val requirement = model.problem.workingRequirements.find(_.worker == w)
-            var min = 0
-            var max = workers(w).availabilities.size
-            if (requirement.isDefined) {
-              max = requirement.get.max.getOrElse(max)
-              min = requirement.get.min.getOrElse(min)
-            }
-            val size = math.min(workers(w).availabilities.intersect(demands(d).periods).size, max) - occurrences(w).value
-            val remaining = max - size
-            (-size, remaining, w)
-          })(Ordering[(Int, Int, Int)])
-
-          mostAvailable(d)(p) = sorted
-
+          mostAvailable(d)(p) = possibleWorkers.toArray
       }
     }
     mostAvailable
@@ -144,28 +141,14 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     for (d <- model.Demands) {
       for (p <- demands(d).positions) {
         val possibleWorkers = demands(d).periods.map(t => possible(d)(t)(p)).reduce((a,b) => a.union(b))
-
-        val sorted = possibleWorkers.toArray.sortBy(w => {
-          val requirement = model.problem.workingRequirements.find(_.worker == w)
-          var min = 0
-          var max = workers(w).availabilities.size
-          if (requirement.isDefined) {
-            max = requirement.get.max.getOrElse(max)
-            min = requirement.get.min.getOrElse(min)
-          }
-          val size = math.min(workers(w).availabilities.intersect(demands(d).periods).size, max) - occurrences(w).value
-          val remaining = max - size
-
-          (math.max(-(min - occurrences(w).value), 0), -size, remaining, w)
-        })(Ordering[(Int, Int, Int, Int)])
-
+        val sorted = possibleWorkers.toArray
         mostAvailable(d)(p) = sorted
       }
     }
     mostAvailable
   }
 
-  def varHeuristic(i: Int): (Int) = {
+  def varHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
 
 //    Choose this variable if domain is 2: meaning it has one value and the sentinel value.
@@ -177,6 +160,37 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     }
   }
 
+  private def intersectionSize(r: ReversibleSparseSet, s: Set[Int]): Int = {
+    if (r.isEmpty || s.isEmpty) 0
+    else {
+      var size = 0
+      for (v <- s) {
+        if (r.hasValue(v)) {
+          size += 1
+        }
+      }
+
+      size
+    }
+  }
+
+  private def intersectionSize(r: ReversibleSparseSet, r2: ReversibleSparseSet): Int = {
+    if (r.isEmpty || r2.isEmpty) 0
+    else {
+      var size = 0
+      val rSize = r.fillArray(_tmp)
+      var i = 0
+      while (i < rSize) {
+        if (r2.hasValue(_tmp(i))) {
+          size += 1
+        }
+        i += 1
+      }
+
+      size
+    }
+  }
+
   def mostAvailableHeuristic(i: Int): Int = {
 
     val (t, d, p) = reverseMap(i)
@@ -185,30 +199,40 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
       mostAvailable(d)(p) = mostAvailable(d)(p).sortBy(w => {
         val requirement = model.problem.workingRequirements.find(_.worker == w)
         var min = 0
-        var max = workers(w).availabilities.size
+        var max = workers(w).availabilities.size - occurrences(w).value
         if (requirement.isDefined) {
-          max = requirement.get.max.getOrElse(max)
+          max = requirement.get.max.getOrElse(max) - occurrences(w).value
           min = requirement.get.min.getOrElse(min)
         }
-        val size = math.min(workers(w).availabilities.intersect(demands(d).periods).size, max) - occurrences(w).value
+
+        val intersection = intersectionSize(_availabilities(w), demands(d).periods)
+        val size = math.min(intersection, max)
         val remaining = max - size
-        (-size, remaining, w)
-      })(Ordering[(Int, Int, Int)])
+        val occ = _occurrencesForPosition(w)(d)(p)
+        val tooMany = if (occurrences(w).value == max) Int.MaxValue else 0
+
+        (tooMany, -occ, -size, remaining, w)
+      })(Ordering[(Int, Int, Int, Int, Int)])
     }
     else {
       mostAvailableWithRequirements(d)(p) = mostAvailableWithRequirements(d)(p).sortBy(w => {
         val requirement = model.problem.workingRequirements.find(_.worker == w)
         var min = 0
-        var max = workers(w).availabilities.size
+        var max = workers(w).availabilities.size - occurrences(w).value
         if (requirement.isDefined) {
-          max = requirement.get.max.getOrElse(max)
+          max = requirement.get.max.getOrElse(max) - occurrences(w).value
           min = requirement.get.min.getOrElse(min)
         }
-        val size = math.min(workers(w).availabilities.intersect(demands(d).periods).size, max) - occurrences(w).value
-        val remaining = max - size
 
-        (-size, math.max(-(min - occurrences(w).value), 0), remaining, w)
-      })(Ordering[(Int, Int, Int, Int)])
+        val intersection = intersectionSize(_availabilities(w), demands(d).periods)
+        val size = math.min(intersection, max)
+        val remaining = max - size
+        val occ = _occurrencesForPosition(w)(d)(p)
+
+        val tooMany = if (occurrences(w).value == max) Int.MaxValue else 0
+
+        (tooMany, math.max(-(min - occurrences(w).value), 0), -occ, -size, remaining, w)
+      })(Ordering[(Int, Int, Int, Int, Int, Int)])
     }
 
     val mostAvailableWorkers =
@@ -245,7 +269,5 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
     }
   }
 
-
-  val last = new LastAssignedHeuristic(x)
-  def branching: Branching = binaryIdx(x, varHeuristic, last.valueHeuristic(valueHeuristic))
+  def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
 }
