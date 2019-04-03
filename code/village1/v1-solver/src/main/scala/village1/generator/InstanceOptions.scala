@@ -15,6 +15,7 @@ case class InstanceOptions(
     "assignPeriod" -> 0.6,
     "assignLocation" -> 0.5,
     "assignMachines" -> 0.3,
-    "takeMachine" -> 0.2
+    "takeMachine" -> 0.2,
+    "assignWorkingRequirements" -> 0.2
   )
 )

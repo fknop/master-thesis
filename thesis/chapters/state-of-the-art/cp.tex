@@ -126,5 +126,28 @@ $obj_1, \dots, obj_n$ are the sub-objectives while $obj_{n+1}$ is the sum of all
 \emph{Strong-Filtering} during the search such that the formulation is at least as strong as a sum of sub-objectives.
 We can change the filtering dynamically during the search before each restart depending on the problem and prioritization of sub-objectives.
 
+\subsection{Heuristics}
+
+The backtracking algorithm uses two heuristics for its search. One heuristic chooses the variable while the other chooses 
+the value for the previously selected variable. Good heuristics can drive the search quickly to a good result. We now present two
+heuristics often used in Constraint Programming.
+
+\subsubsection{First Fail heuristic}
+
+The first fail heuristic is a variable ordering heuristic. 
+It follows the first fail principle which states that the search should first 
+select the variable that will most likely lead to an inconsistency. Multiple 
+possibilities exist, the most simple one being choosing the variable with the smallest domain.
+
+\subsubsection{Conflict Ordering Search}
+
+Conflict Ordering Search (COS) \cite{Gay:COS} is a variable ordering heuristic that 
+reorders variables based on the number of conflicts that happen during the search.
+It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
+COS was shown to be the most performant on scheduling problems.
+
+
+
+
 \end{document}
 
