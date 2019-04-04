@@ -4,10 +4,46 @@
  
 \begin{document}
 
-In this chapter, we describe our implementation for the models presented in \autoref{chapter:models}.
-The implementation is done in Scala using 
-\emph{OscaR} (\ref{subsection:oscar}) for the Constraint Programming model and
-\emph{Gurobi Optimizer} (\ref{subsection:gurobi}) for the Mixed Integer Programming model.
+In this chapter, we describe our implementation for the models presented in \autoref{chapter:models}. 
+We talk about the difficulties encountered while trying to transform the theoretical model to code. 
+We will also discuss some differences between the models and the implementation and some trade-offs that were taken in order to 
+have the most performant solver.
+
+The implementation was done in Scala using 
+\emph{OscaR} (\ref{subsection:oscar}) as CP solver and
+\emph{Gurobi Optimizer} (\ref{subsection:gurobi}) as MIP solver. 
+
+
+
+\section{Input and output format}
+
+For consistency, both solvers take the same input format and returns the same output format.
+We created a JSON (JavaScript Object Notation) Schema \cite{json:schema} to formulate our problems and solution assignments.
+Those schemas allow us to create a typed data structure for JSON objects. All the typing validation 
+is handled by the JSON Schema library. A small example of JSON schema can be found in \ref{json:example}.
+
+\begin{lstlisting}[language=json,firstnumber=1,caption={JSON Schema example},captionpos=b,label={json:example}]
+  "client": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": ["name"]
+  }
+\end{lstlisting}
+
+\section{Mixed Integer Programming solver}
+
+We used the Java API \cite{gurobi:java} of the Gurobi Optimizer in Scala to create our implementation. 
+The solver was implemented almost exactly like the theoretical model.
+
+\section{Constraint Programming solver}
+
+
+
+
 
 \end{document}
 
