@@ -4,4 +4,7 @@ import oscar.algo.search.Branching
 
 trait Heuristic {
   def branching: Branching
+
+  def onSolution(): Unit = {}
+  def onRepeat(): Unit = {}
 }

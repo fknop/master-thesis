@@ -14,7 +14,7 @@ class MostAvailableHeuristic(model: VillageOneCPModel, x: Array[CPIntVar], varia
   private val reverseMap = buildReverseMap()
   private val previous = buildPreviousPeriod()
 
-  var useRequirements: Boolean = false
+  private var useRequirements: Boolean = false
 
   private def buildReverseMap(): Array[(Int, Int, Int)] = {
     var i = 0
@@ -107,7 +107,13 @@ class MostAvailableHeuristic(model: VillageOneCPModel, x: Array[CPIntVar], varia
     mostAvailable
   }
 
-  def varHeuristic(i: Int): (Int) = {
+
+  override def onSolution(): Unit = {
+    useRequirements = true
+  }
+
+
+  def varHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
 
 //    Choose this variable if domain is 2: meaning it has one value and the sentinel value.

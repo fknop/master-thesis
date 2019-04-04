@@ -8,7 +8,7 @@ import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.json.JsonSerializer
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
-import village1.search.cp.heuristic.MostAvailableHeuristicDynamic
+import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristicDynamic}
 import village1.search.cp.relaxations.PropagationGuidedRelaxation
 import village1.search.{Search, SearchResult}
 import village1.util.SysUtils.time
@@ -30,11 +30,11 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   val flatMachines: Array[CPIntVar] = machineVariables.flatten
   val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
-  private val toFlat: Array[Map[Int, Array[Int]]] = buildToFlat()
-
   solver.addDecisionVariables(flatWorkers)
   solver.addDecisionVariables(flatMachines)
   solver.addDecisionVariables(flatLocations)
+
+  private val toFlat: Array[Map[Int, Array[Int]]] = buildToFlat()
 
   var currentSolution: CPIntSol = _
   var bestObjective: Int = Int.MaxValue
@@ -44,31 +44,9 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var bestWorkingViolations: Int = 0
 
 //  private var relaxation: Relaxation = new RandomRelaxation(this)
-  private val heuristic = new MostAvailableHeuristicDynamic(this, flatWorkers, workerVariables)
+  var heuristic: Heuristic = new MostAvailableHeuristicDynamic(this, flatWorkers, workerVariables)
   private val relaxation = new PropagationGuidedRelaxation()
 
-  search {
-    var branching = heuristic.branching
-
-    if (flatMachines.nonEmpty) {
-      branching ++= binaryFirstFail(flatMachines)
-    }
-
-    if (flatLocations.nonEmpty) {
-      branching ++= binaryFirstFail(flatLocations)
-    }
-
-    branching
-  }
-
-  onSolution {
-    bestObjective =  objective1.value
-    bestObjective1 = objective1.value
-    bestObjective2 = objective2.value
-    bestObjective3 = objective3.value
-    currentSolution = new CPIntSol(flatWorkers.map(_.value), bestObjective, 0L)
-    emitSolution(createSolution())
-  }
 
 
   def setInitialSolution(solution: Solution): Unit = {
@@ -94,7 +72,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
         val t = assignment.timeslot
         val workers = assignment.workers
         for (i <- workers.indices) {
-            values(t)(d)(i) = workers(i)
+          values(t)(d)(i) = workers(i)
         }
       }
     }
@@ -102,30 +80,34 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     currentSolution = new CPIntSol(values.flatten.flatten, solution.objective, 0L)
   }
 
-  private def buildToFlat(): Array[Map[Int, Array[Int]]] = {
-    val array: Array[Map[Int, Array[Int]]] = Array.fill(T)(null)
-    var i = 0
-    for (t <- Periods) {
-      var map = Map[Int, Array[Int]]()
-      for (d <- Demands if demands(d).occurs(t)) {
-        val positions = Array.fill(demands(d).requiredWorkers)(0)
-        for (p <- demands(d).positions) {
-          positions(p) = i
-          i += 1
-        }
+  private def setSearch(): Unit = {
+    search {
+      var branching = heuristic.branching
 
-        map = map.updated(d, positions)
-      }
-
-      array(t) = map
+      if (flatMachines.nonEmpty) {
+      branching ++= binaryFirstFail(flatMachines)
     }
 
-    array
+      if (flatLocations.nonEmpty) {
+      branching ++= binaryFirstFail(flatLocations)
+    }
+
+      branching
+    }
+
+    onSolution {
+      bestObjective =  objective1.value
+      bestObjective1 = objective1.value
+      bestObjective2 = objective2.value
+      bestObjective3 = objective3.value
+      currentSolution = new CPIntSol(flatWorkers.map(_.value), bestObjective, 0L)
+
+      heuristic.onSolution()
+
+      emitSolution(createSolution())
+    }
   }
 
-  private def log(message: String): Unit = {
-    if (!solver.silent) println(message)
-  }
 
   override def solve(
      timeLimit: Int = Int.MaxValue,
@@ -133,6 +115,8 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
      silent: Boolean = false,
      options: Option[LNSOptions] = Some(LNSOptions())
    ): SearchResult = {
+
+    setSearch()
 
     solver.silent = silent
 
@@ -191,6 +175,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 //        else
 //          limit = math.min(limit * 2, opt.limit * 8)
 
+        heuristic.onRepeat()
         r += 1
       }
 
@@ -199,6 +184,32 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
     // TODO: does oscar return if it's optimal ?
     SearchResult(lastSolution, runningTime, optimal = false)
   }
+
+  private def buildToFlat(): Array[Map[Int, Array[Int]]] = {
+    val array: Array[Map[Int, Array[Int]]] = Array.fill(T)(null)
+    var i = 0
+    for (t <- Periods) {
+      var map = Map[Int, Array[Int]]()
+      for (d <- Demands if demands(d).occurs(t)) {
+        val positions = Array.fill(demands(d).requiredWorkers)(0)
+        for (p <- demands(d).positions) {
+          positions(p) = i
+          i += 1
+        }
+
+        map = map.updated(d, positions)
+      }
+
+      array(t) = map
+    }
+
+    array
+  }
+
+  private def log(message: String): Unit = {
+    if (!solver.silent) println(message)
+  }
+
 
   private def updateTightenMode(objective: CPIntVar, tightenMode: TightenType.Value): Unit = {
     solver.obj(objective).tightenMode = tightenMode
@@ -211,13 +222,11 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       updateTightenMode(objective2, TightenType.StrongTighten)
 
     if (bestObjective3 > bestWorkingViolations) {
-      heuristic.useRequirements = true
       updateTightenMode(objective3, TightenType.StrongTighten)
       updateTightenMode(objective1, TightenType.NoTighten)
 //      updateTightenMode(objective, TightenType.StrongTighten)
     }
     else {
-      heuristic.useRequirements = false
       updateTightenMode(objective3, TightenType.WeakTighten)
       updateTightenMode(objective1, TightenType.StrongTighten)
 //      updateTightenMode(objective, TightenType.StrongTighten)
@@ -306,7 +315,7 @@ object MainLNS extends App {
   )
 
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0.0))
+    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0))
   )
 
 

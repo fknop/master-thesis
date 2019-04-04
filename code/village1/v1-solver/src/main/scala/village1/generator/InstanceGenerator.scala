@@ -200,7 +200,7 @@ class InstanceGenerator(seed: Long = 0L) {
         min = Some(randomInt(random, 1, math.max(1, size / 2)))
       }
       else {
-        max = Some(randomInt(random, 1, size - 1))
+        max = Some(randomInt(random, 1, size))
       }
 
       requirements = WorkingRequirement(w, min, max) :: requirements

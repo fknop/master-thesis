@@ -10,6 +10,8 @@ import village1.modeling.cp.VillageOneCPModel
 
 class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
 
+
+
   class OnBindConstraint(x: Array[CPIntVar]) extends Constraint(x(0).store) {
     override def associatedVars(): Iterable[CPVar] = x
 
@@ -78,7 +80,7 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
 
   private val reverseMap = buildReverseMap()
   private val previous = buildPreviousPeriod()
-  var useRequirements: Boolean = false
+  private var useRequirements: Boolean = false
 
 
   for (w <- model.Workers) {
@@ -170,6 +172,10 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
 //    mostAvailable
 //  }
 
+  override def onSolution(): Unit = {
+    this.useRequirements = true
+  }
+
   def varHeuristic(i: Int): Int = {
     val (t, d, p) = reverseMap(i)
 
@@ -236,9 +242,10 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
       if (!impossible) {
         val value =
           if (useRequirements)
-            (math.max(-(min - occurrences(w).value), 0), -occ, -size, remaining, w)
+            (-math.max(min - occurrences(w).value, 0), -occ, -size, remaining, w)
           else
             (-occ, -size, remaining, w, 0)
+
 
         if (minValue == null || value < minValue) {
           minValue = value
@@ -263,6 +270,7 @@ class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar]
        mostAvailableHeuristic(i)
     }
   }
+
 
   def branching: Branching = binaryIdx(x, varHeuristic, valueHeuristic)
 }
