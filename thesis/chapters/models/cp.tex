@@ -164,11 +164,22 @@ Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables fo
 \end{equation}
 
 We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations.
-The final objective is:
+
+The final objective will be a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
+in values, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
+We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
+We define those penalties in (\ref{penalties:objective}).
 
 \begin{equation}
-  \text{min} \quad \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + v_r + v_{\sigma} \label{cp:objective}
+  \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
 \end{equation}
+
+\begin{equation}
+  \label{penalties:objective}
+  \bm{\delta} = (\delta_0, \delta_1, \delta_2) = (1, 15, 100)
+\end{equation}
+
+
 
 
 \subsection{Search}
@@ -185,7 +196,7 @@ The variable heuristic used for the search is a first-fail heuristic. In other w
 will chose the variable will the smallest domain. This allows variable with only one value alongside the 
 fictitious value $\sigma$ to always be selected first.
 
-\subsubsection{Value Heuristic}
+\subsubsection{Most Available Value Heuristic}
 
 We define a value heuristic that we call the \emph{most available heuristic}. 
 This heuristic consists of two value ordering.
@@ -214,6 +225,30 @@ $w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is
 First we can see that $w_2$ will never be considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
 $w_3$ has two remaining availabilities. This heuristic guess that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
 The search will always consider $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
+
+\subsubsection{Dynamic Value Heuristic}
+
+The \emph{most available} heuristic works fairly well in practice as seen in \autoref{chapter:experiments}. 
+We can however improve it by making it more dynamic to the search. Instead of one static ordering at the start of the search,
+we can reorder values at each value selection to select the best worker in the current search tree.
+
+To achieve this, we need to store some state during the search that will backtrack automatically.
+
+\begin{enumerate}
+  \item $occ_{wdp}$: the number of times worker $w$ already works for position $p$ of demand $d$.
+  \item $occ_{w}$: the number of times worker $w$ already works in any demands.
+  \item $a_{w} \subseteq w^T$: the set of remaining availabilities of the worker.
+\end{enumerate}
+
+We now have three level of ordering in the heuristic:
+
+\begin{enumerate}
+  \item The first ordering is now the occurrences $occ_{wpd}$ from greatest to smallest values. We prioritize workers that already work for this demand for the longest time.
+  \item The second ordering is the same as the first static ordering except we now take into account the 
+        remaining availabilities of the worker $a_w$ to select the most available worker.
+  \item The third ordering is the second static ordering except we also take into account the number of times the worker 
+        is already assigned $occ_w$.
+\end{enumerate}
 
 \subsubsection{Breaking symmetries}
 
@@ -283,11 +318,10 @@ We discuss and compare more relaxations options in a future chapter.
 
 Our problem uses a multi-objective (\ref{cp:objective}) model. 
 Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in D^P_j} N_{jk}}$
-and $o_4 = \text{min} \ o_1 + o_2 + o_3$.
+and $o_4$ is the original weighted sum described in (\ref{cp:objective}).
 
 
-It seems obvious that we want 
-to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial solutions and unmet requirements respectively. 
+We wish to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial solutions and unmet requirements respectively. 
 
 \begin{enumerate}
   \item First set $o_1$ to \emph{Strong-Filtering} while others are set to \emph{No-Filtering}.
@@ -295,7 +329,7 @@ to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial solutions and 
   \item Once $o_2$ is optimized, keep it in \emph{Weak-Filtering} for the rest of the search and switch $o_3$ to \emph{Strong-Filtering}.
 \end{enumerate}
 
-Note that $o_4$ is kept in \emph{Strong-Filtering} mode for the entire duration of the search.
+$o_4$ is also kept in \emph{Strong-Filtering} mode for the entire duration of the search to avoid having a weaker model than the original weighted-sum.
 
 \end{document}
 

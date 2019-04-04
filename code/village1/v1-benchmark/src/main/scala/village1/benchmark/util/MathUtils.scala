@@ -1,5 +1,7 @@
 package village1.benchmark.util
 
+import village1.benchmark.api.BenchmarkOptions
+
 object MathUtils {
   import Numeric.Implicits._
 
@@ -30,4 +32,21 @@ object MathUtils {
     * @return the standard deviation of the list of values
     */
   def stdDev[T: Numeric](xs: Iterable[T]): Double = math.sqrt(variance(xs))
+
+  def estimatedTime(options: BenchmarkOptions, nSolvers: Int): String = {
+
+    val n = options.T.length * options.D.length * options.W.length
+
+    val timePerSolver = n * options.timeLimit * options.repeat
+
+    val totalTime = timePerSolver * nSolvers
+
+    val totalMinutes = totalTime / 60
+    val seconds = totalTime % 60
+
+    val totalHours = totalMinutes / 60
+    val minutes = totalMinutes % 60
+
+    s"Estimated Time: ${totalHours}h ${minutes}m ${seconds}s"
+  }
 }

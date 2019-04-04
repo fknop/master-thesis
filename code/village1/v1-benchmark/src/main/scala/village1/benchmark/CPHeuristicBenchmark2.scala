@@ -5,6 +5,7 @@ import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api._
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.charts.PerformanceProfileChart
+import village1.benchmark.util.MathUtils
 import village1.search.cp.heuristic.MostAvailableHeuristic
 import village1.util.{FileUtils, Utils}
 
@@ -14,6 +15,8 @@ object CPHeuristicBenchmark2 extends CommandLineBenchmark with Branchings {
   val name = s"cp-heuristic-${Utils.randomInt(0, 1000)}"
 
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
+  println(MathUtils.estimatedTime(options, 2))
+
 
   val benchmark = new SolverBenchmark(options = options)
 

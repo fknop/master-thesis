@@ -39,8 +39,8 @@ class SolverBenchmark(
         demands = D(d),
         workers = W(w),
         skills = 10,
-        machines = 20,
-        locations = 20
+        machines = 0,
+        locations = 0
       )
 
     generator.generate(

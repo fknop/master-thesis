@@ -291,18 +291,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 object MainLNS extends App {
 
   val folder = "data/instances"
-  val instance = s"$folder/problem2.json"
   val generatedFolder = s"$folder/generated/"
-  val generatedInstances: Array[String] = Array(
-    "t5d5w20-491.json",
-    "t10d50w300-638.json"
-  )
-
-  val generatedInstancesPath = generatedInstances.map(f => s"$generatedFolder/$f")
-
-  val id = 1
-  val path = generatedInstancesPath(id)
-  val name = generatedInstances(id)
 
   val generator = new InstanceGenerator()
 
@@ -311,12 +300,23 @@ object MainLNS extends App {
     clients = 10,
     demands = 50,
     workers = 300,
-    skills = 10
+    skills = 15
   )
 
+  val name = s"t${options.t}d${options.demands}w${options.workers}-${generator.seed}.json"
+
   val problem = generator.generate(
-    options.copy(probabilities = options.probabilities.updated("assignWorkingRequirements", 0))
+    options.copy(probabilities =
+      options.probabilities
+        .updated("assignWorkingRequirements", 0.0)
+        .updated("assignWorkerSkill", 0.05)
+        .updated("assignSkill", 0.2)
+        .updated("assignWWI", 1.0)
+        .updated("assignWCI", 1.0)
+    )
   )
+
+  JsonSerializer.serialize(problem)(generatedFolder + name)
 
 
     //  val problem = JsonParser.parse(path)

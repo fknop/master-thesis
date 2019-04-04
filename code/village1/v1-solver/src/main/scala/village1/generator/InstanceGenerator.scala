@@ -6,7 +6,7 @@ import village1.util.Utils.{overlappingSets, randomInt}
 
 import scala.util.Random
 
-class InstanceGenerator(seed: Long = 0L) {
+class InstanceGenerator(val seed: Long = 0L) {
 
   private val random: Random = new Random(seed)
 
@@ -14,6 +14,15 @@ class InstanceGenerator(seed: Long = 0L) {
 
   private def generateWorkforce(options: InstanceOptions): Array[Worker] = {
     Array.tabulate(options.workers)(i => Worker(id = i, name = s"Worker $i", availabilities = Set()))
+  }
+
+  private def takeIdx(collection: Array[_], not: Set[Int] = Set(-1)): Int = {
+    var w = -1
+    do {
+      w = randomInt(random, 0, collection.length - 1)
+    } while (not.contains(w))
+
+    w
   }
 
   private def takeSkill(skills: Array[Skill]): Skill = {
@@ -194,7 +203,7 @@ class InstanceGenerator(seed: Long = 0L) {
       var max: Option[Int]  = None
       if (prob <= assignBoth) {
         min = Some(randomInt(random, 1, math.max(1, size / 2)))
-        max = Some(randomInt(random, min.get, size - 1))
+        max = Some(randomInt(random, min.get, math.max(size, min.get)))
       }
       else if (prob <= assignMin) {
         min = Some(randomInt(random, 1, math.max(1, size / 2)))
@@ -207,6 +216,49 @@ class InstanceGenerator(seed: Long = 0L) {
     }
 
     requirements.toArray
+  }
+
+  private def generateWWI(options: InstanceOptions, workers: Array[Worker]): Array[Array[Int]] = {
+    val prob = options.probabilities.getOrElse("assignWWI", 0.05)
+    val reassign = options.probabilities.getOrElse("reassignWWI", 0.2)
+    var incompatibilities = List[Array[Int]]()
+    for (w <- workers.indices) {
+      var taken = Set(w)
+      do {
+        if (isTrue(prob)) {
+          val w2 = takeIdx(workers, taken)
+          taken += w2
+          incompatibilities ::= Array(w, w2)
+        }
+      } while (isTrue(reassign))
+    }
+
+    incompatibilities.toArray
+  }
+
+  private def generateWCI(options: InstanceOptions, workers: Array[Worker], clients: Array[Client]): Array[Array[Int]] = {
+    val prob = options.probabilities.getOrElse("assignWCI", 0.05)
+    val reassign = options.probabilities.getOrElse("reassignWCI", 0.2)
+
+    var incompatibilities = List[Array[Int]]()
+    for (w <- workers.indices) {
+      var taken = Set[Int]()
+
+      do {
+        if (isTrue(prob)) {
+          val c = takeIdx(clients)
+          taken += c
+          incompatibilities ::= Array(w, c)
+        }
+      } while (isTrue(reassign))
+
+      if (isTrue(prob)) {
+        val c = takeIdx(clients)
+        incompatibilities ::= Array(w, c)
+      }
+    }
+
+    incompatibilities.toArray
   }
 
   // Only generate simple skills for now (does not change much in the solver)
@@ -249,7 +301,9 @@ class InstanceGenerator(seed: Long = 0L) {
       clients = clients,
       locations = locations,
       machines = machines,
-      workingRequirements = requirements
+      workingRequirements = requirements,
+      workerClientIncompatibilities = generateWCI(options, workers, clients),
+      workerWorkerIncompatibilities = generateWWI(options, workers)
     )
   }
 }

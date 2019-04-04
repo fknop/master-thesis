@@ -4,6 +4,7 @@ import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.api._
 import village1.benchmark.charts.PerformanceProfileChart
+import village1.benchmark.util.MathUtils
 import village1.util.Utils
 
 object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
@@ -11,6 +12,7 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   val name = s"cp,mip,cp+mip${Utils.randomInt(0, 1000)}"
 
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
+  println(MathUtils.estimatedTime(options, 3))
 
   val benchmark = new SolverBenchmark(options = options)
   val (t0, o0) = benchmark.run("CP", solveCP(benchmark))
@@ -22,9 +24,9 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   val writer = JsonBenchmark.serialize(instance)
   writer(options.out)
 
-  def m(s: BenchmarkSerie) = s.results.map(_.mean)
 
-  val values = Array(m(o0), m(o1), m(o2))
+  val objectiveValues = Array(o0.means, o1.means, o2.means)
+  val timeValues = Array(t0.means, t1.means, t2.means)
   val names = Array("CP", "MIP", "CP+MIP")
 
   val baselines = Array(
@@ -38,8 +40,13 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   )
 
   for (baseline <- baselines) {
-    val profile = PerformanceProfile.generate(baseline.map(values(_)), values, names)
+    val profile = PerformanceProfile.generate(baseline.map(objectiveValues(_)), objectiveValues, names)
+    val timeProfile = PerformanceProfile.generate(baseline.map(timeValues(_)), timeValues, names)
+
     val bName = baseline.map(names(_)).mkString(",")
     PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name-B=$bName.html")
+    PerformanceProfileChart.generate(timeProfile)(s"data/benchmark/html/$name-TIME-B=$bName.html")
   }
+
+  JsonBenchmark.serialize(instance)(options.out)
 }

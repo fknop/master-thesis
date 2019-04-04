@@ -13,14 +13,20 @@
 The performance profile shows a gain of about $2$ to $3.4$ for our custom heuristic.
 
 
-As our heuristic clearly outperforms standard first-fail, we will assume that every following experiments involving Constraint Programming will use this heuristic.
-
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/heuristic.png}
-  \caption{Most Available and First Fail heuristics on 72 instances (first solution).}
+  \caption{Most Available and First Fail heuristics [72 instances/first solution].}
   \label{experiments:heuristic1}
 \end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/static-dynamic-heuristic.png}
+  \caption{Most Available: static and dynamic [486 instances/15s].}
+  \label{experiments:heuristic2}
+\end{figure}
+
 
 \subsection{Large Neighborhood Search}
 
@@ -36,7 +42,7 @@ However, we also tested the MIP solver by giving it a first solution obtained fr
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/solvers.png}
-  \caption{CP, MIP and CP+MIP solvers on 216 instances (30s).}
+  \caption{CP, MIP and CP+MIP solvers [216 instances/30s].}
   \label{experiments:solvers:3}
 \end{figure}
 
