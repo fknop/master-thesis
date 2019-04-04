@@ -21,6 +21,7 @@
 \usepackage{flexisym}
 \usepackage{adjustbox}
 
+\usepackage{lipsum}
 
 
 \graphicspath{{images/}{../images/}{../../images}}
@@ -43,7 +44,7 @@
 
 % Document
 \begin{document}
-  
+
   \def\chapterautorefname{Chapter}
   \def\sectionautorefname{Section}
   \newcommand{\vone}{Village n\textsuperscript{o}1}
@@ -52,7 +53,24 @@
   
   \maketitle
 
+  \thispagestyle{plain}
+
+
+  \begin{abstract}
+    \normalsize
+    \lipsum[1]
+  \end{abstract}
+
+
+  \chapter*{Acknowledgements}
+  \addcontentsline{toc}{chapter}{\numberline{}Acknowledgements}%
+
+  \lipsum[1]
+
   \tableofcontents
+
+
+
 
   \chapter{Introduction}
   \label{chapter:introduction}
