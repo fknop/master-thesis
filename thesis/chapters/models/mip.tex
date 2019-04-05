@@ -65,6 +65,52 @@ the number of fictitious variables assigned to one.
     \sum_{i \in W} w_{ijkl} + f_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P & \label{wc1}
   \end{align}
 
+
+\autoref{wc1:visu} shows a visualization of constraints (\ref{wc1}) and (\ref{wc2}) for one time period.
+However, to simplify, we suppose that demands only need one worker, thus ignoring positions.
+
+\begin{figure}[]
+  \centering
+  \begin{tikzpicture}[
+    node distance=1mm and 0mm,
+    baseline]
+    \matrix (M1) [matrix of math nodes,row sep=0.2em, column sep=0.3em]
+    {
+      w_{11}  &  +  &  w_{21} &  +    & \dots   & +  &   w_{n1}  &= 1    \\
+      +       &     &   +     &       &   &   & \\
+      w_{12}  &  +  &  w_{22} &  +    & \dots   & +  &   w_{n2}  &= 1    \\
+      +       &     &     +   &       &         &    &       +           \\   
+      \vdots  &     &  \vdots &      & \ddots   &   &   \vdots    \\ 
+      +       &     &     +   &       &         &    &       +           \\ 
+      w_{1m}  &  +  &  w_{2m} &  +    & \dots   & +  &   w_{nm}  &= 1    \\ 
+      \leq 1  &     &  \leq 1 &       &         &    &    \leq 1        \\
+    };
+    % \draw   (M1-1-7.north east) -- (M1-7-7.south east);
+    % \draw   (M1-7-1.south west) -- (M1-7-7.south east);
+    \draw[red,very thick] 
+            (M1-1-1.north west) -| (M1-1-8.south east) -| (M1-1-1.north west);
+    \draw[blue,very thick] 
+      (M1-1-3.north west) -| (M1-8-3.south east) -| (M1-1-3.north west);
+    \draw[green,thick] 
+      (M1-7-7.north west) -| (M1-7-7.south east) -| (M1-7-7.north west);
+    \node (fv) [below right=of M1.south east,align=left,
+                font=\sffamily\bfseries] {Different\\workers};
+    \draw[blue!60,very thick,shorten >=1mm,-{Stealth[bend]}] 
+            (fv.west) to [out=180,in=270] (M1-8-3.south);
+    \node (fv2) [above right=of M1.north west,align=left,
+     font=\sffamily\bfseries] {Position\\satisfied};
+    \draw[red!60,very thick,shorten >=1mm,-{Stealth[bend]}] 
+     (fv2.west) to [out=180,in=180] (M1-1-1.west);
+     \node (fv3) [right=1cm of M1.east,align=left,
+     font=\sffamily\bfseries] {Worker $n$ for\\demand $m$};
+     \draw[green!60,thick,shorten >=1mm,-{Stealth[bend]}] 
+     (fv3.west) to [out=180,in=0] (M1-7-7.north east);
+  \end{tikzpicture}
+
+  \caption{Visualization of (\ref{wc1}) and (\ref{wc2}).}
+  \label{wc1:visu}
+\end{figure}
+
 \subsubsection{All workers assigned in a time period must be different}
 
 One worker can only work one time per time period. For each worker, we add the sum of all its variables 
@@ -102,6 +148,46 @@ We define that the sum over all the positions of the two incompatible workers mu
 \begin{align}
   \sum_{l \in d^P_k} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{ww}}, j \in T, k \in D &\label{wc5}
 \end{align}
+
+
+
+\begin{figure}[]
+  \centering
+  \begin{tikzpicture}[
+    node distance=1mm and 0mm,
+    baseline]
+    \matrix (M1) [matrix of math nodes,row sep=0.5em, column sep=0.3em]
+    {
+      \ & w_{11}  &  +  &  w_{21} &  +   &  w_{31} &  +   & \dots   & +  &   w_{n1}  \\
+      \color{red} + & w_{12}  &  +  &  w_{22} &  +   & w_{32}  &  +   & \dots   & +  &   w_{n2}   \\
+      \color{blue} + & w_{13}  &  +  &  w_{23} &  +   & w_{33}  &  +   & \dots   & +  &   w_{n3}   \\
+      \ & \vdots  &     &  \vdots &      & \vdots  &      & \vdots   &   &   \vdots \\ 
+      \ & w_{1m}  &  +  &  w_{2m} &  +   &  w_{3m} &  +   & \dots   & +  &   w_{nm}    \\
+      \\
+    };
+
+    \draw[red] 
+          (M1-2-2.south west) -| (M1-1-10.north east) -| (M1-2-2.south west);
+    \draw[blue] 
+      (M1-3-2.south west) -| (M1-2-10.north east) -| (M1-3-2.south west);
+    
+    \node[color=red] (fv) [right=of M1-1-10.south east,align=left,
+    font=\sffamily\bfseries] {${< 2}$};
+
+    \node[color=blue] (fv2) [right=of M1-3-10.north east,align=left,
+     font=\sffamily\bfseries] {${< 2}$};
+
+    \draw[purple,thick] 
+        (M1-5-10.north west) -| (M1-5-10.south east) -| (M1-5-10.north west);
+     \node (fv3) [right=1cm of M1.south east,align=left,
+     font=\sffamily\bfseries] {Worker $m$ for\\position $n$};
+     \draw[purple!60,thick,shorten >=1mm,-{Stealth[bend]}] 
+     (fv3.west) to [out=180,in=0] (M1-5-10.east);
+  \end{tikzpicture}
+
+  \caption{Example of (\ref{wc5}) if $(w_1, w_2)$ and $(w_2, w_3)$ are incompatible pairs.}
+  \label{wc5:visu}
+\end{figure}
 
 \subsubsection{Restrict skilled positions to skilled workers}
 
