@@ -8,7 +8,7 @@
 
 This chapter presents the resource allocation problem.
 We first introduce the general problem and its constraints, 
-the formal models are described in \autoref{chapter:models}.
+the formal models are then described in \autoref{chapter:models}.
 
 The \vone\ problem consists of allocating resources to work demands.
 This problem is a type of staff scheduling problem, it can be seen as a variant of the 
@@ -25,8 +25,9 @@ work location and additional resources like machines or vehicles. Each demand ha
 \begin{itemize}
   \item[$-$] A given set of time periods.
   \item[$-$] A required number of workers per period.
-  \item[$-$] Some skills requirements to be fullfilled by the workers. 
+  \item[$-$] Some skills requirements to be fulfilled by different workers. 
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
+  \item[$-$] Additional skills requirements to be fulfilled by any workers assigned to that demand.
   \item[$-$] A list of machines to perform the work.
   \item[$-$] An eventual list of possible locations where the demand can be executed and a vehicle to drive the workers to destination.
   A demand can only have a location if it is an external labor request. Internal work to the company use predefined locations.
@@ -45,34 +46,33 @@ Each worker has:
 
 The goal is to assign workers, machines and locations to a list of demands over the set of all time slots.
 Each resource can only be assigned once per time period and need to satisfy all the constraints stated by the demand. 
-The sub-goal is to also assign workers in such a way that they work for the longest time possible at the same position and 
- such that the assignments between workers are balanced throughout the entire schedule.
+The sub-goal is to assign workers in such a way that they work for the longest time possible at the same position.
 
 \section{Constraints}
 \subsection{Hard Constraints}
 
-\subsubsection{Respect worker availabilities}
+\subsubsection{A worker can only work when available}
 
-A worker has a set of availabilities and should not be assigned to a 
-shift when not available.
+Each worker has a defined set of availabilities and cannot be assigned to a demand when 
+unavailable.
 
-\subsubsection{Respect demand occurrences}
+\subsubsection{No worker should be assigned to a demand which is not occurring}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
 occurring.
 
-\subsubsection{No worker should be assigned twice for the same period}
+\subsubsection{No worker can be assigned twice for the same period} 
+A worker cannot do the work of two different workers at the same time.
+Hence, a worker can only work at most once per time period.
 
-A worker obviously cannot work at two positions at the same time. 
+\subsubsection{Each demand has a required number of workers}
 
-\subsubsection{Required number of workers}
-
-A demand has a needed number of workers to be satisfied. 
-For each time period a demand is occurring, it should have the required 
+Each demand has a needed number of workers to be satisfied. 
+For each time period in which a demand is occurring, it should have the required 
 number of workers assigned to it.
 
-\subsubsection{Skill restrictions}
+\subsubsection{Each assignment must respect skill restrictions}
 
 Each position of a demand might require skills to be satisfied. 
 To be assigned to that position, a worker must have the required skills.
@@ -108,15 +108,14 @@ to that demand.
 As with machines, locations must be assigned only once per time period.
 
 
-
-
 \subsection{Soft Constraints}
 
-\subsubsection{Client-worker preference}
+\subsubsection{Satisfy the most assignments possible}
 
-A client might prefer some workers over others. 
-We use a soft constraint for this as it might not always be possible to 
-satisfy.
+Each demand need a required number of workers. However, we can assign a fictitious worker to demands 
+and minimize the number of fictitious workers. This is done in the case where there is not enough workers
+or no worker that satisfy a particular skill. From a modeling point of view, the hard constraint which states
+that the required number of workers must be satisfied is still satisfied with a fictitious worker.
 
 \subsubsection{Contiguous shifts}
 

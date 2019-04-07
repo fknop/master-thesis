@@ -91,7 +91,7 @@ However, to simplify, we suppose that demands only need one worker, thus ignorin
             (M1-1-1.north west) -| (M1-1-8.south east) -| (M1-1-1.north west);
     \draw[blue,very thick] 
       (M1-1-3.north west) -| (M1-8-3.south east) -| (M1-1-3.north west);
-    \draw[green,thick] 
+    \draw[purple,thick] 
       (M1-7-7.north west) -| (M1-7-7.south east) -| (M1-7-7.north west);
     \node (fv) [below right=of M1.south east,align=left,
                 font=\sffamily\bfseries] {Different\\workers};
@@ -103,7 +103,7 @@ However, to simplify, we suppose that demands only need one worker, thus ignorin
      (fv2.west) to [out=180,in=180] (M1-1-1.west);
      \node (fv3) [right=1cm of M1.east,align=left,
      font=\sffamily\bfseries] {Worker $n$ for\\demand $m$};
-     \draw[green!60,thick,shorten >=1mm,-{Stealth[bend]}] 
+     \draw[purple!60,thick,shorten >=1mm,-{Stealth[bend]}] 
      (fv3.west) to [out=180,in=0] (M1-7-7.north east);
   \end{tikzpicture}
 
@@ -185,7 +185,7 @@ We define that the sum over all the positions of the two incompatible workers mu
      (fv3.west) to [out=180,in=0] (M1-5-10.east);
   \end{tikzpicture}
 
-  \caption{Example of (\ref{wc5}) if $(w_1, w_2)$ and $(w_2, w_3)$ are incompatible pairs.}
+  \caption{Example of (\ref{wc5}) if $(w_1, w_2)$ and $(w_2, w_3)$ are incompatible pairs).}
   \label{wc5:visu}
 \end{figure}
 

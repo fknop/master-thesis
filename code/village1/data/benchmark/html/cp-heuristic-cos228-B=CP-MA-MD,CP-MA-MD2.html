@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark</title>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <style>
+    #container0, #container1 {
+      min-width: 310px;
+      max-width: 800px;
+      height: 600px;
+      margin: 0 auto
+    }
+  </style>
+</head>
+<body>
+  
+
+    <div id="container0"></div>
+
+  <script>
+
+    const data = {
+  "series" : [ {
+    "name" : "CP-MA-MD",
+    "x" : [ 1, 1, 1, 1, 1, 1, 1, 1, 1.0133928571428572, 1.0296296296296297, 1.0473684210526315, 1.0526315789473684 ],
+    "y" : [ 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.75, 0.8333333333333334, 0.9166666666666666, 1 ]
+  }, {
+    "name" : "CP-MA-COS",
+    "x" : [ 0.9805825242718447, 1, 1, 1.0172413793103448, 1.0211640211640212, 1.0263157894736843, 1.0280701754385966, 1.0389610389610389, 1.04, 1.0518518518518518, 1.0526315789473684, 1.0669642857142858 ],
+    "y" : [ 0.08333333333333333, 0.25, 0.25, 0.3333333333333333, 0.4166666666666667, 0.5, 0.5833333333333334, 0.6666666666666666, 0.75, 0.8333333333333334, 0.9166666666666666, 1 ]
+  }, {
+    "name" : "CP-MA-MD2",
+    "x" : [ 1, 1, 1, 1, 1, 1.0082644628099173, 1.01, 1.0211640211640212, 1.0223880597014925, 1.0229885057471264, 1.0315789473684212, 1.0324675324675325 ],
+    "y" : [ 0.4166666666666667, 0.4166666666666667, 0.4166666666666667, 0.4166666666666667, 0.4166666666666667, 0.5, 0.5833333333333334, 0.6666666666666666, 0.75, 0.8333333333333334, 0.9166666666666666, 1 ]
+  } ]
+}
+
+    const series = data.series
+	  const container  = document.getElementById('container0');
+
+    const minX = 0
+    const minY = 0
+
+    const maxX = Math.max(...series.map(s => s.x).map(x => x[x.length - 1]))
+    const maxY = 1
+
+    const layout = {
+      xaxis: {
+        title: "Objective ratio (lower the better)",
+        zeroline: false,
+        dtick: 0.2
+      },
+      yaxis: {
+        title: 'Instances (%)',
+        zeroline: false,
+        dtick: 0.1
+      }
+    }
+
+    Plotly.plot(container, series.map(serie => ({
+      name: serie.name,
+      x: [minX, ...serie.x, maxX],
+      y: [minY, ...serie.y, maxY],
+      mode: 'lines',
+      line: {shape: 'hv'},
+    })), layout)
+  </script>
+</body>
+</html>

@@ -323,7 +323,7 @@ object MainLNS extends App {
 
     val search = new VillageOneLNS(problem)
 
-    val stats = search.solve(timeLimit = 10, options = Some(LNSOptions().copy(limit = 10000, bestWorkingViolations = 0)))
+    val stats = search.solve(timeLimit = 20, options = Some(LNSOptions().copy(limit = 3000, bestWorkingViolations = 0)))
 
     val solution = search.lastSolution
 

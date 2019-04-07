@@ -8,7 +8,7 @@ import oscar.cp.modeling.Branchings
 import village1.modeling.Constants
 import village1.modeling.cp.VillageOneCPModel
 
-class MostAvailableHeuristicDynamic(model: VillageOneCPModel, x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
+class MostAvailableHeuristicDynamic(model: VillageOneCPModel, val x: Array[CPIntVar], variables: Array[Array[Array[CPIntVar]]]) extends Branchings with Heuristic {
 
 
 

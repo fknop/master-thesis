@@ -346,8 +346,8 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
     if (requirements.nonEmpty) {
       val variables = workerVariables.flatten.flatten
 
-      val low = Array.fill(W)(0)
-      val up = Array.tabulate(W)(workers(_).availabilities.size)
+//      val low = Array.fill(W)(0)
+//      val up = Array.tabulate(W)(workers(_).availabilities.size)
 
       val violations: Array[CPIntVar] = Array.fill(requirements.length)(null)
 
@@ -356,15 +356,15 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
       add(gcc(variables.filter(v => set.count(v.hasValue) > 0), occurrences), CPPropagStrength.Weak)
       for (i <- requirements.indices) {
         val r = requirements(i)
-        r.min match {
-          case Some(min) => low(r.worker) = min
-          case None =>
-        }
-
-        r.max match {
-          case Some(max) => up(r.worker) = max
-          case None =>
-        }
+//        r.min match {
+//          case Some(min) => low(r.worker) = min
+//          case None =>
+//        }
+//
+//        r.max match {
+//          case Some(max) => up(r.worker) = max
+//          case None =>
+//        }
 
         val violation = maximum(Array(
             occurrences(i)._2 - r.max.getOrElse(workers(r.worker).availabilities.size),
