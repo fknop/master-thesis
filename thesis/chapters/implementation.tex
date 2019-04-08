@@ -25,7 +25,7 @@ Those schemas allow us to create a typed data structure for JSON objects. All th
 is handled by the JSON Schema library. A small example of JSON schema can be found in \autoref{json:example}. 
 This example defines a client structure which takes a required string property called \textit{name}.
 
-\begin{lstfloat}
+
 \begin{lstlisting}[language=json,firstnumber=1,caption={JSON Schema example},captionpos=b,label={json:example}]
   "client": {
     "type": "object",
@@ -37,7 +37,37 @@ This example defines a client structure which takes a required string property c
     "required": ["name"]
   }
 \end{lstlisting}
-\end{lstfloat}
+
+The data is parsed into an immutable data structure in Scala which looks like this:
+
+\begin{lstlisting}[style=scalaStyle,caption={Problem structure in Scala},captionpos=b]
+case class Problem(
+  T: Int,
+  demands: Array[Demand],
+  workers: Array[Worker],
+  clients: Array[Client],
+  locations: Array[Location] = Array(),
+  machines: Array[Machine] = Array(),
+  workerWorkerIncompatibilities: Array[Array[Int]] = Array(),
+  workerClientIncompatibilities: Array[Array[Int]] = Array(),
+  workingRequirements: Array[WorkingRequirement] = Array(),
+  initialSolution: Option[Solution] = None
+)
+\end{lstlisting}
+
+
+\section{Common solver API}
+
+Both solvers implement a \texttt{solve} function which takes the same set of parameters.
+This function can take generic options implemented by the subclasses (i.e. specific MIP or CP options).
+
+\begin{lstlisting}[style=scalaStyle,caption={Solver API},captionpos=b]
+trait SearchOptions
+
+trait Search[T <: SearchOptions] {
+  def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[T] = None): SearchResult
+}
+\end{lstlisting}
 
 \section{Mixed Integer Programming solver}
 
@@ -113,5 +143,61 @@ for (i <- requirements.indices) {
 // workingRequirementsViolations: CPIntVar
 add(sum(violations, workingRequirementsViolations))
 \end{lstlisting}
+
+
+\section{Instances generation}
+\label{section:instance-gen}
+
+Randomized instances were needed to be able to test our solvers. Unfortunately, we were not 
+able to have real testing data to base our generation on. 
+
+A generator was implemented with a series of options to create different types of instances. The options are the following:
+
+
+\begin{lstlisting}[style=scalaStyle,caption={Instance options},captionpos=b]
+case class InstanceOptions(
+  t: Int,                                   // Number of periods 
+  clients: Int,                             // Number of clients 
+  demands: Int,                             // Number of demands 
+  workers: Int,                             // Number of workers 
+  skills: Int,                              // Number of skills 
+  locations: Int = 0,                       // Number of locations 
+  machines: Int = 0,                        // Number of machines
+  probabilities: Map[String, Double] = Map(
+    "assignSkill" -> 0.2,                   // Assign skill to demand
+    "assignWorkerSkill" -> 0.2,             // Assign skill to worker
+    "assignPeriod" -> 0.6,                  // Assign period to demand
+    "assignLocation" -> 0.5,                // Assign location to demand
+    "assignMachines" -> 0.3,                // Assign machines to demand
+    "takeMachine" -> 0.2,                   // Assign a machine to demand
+    "assignWorkingRequirements" -> 0.2,     // Assign requirements to worker
+    "assignWWI" -> 0.05,                    // Assign worker-worker 
+                                            // incompatibility for each worker 
+    "assignWCI" -> 0.05                     // Assign worker-client
+                                            // incompatibility for each worker
+  )
+)
+\end{lstlisting}
+
+This represent almost all the parameters that an instance can have. We created a
+map of probabilities to generate easier or harder instances. For example,
+the \texttt{assignSkill} value is responsible for the probability of a position to be assigned a skill. 
+We can increase this value if we want more skilled positions and vice-versa.
+
+We also needed to be able to reproduce instances, the \texttt{InstanceGenerator} API can 
+take a seed which default at $0$.
+
+  
+\begin{lstlisting}[style=scalaStyle,caption={Instance generator API},captionpos=b]
+class InstanceGenerator(val seed: Long = 0L) {
+  def generate(options: InstanceOptions): Problem
+}
+\end{lstlisting}
+
+The generator makes sure that a solution is always possible by assigning periods to workers 
+that have been assigned to demands. It also add the demand periods to $k$ random workers
+where $k$ is the number of required workers for that demand. This allow having more solutions variety.
+    
+The generator tries as much as possible to create meaningful instances but it is of course not able to replicate the importance of real data properly.
 \end{document}
 

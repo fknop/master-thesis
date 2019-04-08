@@ -1,6 +1,6 @@
 package village1.benchmark
 
-import village1.benchmark.api.SolverBenchmark
+import village1.benchmark.api.BenchmarkRunner
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
 import village1.search.SearchResult
@@ -8,7 +8,7 @@ import village1.search.cp.{LNSOptions, VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 
 object BenchmarkSolverFunctions {
-  def solveMIP (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+  def solveMIP (b: BenchmarkRunner): VillageOneModel => (Long, Int) = {
      base: VillageOneModel => {
       val search = new MIPSearch(base)
       val results: SearchResult = search.solve(silent = true, timeLimit = b.TimeLimit, solutionLimit = b.SolutionLimit)
@@ -28,7 +28,7 @@ object BenchmarkSolverFunctions {
 //    }
 //  }
 
-  def solveCP (b: SolverBenchmark, options: CPModelOptions = CPModelOptions(), lnsOptions: LNSOptions = LNSOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}): VillageOneModel => (Long, Int) = {
+  def solveCP (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions(), lnsOptions: LNSOptions = LNSOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base, options)
       applyToSearch(search)
@@ -38,7 +38,7 @@ object BenchmarkSolverFunctions {
     }
   }
 
-  def solveCPPropagationRelax (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
+  def solveCPPropagationRelax (b: BenchmarkRunner): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
 
@@ -53,7 +53,7 @@ object BenchmarkSolverFunctions {
     }
   }
 
-    def solveCP_MIP (b: SolverBenchmark, startMipProbability: Double = 0.5): VillageOneModel => (Long, Int) = {
+    def solveCP_MIP (b: BenchmarkRunner, startMipProbability: Double = 0.5): VillageOneModel => (Long, Int) = {
 
       base: VillageOneModel => {
         val cp = new VillageOneSearch(base)

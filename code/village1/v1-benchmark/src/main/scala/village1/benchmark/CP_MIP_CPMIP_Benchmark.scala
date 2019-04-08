@@ -14,7 +14,7 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
   println(MathUtils.estimatedTime(options, 3))
 
-  val benchmark = new SolverBenchmark(options = options)
+  val benchmark = new BenchmarkRunner(options = options)
   val (t0, o0) = benchmark.run("CP", solveCP(benchmark))
   val (t1, o1) = benchmark.run("MIP", solveMIP(benchmark))
   val (t2, o2) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))

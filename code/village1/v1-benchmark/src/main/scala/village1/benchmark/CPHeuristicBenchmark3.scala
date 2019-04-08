@@ -19,7 +19,7 @@ object CPHeuristicBenchmark3 extends CommandLineBenchmark with Branchings {
   println(MathUtils.estimatedTime(options, 2))
 
 
-  val benchmark = new SolverBenchmark(options = options)
+  val benchmark = new BenchmarkRunner(options = options)
 
   val names = Array("CP-MA-MD", "CP-MA-COS", "CP-MA-MD2")
   val (t0, o0) = benchmark.run(names(0), solveCP(benchmark))

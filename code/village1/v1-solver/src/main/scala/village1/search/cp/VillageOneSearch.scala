@@ -5,20 +5,18 @@ import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.cp.heuristic.MostAvailableHeuristic
-import village1.search.{Search, SearchResult}
-
-case class CPSearchOptions()
+import village1.search.{Search, SearchOptions, SearchResult}
 
 class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
   extends VillageOneCPModel(problem, options, base)
-  with Search[CPSearchOptions] {
+  with Search[SearchOptions] {
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
 
   override def solve(timeLimit: Int = Int.MaxValue,
                      solutionLimit: Int = Int.MaxValue,
                      silent: Boolean = false,
-                     options: Option[CPSearchOptions] = None
+                     options: Option[SearchOptions] = None
                     ): SearchResult = {
 
     solver.silent = silent
@@ -51,7 +49,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
 
     val stats = start(nSols = solutionLimit, timeLimit = timeLimit)
 
-    SearchResult(lastSolution, stats.time, stats.completed)
+    SearchResult(lastSolution, stats.time)
   }
 }
 

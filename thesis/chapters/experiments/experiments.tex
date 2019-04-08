@@ -5,17 +5,50 @@
 \begin{document}
 
 In this chapter, we experiment our solvers and discuss the results. 
-We first talk about how we generated test instances to run our experiments and how 
-those experiments were run.
-
-\section{Instances generation}
-
-To be able to make meaninful experiments, we need test data. Unfortunately, we were 
-not able to be provided with real testing data. 
-We had to generate data randomly with a series of parameters and probabilities passed 
-to an instance generator. 
 
 \section{Benchmark process}
+
+Our benchmark API takes an options structure (\autoref{benchmark:options}).
+The arrays \texttt{T}, \texttt{D} and \texttt{W} determines the sizes of the instances. The benchmark runner 
+will create instances with a combinations of those parameters. For example, with the values in \autoref{benchmark:options},
+the benchmark runner will create 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
+three values being $(T, D, W)$.
+
+\begin{lstlisting}[style=scalaStyle,label={benchmark:options},caption={Benchmark options},captionpos=b]
+trait BenchmarkOptions {
+  val solutionLimit: Int = Int.MaxValue
+  val timeLimit: Int = 20
+  val repeat: Int = 1
+  val dryRun: Int = 1
+  val T: Array[Int] = Array(5)
+  val D: Array[Int] = Array(30, 50)
+  val W: Array[Int] = Array(100, 200, 300)
+  val probabilities: Map[String, Double] = Map()
+  val seed: Long = -1L
+}
+\end{lstlisting}
+
+We can specify a solution limit as well as a time limit. We can also repeat our benchmark and takes 
+the average of results. We can also have dry runs to warm up the JVM (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
+we can specify the probabilities for our instances as explained in \autoref{section:instance-gen}.
+
+Our benchmark runner has a function \texttt{run} that takes a name (e.g. solver name, serie name, etc), and a solving function 
+which takes a generic model and returns a pair with the time spent in milliseconds and the objective value respectively.
+
+\begin{lstlisting}[style=scalaStyle,label={benchmark:run},caption={Benchmark run function},captionpos=b]
+class BenchmarkRunner(val options: BenchmarkOptions) {
+  def run (
+    name: String, 
+    solve: VillageOneModel => (Long, Int)
+  ): (BenchmarkSerie, BenchmarkSerie)
+}
+\end{lstlisting}
+
+This functions returns a pair of benchmark series: one serie for the time values and one serie for the objective values.
+The \texttt{BenchmarkSerie} class is simply a class that takes a name and a list of benchmark measurements (i.e. mean, standard deviation, min and max).
+
+This implementation allows us to create a variety of benchmark by simply changing the \texttt{solve} function.
+
 
 \section{Constraint Programming}
 

@@ -19,7 +19,7 @@ object CPLimitBenchmark extends CommandLineBenchmark with Branchings {
   val lnsOptions = limits.map(l => base.copy(limit = l))
   val names = limits.map(l => s"L=$l")
 
-  val benchmark = new SolverBenchmark(options = options)
+  val benchmark = new BenchmarkRunner(options = options)
 
   val results = lnsOptions.zip(names).map { arg =>
     val (_, o) = benchmark.run(arg._2, solveCP(benchmark, lnsOptions = arg._1))

@@ -37,7 +37,7 @@
 
 
 \colorlet{punct}{red!60!black}
-\definecolor{background}{HTML}{f9f9f9}
+\definecolor{background}{HTML}{fbfbfb}
 \definecolor{delim}{RGB}{20,105,176}
 \definecolor{string}{HTML}{279900}
 \colorlet{numb}{magenta!60!black}
@@ -52,7 +52,7 @@
 \lstdefinelanguage{json}{
     basicstyle=\normalfont\ttfamily,
     numbers=left,
-    numberstyle=\scriptsize,
+    numberstyle=\scriptsize\color{gray},
     stepnumber=1,
     numbersep=8pt,
     showstringspaces=false,
@@ -94,8 +94,9 @@
   showstringspaces=false,
   columns=flexible,
   basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numberstyle=\scriptsize\color{gray},
+  backgroundcolor=\color{background},
   keywordstyle=\color{blue},
   commentstyle=\color{dkgreen},
   stringstyle=\color{mauve},

@@ -1,14 +1,14 @@
 package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
-import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
+import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, BenchmarkRunner}
 import village1.util.Utils
 
 object MIPStartBenchmark extends CommandLineBenchmark {
 
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/cp-mip${Utils.randomInt(0, 100)}.json"))
 
-  val benchmark = new SolverBenchmark(options = options)
+  val benchmark = new BenchmarkRunner(options = options)
   val cp_mip0 = benchmark.run("CP+MIP 0.2", solveCP_MIP(benchmark, 0.2))
   val cp_mip1 = benchmark.run("CP+MIP 0.3", solveCP_MIP(benchmark, 0.3))
   val cp_mip2 = benchmark.run("CP+MIP 0.5", solveCP_MIP(benchmark, 0.5))

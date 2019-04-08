@@ -1,5 +1,7 @@
 package village1.search
 
-trait Search[T] extends SolutionEmitter {
-  def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[T] = None): SearchResult
+trait SearchOptions
+
+trait Search[T <: SearchOptions] extends SolutionEmitter {
+  def solve(timeLimit: Int = Int.MaxValue, solutionLimit: Int = Int.MaxValue, silent: Boolean = false, options: Option[T] = None): SearchResult
 }

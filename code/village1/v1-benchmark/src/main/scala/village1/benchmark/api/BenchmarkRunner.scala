@@ -7,7 +7,7 @@ import village1.benchmark.util.MathUtils._
 import scala.util.Random
 
 
-class SolverBenchmark(
+class BenchmarkRunner(
    val options: BenchmarkOptions
  ) {
 

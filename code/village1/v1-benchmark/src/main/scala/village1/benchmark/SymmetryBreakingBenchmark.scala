@@ -1,13 +1,13 @@
 package village1.benchmark
 
 import village1.benchmark.BenchmarkSolverFunctions._
-import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, SolverBenchmark}
+import village1.benchmark.api.{BenchmarkArgs, CommandLineBenchmark, BenchmarkRunner}
 
 object SymmetryBreakingBenchmark extends CommandLineBenchmark {
 
   val options = parseArgs(BenchmarkArgs(out = "data/benchmark/cp-symmetry.json"))
 
-  val benchmark = new SolverBenchmark(options = options)
+  val benchmark = new BenchmarkRunner(options = options)
 //  val cpResults = benchmark.run("CP-NoSym", solveCP(benchmark))
 //  val cpResultsSB = benchmark.run("CP-Sym", solveCPWithSymmetries(benchmark))
 

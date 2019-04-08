@@ -10,14 +10,14 @@ import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, Solution, VillageOneModel}
 import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristicDynamic}
 import village1.search.cp.relaxations.PropagationGuidedRelaxation
-import village1.search.{Search, SearchResult}
+import village1.search.{Search, SearchOptions, SearchResult}
 import village1.util.SysUtils.time
 
 import scala.util.Random
 
 
 
-case class LNSOptions(repeat: Int = Int.MaxValue, limit: Int = 2500, bestWorkingViolations: Int = 0)
+case class LNSOptions(repeat: Int = Int.MaxValue, limit: Int = 2500, bestWorkingViolations: Int = 0) extends SearchOptions
 
 class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
       extends VillageOneCPModel(problem, options, base)
@@ -181,8 +181,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
 
     }
 
-    // TODO: does oscar return if it's optimal ?
-    SearchResult(lastSolution, runningTime, optimal = false)
+    SearchResult(lastSolution, runningTime)
   }
 
   private def buildToFlat(): Array[Map[Int, Array[Int]]] = {
@@ -321,7 +320,7 @@ object MainLNS extends App {
 
     //  val problem = JsonParser.parse(path)
 
-    val search = new VillageOneLNS(problem)
+    val search: Search[LNSOptions] = new VillageOneLNS(problem)
 
     val stats = search.solve(timeLimit = 20, options = Some(LNSOptions().copy(limit = 3000, bestWorkingViolations = 0)))
 
@@ -332,9 +331,9 @@ object MainLNS extends App {
         JsonSerializer.serialize(s)(s"data/results/$name-o=${s.objective}.json")
         println(s.valid)
         println("Partial: " + s.partial)
-        println("Objective 1: " + search.bestObjective1)
-        println("Objective 2: " + search.bestObjective2)
-        println("Objective 3: " + search.bestObjective3)
+//        println("Objective 1: " + search.bestObjective1)
+//        println("Objective 2: " + search.bestObjective2)
+//        println("Objective 3: " + search.bestObjective3)
       case _ => println("No solution found")
     }
 }
