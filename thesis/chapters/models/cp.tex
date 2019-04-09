@@ -158,7 +158,7 @@ We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
 of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
 constraint called \texttt{at\_least\_nvalue} to count this number.
-Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ accross all time periods of that demand:
+Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods of that demand:
 
 \begin{equation}
   \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in d^P_j
@@ -311,7 +311,7 @@ $x_1$ is assigned the value $2$, we will ignore the permutation $x_1 = 2, x_2 = 
   \label{tree:symmetry}
 \end{figure}
 
-\subsubsection{Large Neighorhood Search}
+\subsubsection{Large Neighborhood Search}
 
 We use LNS to ensure that we explore as much of the search space as possible. 
 We use the Propagation Guided Relaxation \cite{Propagation:LNS} to relax our best solutions.

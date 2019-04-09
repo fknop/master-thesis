@@ -25,12 +25,12 @@ Those constraints can be decomposed into multiple simpler constraints but the fi
 is often worse than its global counterpart. 
 
 There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
-a number of violations. This is particularely useful for over-constrained problems which cannot be solved by a CSP.
+a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a CSP.
 Instead the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
-\subsubsection{AllDifferent Cconstraint}
+\subsubsection{AllDifferent Constraint}
 \label{sota:alldifferent}
 
-The \texttt{allddifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
+The \texttt{alldifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
 Programming.
 This constraint is defined over a subset of variables for which values must be different. More formally:
 
@@ -41,14 +41,14 @@ This constraint is defined over a subset of variables for which values must be d
 This constraint can be decomposed into multiple binary inequalities. It makes \texttt{alldifferent} an operational global constraint.
 It can be proven that the filtering of the global constraint cannot be achieved with a decomposition. As 
 an example, let us define three variables $x_1$, $x_2$ and $x_3$ respectively taking domains $\{1,2\}$, $\{1,2\}$, $\{1,2,3,4\}$. 
-The global constraint would be able to successfuly filter $1$ and $2$ from the domain of 
+The global constraint would be able to successfully filter $1$ and $2$ from the domain of 
 $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decomposition is not able to filter those values.
 
 
 \subsubsection{Global Cardinality Constraint}
 \label{sota:gcc}
 
-The global cardility constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
+The global cardinality constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
 \texttt{alldifferent} constraint. It does not enforces (although it can) the uniqueness of values of its variables
 but instead enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
 between a lowerbound and a upperbound, respectively $l_i$ and $u_i$. 
@@ -73,7 +73,7 @@ The violation associated with this constraint is the sum of excess or shortage \
 \end{align*}
 
 
-\subsection{Large Neighorhood Search}
+\subsection{Large Neighborhood Search}
 
 A Constraint Programming solver can often get stuck in a search tree that do not lead to good solutions.
 We want instead to explore as much of the search space as possible. 
@@ -89,7 +89,7 @@ The LNS framework often goes as follow:
   \item Restart
 \end{enumerate}
 
-The entire search might be limited with a time limit, number of solutions or number of restarts. Each independant search 
+The entire search might be limited with a time limit, number of solutions or number of restarts. Each independent search 
 is often limited with a number of backtracks or a time limit.
 
 \subsection{Variable Objective Search}
