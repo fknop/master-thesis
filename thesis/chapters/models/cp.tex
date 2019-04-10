@@ -8,11 +8,12 @@
 \section{Constraint Programming Model}
 \label{section:cpmodel}
 
-The translation to the mathematical (MIP) model to the CP model is fairly
-straightforward. Binary variables are translated to integer variables, each value representing
-one resource (i.e. worker, zone or machines). 
-For example, binary variables $w_{0jkl}, \dots, w_{njkl}$ are transformed to a single variable 
-$w_{jkl} \in \{0, \dots, n\}$
+We now present our Constraint Programming model. This model contains some differences
+with the mathematical model described in \autoref{section:mipmodel}.
+For example, a Constraint Programming model usually does not contain binary variables to refer to multiples values 
+of a domain. Instead it uses integer variables having the entire domain. 
+Typically, binary variables $w_0, \dots, w_i, \dots, w_n$ where $i \in W$ and $w = i$ if $w_i = 1$ are equivalent to 
+one variable $w \in \{0, \dots, n\}$.
 
 
 

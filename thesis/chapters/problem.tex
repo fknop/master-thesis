@@ -10,43 +10,62 @@ This chapter presents the resource allocation problem.
 We first introduce the general problem and its constraints, 
 the formal models are then described in \autoref{chapter:models}.
 
-The \vone\ problem consists of allocating resources to work demands.
+The resource allocation problem described in this thesis is based on the needs of the \vone\ company.
+The problem consists of allocating resources to work demands.
 This problem is a type of staff scheduling problem, it can be seen as a variant of the 
 well known \emph{Nurses Scheduling Problem} (NSP) \cite{Burke2004}. The goal of the NSP is to assign 
 nurses to shifts such that the entire schedule is satisfied. 
 This type of problem often has hard constraints to state restrictions 
 and soft constraints to state preferences. 
 
-\vone\ has internal work for their employees but also receives 
-external labor requests. The problem is separated in multiple time periods all equal in time.
-A demand often occurs in multiple time slots and consists of a required number of workers, an eventual 
-work location and additional resources like machines or vehicles. Each demand has:
+
+In our problem, we have a number of time periods all equal in time and work demands with multi-skill requirements
+happening in those periods. 
+A demand can occur in multiple time periods and consists of a required number of workers, an eventual work location 
+and additional resources like machines.
+
+More formally, the problem consists of:
 
 \begin{itemize}
-  \item[$-$] A given set of time periods.
-  \item[$-$] A required number of workers per period.
-  \item[$-$] Some skills requirements to be fulfilled by different workers. 
+  \item[$-$] A list of multiple time periods all equal in time ($t \in T$).
+  \item[$-$] A list of clients ($c \in C$). 
+  \item[$-$] A list of demands ($d \in D$).
+  \item[$-$] A list of workers ($w \in W$). 
+  \item[$-$] A list of skills ($s \in S$).
+  \item[$-$] A list of locations ($l \in L$).
+  \item[$-$] A list of machines ($m \in M$).
+  \item[$-$] A list of working requirements associated with workers ($r \in R$). A requirement $r$ states that a worker $r_w$
+  needs to work a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem time window.  
+  \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{ww}$).
+  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$).
+\end{itemize}
+
+Each demand has:
+
+\begin{itemize}
+  \item[$-$] A client ($d^c \in C$).
+  \item[$-$] A given set of time periods ($d^T \subseteq T$).
+  \item[$-$] A required number of workers per period ($d^w \in \mathbb{N}$).
+  \item[$-$] Some skills requirements to be fulfilled by different workers ($d^S \subseteq S$).
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
-  \item[$-$] Additional skills requirements to be fulfilled by any workers assigned to that demand.
-  \item[$-$] A list of machines to perform the work.
-  \item[$-$] An eventual list of possible locations where the demand can be executed and a vehicle to drive the workers to destination.
-  A demand can only have a location if it is an external labor request. Internal work to the company use predefined locations.
-  \item[$-$] An eventual need for a worker supervisor which will supervise the group.
+  \item[$-$] Additional skills requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($d^{S^{+}} \subseteq S$).
+  \item[$-$] A list of machines to perform the work ($d^M \subseteq M$).
+  \item[$-$] An eventual list of possible locations where the demand can be performed ($d^L \subseteq L$). 
+  Vehicles used to drive the workers to the work location are considered as machines.
 \end{itemize}
 
 
 Each worker has:
 
 \begin{itemize}
-  \item[$-$] Some skills and restrictions (e.g. package lifter, supervisor, etc.).
-  \item[$-$] A list of availabilities at which the worker can work.
-  \item[$-$] A list of incompatibilities with other workers (i.e. workers that cannot work together).
-  \item[$-$] A list of incompatibilities with clients (i.e. workers that cannot work for clients).
+  \item[$-$] A list of skills (e.g. package lifter, supervisor, etc.) ($w^S \subseteq S$).
+  \item[$-$] A list of availabilities at which the worker can work ($w^T \subseteq T$).  
 \end{itemize}
 
-The goal is to assign workers, machines and locations to a list of demands over the set of all time slots.
-Each resource can only be assigned once per time period and need to satisfy all the constraints stated by the demand. 
-The sub-goal is to assign workers in such a way that they work for the longest time possible at the same position.
+
+The goal is to assign workers to multi-skill positions as well as machines and locations to a list of demands over the set of all time slots.
+Each resource can only be assigned once per time period and needs to satisfy all the constraints stated by the demand. 
+% The possible objective is to assign workers in such a way that they work for the longest time possible at the same position.
 
 \section{Constraints}
 \subsection{Hard Constraints}
@@ -68,14 +87,15 @@ Hence, a worker can only work at most once per time period.
 
 \subsubsection{Each demand has a required number of workers}
 
-Each demand has a needed number of workers to be satisfied. 
+Each demand needs a number of workers to be satisfied. 
 For each time period in which a demand is occurring, it should have the required 
 number of workers assigned to it.
 
 \subsubsection{Each assignment must respect skill restrictions}
 
 Each position of a demand might require skills to be satisfied. 
-To be assigned to that position, a worker must have the required skills.
+To be assigned to that position, a worker must have the required skills. 
+A worker can also have more skills than the required skills by the position.
 
 \subsubsection{Worker-worker incompatibilities}
 
@@ -128,7 +148,8 @@ violations.
 \subsubsection{Working requirements}
 
 Workers can have minimum and maximum working periods. We want to make sure 
-that these requirements are respected as much as possible.
+that these requirements are satisfied. However, as this is not always possible to solve, we 
+state this as a soft constraint.
 
 \end{document}
 

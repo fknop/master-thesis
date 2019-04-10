@@ -11,7 +11,15 @@ Each constraint $C_j$, $1 \leq j \leq m$, is a constraint over some set of varia
 of the constraint. The size of this set is known as the arity of the constraint. 
 A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all of the constraints. \cite{cp-definition}
 
+Problems are sometimes over-constrained and hard to solve with a CSP. In those cases, we can transform our 
+CSP to a Constraint Optimization Problem (COP) where we try to optimize one or multiple objectives coming 
+from the transformation of hard constraints into soft constraints.
+
 \subsection{Global Constraints}
+
+
+We now describe the principle of global constraints and how they are useful for our resource allocation problem 
+described in \autoref{chapter:problem}.
 
 As described in more depth in \cite{Hentenryck:2003}:
 
@@ -30,6 +38,11 @@ Instead the CSP is transformed into a \emph{Constraint Optimization Problem} (CO
 \subsubsection{AllDifferent Constraint}
 \label{sota:alldifferent}
 
+In our resource allocation problem (\ref{chapter:problem}), we need to assign different workers to demands during the same time period. 
+This is usually done in Constraint Programming by using the \texttt{alldifferent} constraint.
+
+\paragraph{}
+
 The \texttt{alldifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
 Programming.
 This constraint is defined over a subset of variables for which values must be different. More formally:
@@ -47,6 +60,13 @@ $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decom
 
 \subsubsection{Global Cardinality Constraint}
 \label{sota:gcc}
+
+As described in \autoref{chapter:problem}, our resource allocation problem need to take into account working requirements, i.e. a minimum 
+and a maximum number of times that a worker can work. For this, we need to count the occurrences that a worker is assigned to a position and 
+limit those occurrences to a minimum and maximum. 
+
+\paragraph{}
+
 
 The global cardinality constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
 \texttt{alldifferent} constraint. It does not enforces (although it can) the uniqueness of values of its variables
@@ -95,12 +115,18 @@ is often limited with a number of backtracks or a time limit.
 \subsection{Variable Objective Search}
 
 A multi-objective problem is often modeled by having a weighted sum of sub-objectives to form a 
-single objective.
+single objective. 
 
 \begin{align*}
   \text{min} \quad & obj = \sum_{i} w_i o_i \\
   \text{s.t.} \quad & constraints
 \end{align*}
+
+Our resource allocation problem (\ref{chapter:problem}) uses such objective. One issue with this objective modeling is how 
+to prioritize sub-objectives (e.g. is it more important to minimize contiguous workers or requirements). This is 
+usually solved by assigning more weight to more important objectives, however the pruning of such method alone is inefficient.
+
+\paragraph{}
 
 Variable Objective Large Neighborhood Search (VO-LNS) \cite{Schaus:VOLNS} is an extension of LNS for multi-objective 
 problems which offers
