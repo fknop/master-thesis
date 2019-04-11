@@ -10,24 +10,22 @@ This chapter presents the resource allocation problem.
 We first introduce the general problem and its constraints, 
 the formal models are then described in \autoref{chapter:models}.
 
-The resource allocation problem described in this thesis is based on the needs of the \vone\ company.
-The problem consists of allocating resources to work demands.
-This problem is a type of staff scheduling problem, it can be seen as a variant of the 
-well known \emph{Nurses Scheduling Problem} (NSP) \cite{Burke2004}. The goal of the NSP is to assign 
-nurses to shifts such that the entire schedule is satisfied. 
-This type of problem often has hard constraints to state restrictions 
-and soft constraints to state preferences. 
+The resource allocation problem described in this thesis is a staff scheduling problem based on the needs of the \vone\ company. 
+This company employs people with disabilities, they offer services to companies and private individuals such 
+as industrial jobs. The fact that they are working with people with handicap means that they have special needs concerning
+the work that each worker can do.
 
 
-In our problem, we have a number of time periods all equal in time and work demands with multi-skill requirements
-happening in those periods. 
-A demand can occur in multiple time periods and consists of a required number of workers, an eventual work location 
-and additional resources like machines.
 
-More formally, the problem consists of:
+% In our problem, we have a planning period with each time period equal in time and work demands with multi-skill requirements
+% happening in those periods. 
+% A demand can occur in multiple time periods and consists of a required number of workers, an eventual work location 
+% and additional resources like machines.
+
+Our resource allocation problem consists of:
 
 \begin{itemize}
-  \item[$-$] A list of multiple time periods all equal in time ($t \in T$).
+  \item[$-$] A planning period ($T$) with each period ($t \in T$) equal in time.
   \item[$-$] A list of clients ($c \in C$). 
   \item[$-$] A list of demands ($d \in D$).
   \item[$-$] A list of workers ($w \in W$). 
@@ -37,7 +35,9 @@ More formally, the problem consists of:
   \item[$-$] A list of working requirements associated with workers ($r \in R$). A requirement $r$ states that a worker $r_w$
   needs to work a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem time window.  
   \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{ww}$).
-  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$).
+  Two incompatible workers cannot work with each other.  
+  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$)
+  A worker incompatible with a client cannot work for that client.
 \end{itemize}
 
 Each demand has:
@@ -61,6 +61,14 @@ Each worker has:
   \item[$-$] A list of skills (e.g. package lifter, supervisor, etc.) ($w^S \subseteq S$).
   \item[$-$] A list of availabilities at which the worker can work ($w^T \subseteq T$).  
 \end{itemize}
+
+
+This type of staff scheduling problem can be seen as a variant of the 
+well known \emph{Nurses Scheduling Problem} (NSP) \cite{Burke2004}. 
+This type of problem often contains hard constraints to state restrictions 
+and soft constraints to state preferences. 
+
+
 
 
 The goal is to assign workers to multi-skill positions as well as machines and locations to a list of demands over the set of all time slots.

@@ -52,11 +52,21 @@ This implementation allows us to create a variety of benchmark by simply changin
 
 \section{Constraint Programming}
 
-\subsection{Heuristics}
+\subsection{Comparison between heuristics}
+
+We talked in \autoref{section:cpmodel} about our custom heuristic called Most Available Heuristic.
+We now compare the performance of this heuristic with standard heuristic like the \texttt{max-value} heuristic.
+We also compare the variable heuristics used in addition to our aforementioned heuristic.
+
+\subsubsection{\texttt{mostavailable} \& \texttt{max-value}}
+
+The \texttt{max-value} heuristic is a value heuristic that takes the maximum value in the domain of a selected variable during the search.
+It's one of the simplest value heuristic that can be implemented but unfortunately does not offer great performances.
 
 \autoref{experiments:heuristic1} shows the objective ratio between the implemented custom \textit{Most Available} Heuristic and a standard 
-\textit{First Fail} heuristic after the first solution. The two heuristics were tested on 72 instances of various sizes from small to big instances.
-The performance profile shows a gain of about $2$ to $3.4$ for our custom heuristic.
+\textit{First Fail} variable heuristic with the \texttt{max-value} value heuristic after the first solution.
+The two heuristics were tested on 72 instances of various sizes from small to big instances.
+The performance profile shows a clear gain of about $2$ to $3.4$ for our custom heuristic.
 
 
 \begin{figure}
@@ -66,6 +76,26 @@ The performance profile shows a gain of about $2$ to $3.4$ for our custom heuris
   \label{experiments:heuristic1}
 \end{figure}
 
+
+\subsubsection{\texttt{mostavailable} \& dynamic \texttt{mostavailable}}
+
+We also discussed in \autoref{section:cpmodel} an improvement based on the \texttt{mostavailable} static ordering
+where we ordered dynamically the most available worker at each value selection.
+
+\autoref{experiments:heuristic2} shows the performance profile of the dynamic \& static most available heuristics.
+This benchmark was performed on 486 instances for a duration of 15 seconds each.
+
+TODO: performance analysis
+
+
+
+As our dynamic value heuristic outperforms every other tested heuristic, we will assume for the rest of this chapter 
+that the value heuristic for the Constraint Programming solver is the dynamic \texttt{mostavailable}.
+
+%We can see a slight 
+%improvement of about 10\% to 60\% for approximately 90\% of instances and as much as 2 to 4 times an improvement for the remaining instances. 
+
+
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/static-dynamic-heuristic.png}
@@ -74,10 +104,46 @@ The performance profile shows a gain of about $2$ to $3.4$ for our custom heuris
 \end{figure}
 
 
-\subsection{Large Neighborhood Search}
+\subsubsection{Max Degree \& Min Size}
+
+In addition to our Most Available heuristic, we use a variation of the \texttt{maxdegree} heuristic. 
+This heuristic is a first-fail variable heuristic that selects the most constrained unbound variable. However,
+as stated in our model in \autoref{section:cpmodel}, skills are not represented with constraints but instead values 
+are removed from the domain at initialization. To express skills as part of the max degree, we simply add the number of 
+skills required by a variable to the degree of that variable. The \texttt{minsize} heuristic is also a first-fail variable heuristic which 
+selects the variable with minimum domain size.
+
+TODO FIGURE + PERF ANALYSIS 
 
 
-\section{Comparing solvers}
+\subsubsection{Max Degree \& Conflict Ordering Search}
+
+Conflict Ordering Search (COS) \cite{Gay:COS} is a variable ordering heuristic that 
+reorders variables based on the number of conflicts that happen during the search.
+It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
+COS was shown to be the most performant on scheduling problems.
+
+
+TODO: FIGURE + PERF ANALYSIS
+
+\subsection{Comparison between searches}
+
+
+As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, LNS is used to expand the exploration
+of the search tree. We now compare our solver with the use of LNS and without. We also compare multiple 
+relaxations method.
+
+
+\subsubsection{Standard Search \& LNS}
+
+TODO: FIGURE + PERF ANALYSIS
+
+
+\subsubsection{Random Relaxation \& Propagation Based Relaxation}
+
+TODO: FIGURE + PERF ANALYSIS
+
+\section{Comparison between solvers}
 
 We now start by comparing different solvers together. \autoref{experiments:solvers:3} 
 shows a performance profile generated from 216 instances of various sizes.

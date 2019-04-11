@@ -4,7 +4,16 @@
  
 \begin{document}
 
-The most common \emph{Mixed Integer Programming} (MIP) problems are of the form:
+Linear Programming (LP) is a mathematical optimization technique which is used to minimize or maximize 
+an objective subject to constraints represented by linear equations. 
+If all variables are required to be integers, it is called Integer Programming (IP). 
+Integer Programming, in contrast to LP which can be solved efficiently, is often NP-complete.  
+Mixed Integer Programming (MIP) takes LP and IP together to form a problem where only some variables 
+are required to be integer. MIP problems are also generally NP-complete.
+
+\paragraph{}
+
+The most common MIP problems are of the form:
 
 \begin{align}
   \textrm{min} \quad & \bm{c}^T\bm{x} & \label{mipobj} \\ 
