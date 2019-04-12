@@ -43,7 +43,6 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
   var bestObjective3: Int = Int.MaxValue
   var bestWorkingViolations: Int = 0
 
-//  private var relaxation: Relaxation = new RandomRelaxation(this)
   var heuristic: Heuristic = new MostAvailableHeuristicDynamic(this, flatWorkers, workerVariables)
   private val relaxation = new PropagationGuidedRelaxation()
 

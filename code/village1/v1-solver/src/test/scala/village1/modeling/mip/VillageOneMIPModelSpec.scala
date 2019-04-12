@@ -63,10 +63,10 @@ class VillageOneMIPModelSpec extends CommonSpec {
 
 
     it("Should be unsolvable") {
-      val search = getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"), MipModelOptions().copy(allowPartial = false))
-      val result = solve(search)
-      result.solution should equal(null)
-      search.lastSolution should equal(null)
+      an [UnsolvableException] should be thrownBy {
+        val search = getSearch(JsonParser.parse("data/test/additional-skills-impossible.json"), MipModelOptions().copy(allowPartial = false))
+        val result = solve(search)
+      }
     }
 
     it("Should be unsolvable - 2") {
