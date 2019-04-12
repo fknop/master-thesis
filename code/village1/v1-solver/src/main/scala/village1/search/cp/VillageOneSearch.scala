@@ -12,6 +12,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
   with Search[SearchOptions] {
 
   def this(base: VillageOneModel) = this(problem = base.problem, base = Some(base))
+  def this(base: VillageOneModel, options: CPModelOptions) = this(base.problem, options, Some(base))
 
   override def solve(timeLimit: Int = Int.MaxValue,
                      solutionLimit: Int = Int.MaxValue,

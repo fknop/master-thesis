@@ -38,6 +38,15 @@ object BenchmarkSolverFunctions {
     }
   }
 
+  def solveCP_NoLNS (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions()): VillageOneModel => (Long, Int) = {
+    base: VillageOneModel => {
+      val search = new VillageOneSearch(base, options)
+      val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
+      if (results.solution.isEmpty) null
+      else (results.time, results.solution.get.objective)
+    }
+  }
+
   def solveCPPropagationRelax (b: BenchmarkRunner): VillageOneModel => (Long, Int) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
