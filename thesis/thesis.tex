@@ -9,6 +9,7 @@
 % \subtitle{Optional subtitle}
 
 \usepackage{subfiles}
+\usepackage[toc,page]{appendix}
 \usepackage{amsmath}
 \usepackage{amsfonts,amsthm}
 \usepackage{bm}
@@ -132,6 +133,7 @@
 
   \def\chapterautorefname{Chapter}
   \def\sectionautorefname{Section}
+  \newcommand*{\Appendixautorefname}{Appendix}
   \newcommand{\vone}{Village n\textsuperscript{o}1}
 
   % Front cover page
@@ -155,6 +157,9 @@
   \tableofcontents
 
 
+  \listoffigures
+
+  \listoftables
 
 
   \chapter{Introduction}
@@ -189,7 +194,7 @@
   \label{chapter:models}
 
   \subfile{chapters/models/intro}
-  \subfile{chapters/models/notations}
+  % \subfile{chapters/models/notations}
   \subfile{chapters/models/mip}
   \subfile{chapters/models/cp}
 
@@ -215,6 +220,14 @@
     bibliography/json
   } 
   \bibliographystyle{ieeetr}
+
+  \begin{appendices}
+
+  \subfile{chapters/appendix/notations.tex}
+  \subfile{chapters/appendix/mip.tex}
+  \subfile{chapters/appendix/cp.tex}
+
+  \end{appendices}
 
   % Back cover page
   \backcoverpage

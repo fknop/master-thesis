@@ -20,7 +20,7 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   val (t2, o2, oot2) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))
 
 
-  val normalized = benchmark.normalize(options.timeLimit, oot0, oot1, oot2)
+  val normalized = benchmark.normalize(oot0, oot1, oot2)
 
 
   OOTChart.generate(normalized)(s"data/benchmark/html/oot-$name.html")

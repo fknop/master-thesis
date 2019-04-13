@@ -1,0 +1,48 @@
+% !TEX root = ../../thesis.tex
+
+\documentclass[../../thesis.tex]{subfiles}
+ 
+\begin{document}
+
+\chapter{Complete Mixed Integer Programming model}
+
+\begingroup
+\allowdisplaybreaks
+\begin{subequations}
+  \label{obj}
+  \begin{align}
+    \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) & \qquad & \quad \label{obj:1} \\ 
+     & + \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl}  & \qquad &  \quad \label{obj:2} \\ 
+     & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  & \qquad &  \quad \label{obj:3}
+  \end{align}
+\end{subequations}
+\begin{align}
+    % \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) &+&  \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl} \nonumber \\
+    % & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) &+&   max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj} \\
+    \textrm{s.t} \qquad & \sum_{i \in W} w_{ijkl} + s_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \label{wc1} \\
+    & \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T \label{wc2} \\
+    & t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D \label{wc3} \\
+    & t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W \label{wc4} \\ 
+    & t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D \label{sc1} \\
+    & t_j \notin w^T_{i} \implies \forall l \ s_{jkl} = 0, && \forall j \in T, i \in W \label{sc2} \\ 
+    & \sum_{l \in d^P_k} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{ww}}, j \in T, k \in D \label{wc5} \\
+    & d^c_{k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D \label{wc6} \\ 
+    & w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k, \nonumber \\
+    & && i \in W \setminus W_{d^{s_l}_k} \label{wc7} \\
+    & \sum_{l \in d_k^P} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in d^{S^+}_k, i \in W_{d^{S^+}_k} \label{wc8} \\
+    & z_i \notin d^Z_j \implies z_{ij} = 0, && \forall i \in Z, j \in D \label{zc1}  \\
+    & |d^Z_j| > 0 \implies \sum_{i \in Z} z_{ij} = 1, && \forall j \in D \label{zc2} \\
+    & z_{ij} + z_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in Z \label{zc3} \\
+    & m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D  \label{mc1} \\
+    & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \label{mc2} \\
+    & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \label{mc3} \\
+    & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k \label{binary1} \\
+    & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k \label{binary2} \\
+    & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D \label{binary3} \\ 
+    & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D \label{binary4} \\ 
+    & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, && \forall i \in W \label{occ}
+\end{align}
+\endgroup
+
+\end{document}
+

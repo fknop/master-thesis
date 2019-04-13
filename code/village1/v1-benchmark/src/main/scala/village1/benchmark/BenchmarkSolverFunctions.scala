@@ -3,7 +3,7 @@ package village1.benchmark
 import village1.benchmark.api.BenchmarkRunner
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
-import village1.search.{SearchResult, SolutionEmitter}
+import village1.search._
 import village1.search.cp.{LNSOptions, VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 
@@ -60,11 +60,6 @@ object BenchmarkSolverFunctions {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base)
 
-//      search.relax {
-//        val relaxation = new PropagationGuidedRelaxation()
-//        () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 3)
-//      }
-
       val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
       assert(search.lastSolution != null)
       (results.time, results.solution.get.objective)
@@ -73,31 +68,16 @@ object BenchmarkSolverFunctions {
 
     def solveCP_MIP (b: BenchmarkRunner, startMipProbability: Double = 0.5):  VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
 
-      base: VillageOneModel => {
-        val cp = new VillageOneSearch(base)
-        val mip = new MIPSearch(base)
-
+      base: VillageOneModel =>
+        val solver = new VillageOneSolver(base)
 
         def solve(): (Long, Int) = {
-          val cpResults = cp.solve(solutionLimit = 1, timeLimit = b.TimeLimit, silent = true)
-
-          val remaining = (((b.TimeLimit * 1000.0) - cpResults.time) / 1000.0).round.toInt
-
-
-          if (cpResults.solution.isDefined) {
-            mip.setInitialSolution(cpResults.solution.get, startMipProbability)
-          }
-
-          val nSols = if (cpResults.solution.isDefined) 1 else 0
-
-          val results = mip.solve(silent = true, timeLimit = remaining, solutionLimit = math.max(b.SolutionLimit - nSols, 1))
-          if (mip.lastSolution.isEmpty && cp.lastSolution.isEmpty) null
-          else if (mip.lastSolution.isEmpty && cp.lastSolution.isDefined) (cpResults.time + results.time, cp.lastSolution.get.objective)
-          else (cpResults.time + results.time, mip.lastSolution.get.objective)
+          val options = SolverOptions(method = SolverType.CP_MIP)
+          val results = solver.solve(b.TimeLimit, b.SolutionLimit, silent = true, Some(options))
+          (results.time, results.solution.get.objective)
         }
 
-        (mip, solve)
-      }
+        (solver, solve)
     }
 
 }

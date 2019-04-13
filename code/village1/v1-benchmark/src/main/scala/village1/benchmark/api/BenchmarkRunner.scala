@@ -1,9 +1,14 @@
 package village1.benchmark.api
 
+import play.api.libs.json.Json
+import village1.benchmark.api.json.JsonBenchmark
+import village1.benchmark.charts.{OOTChart, PerformanceProfileChart}
+import village1.benchmark.util.MathUtils
 import village1.benchmark.util.MathUtils._
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.SolutionEmitter
+import village1.util.FileUtils
 
 import scala.util.Random
 
@@ -118,7 +123,7 @@ class BenchmarkRunner(
     BenchmarkOverTimeNSerie(serie.name, measurements)
   }
 
-  def normalize(t: Int, series: BenchmarkOverTimeSerie*): Array[BenchmarkOverTimeNSerie] = {
+  def normalize(series: BenchmarkOverTimeSerie*): Array[BenchmarkOverTimeNSerie] = {
     val results: Array[Array[List[(Long, Int)]]] = series.map(_.results).toArray
     val bests = Array.fill[Int](results(0).length)(0)
 
@@ -126,7 +131,7 @@ class BenchmarkRunner(
       bests(i) = results.map(_(i).head._2).min
     }
 
-    series.map(s => normalizeSerie(s, t, bests)).toArray
+    series.map(s => normalizeSerie(s, options.timeLimit, bests)).toArray
   }
 
   def lowerBoundSerie(): BenchmarkSerie = {
@@ -240,4 +245,87 @@ class BenchmarkRunner(
   }
 }
 
+object BenchmarkRunner {
+  /*
 
+  val name = s"cp-lns-${Utils.randomInt(0, 1000)}"
+
+  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
+  println(MathUtils.estimatedTime(options, 2))
+
+
+  val benchmark = new BenchmarkRunner(options = options)
+
+  val names = Array("CP-LNS", "CP")
+  val (t0, o0, oot0) = benchmark.run(names(0), solveCP(benchmark))
+  val (t1, o1, oot1) = benchmark.run(names(1), solveCP_NoLNS(benchmark))
+
+  val normalized = benchmark.normalize(options.timeLimit, oot0, oot1)
+
+
+//  val lb = benchmark.lowerBoundSerie()
+//  val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1), objectiveSeries = Seq(o0, o1, lb))
+
+
+  OOTChart.generate(normalized)(s"data/benchmark/html/oot-${name}.html")
+
+  val values = Array(o0.means, o1.means)
+
+  val baselines = Array(
+    Array(0),
+    Array(1),
+    Array(0, 1)
+  )
+
+  for (baseline <- baselines) {
+    val profile = PerformanceProfile.generate(baseline.map(values(_)), values, names)
+    val bName = baseline.map(names(_)).mkString(",")
+    PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name-B=$bName.html")
+  }
+   */
+
+  def run(
+     name: String,
+     options: BenchmarkOptions,
+     names: Array[String],
+     solvers: Array[BenchmarkRunner => VillageOneModel => (SolutionEmitter, () => (Long, Int))]): Unit = {
+
+    assert(names.length == solvers.length)
+    println("Benchmark: " + name)
+    println(MathUtils.estimatedTime(options, names.length))
+
+    val runner = new BenchmarkRunner(options)
+    val path = "data/benchmark/"
+
+    val series: Seq[(BenchmarkSerie, BenchmarkSerie, BenchmarkOverTimeSerie)] = names.zip(solvers.map(_(runner))).map(v => runner.run(v._1, v._2))
+    val ootSeries = series.map(_._3)
+
+    import village1.benchmark.api.json.JsonBenchmark.benchmarkOOTSerieWrites
+    val ootJson = Json.prettyPrint(
+      Json.toJson(ootSeries)
+    )
+
+    FileUtils.writeFile(s"$path/$name/oot.json", ootJson)
+
+    val normalized = runner.normalize(ootSeries: _*)
+    OOTChart.generate(normalized)(s"$path/$name/oot.html")
+
+    val lb = runner.lowerBoundSerie()
+    val instance = runner.makeInstance(timeSeries = series.map(_._1), objectiveSeries = series.map(_._2) ++ Seq(lb))
+    val writer = JsonBenchmark.serialize(instance)
+    writer(s"$path/$name/instance.json")
+
+
+    val values = series.map(_._2.means)
+
+    val baselines: Seq[Seq[Int]] = values.indices.foldLeft(Seq[Seq[Int]]()) {
+      (acc, x) => acc ++ values.indices.combinations(x + 1)
+    }
+
+    for (baseline <- baselines) {
+      val profile = PerformanceProfile.generate(baseline.map(values(_)).toArray, values.toArray, names)
+      val bName = baseline.map(names(_)).mkString(",")
+      PerformanceProfileChart.generate(profile)(s"$path/$name/profile-B=$bName.html")
+    }
+  }
+}

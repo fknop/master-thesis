@@ -5,12 +5,13 @@ import village1.benchmark.api._
 import village1.json.JsonUtils
 
 object JsonBenchmark {
-  implicit private val problemSizeReads = Json.reads[ProblemSize]
-  implicit private val bennchmarkMeasurementReads = Json.reads[BenchmarkMeasurement]
+  implicit val problemSizeReads = Json.reads[ProblemSize]
+  implicit val bennchmarkMeasurementReads = Json.reads[BenchmarkMeasurement]
   //  implicit private val benchmarkResultReads = Json.reads[BenchmarkResult]
-  implicit private val benchmarkSeriReads= Json.reads[BenchmarkSerie]
-  implicit private val benchmarkReads = Json.reads[BenchmarkInstance]
-  implicit private val benchmarkOOTSerieReads = Json.reads[BenchmarkOverTimeNSerie]
+  implicit val benchmarkSeriReads= Json.reads[BenchmarkSerie]
+  implicit val benchmarkReads = Json.reads[BenchmarkInstance]
+  implicit val benchmarkOOTNSerieReads = Json.reads[BenchmarkOverTimeNSerie]
+  implicit val benchmarkOOTSerieReads = Json.reads[BenchmarkOverTimeSerie]
 
   def parse(path: String): BenchmarkInstance = {
     val json = JsonUtils.parseJsonFile(path)
@@ -21,11 +22,12 @@ object JsonBenchmark {
     }
   }
 
-  implicit private val problemSizeWrites = Json.writes[ProblemSize]
-  implicit private val bennchmarkMeasurementWrites = Json.writes[BenchmarkMeasurement]
-  implicit private val benchmarkSerieWrites = Json.writes[BenchmarkSerie]
-  implicit private val benchmarkWrites: OWrites[BenchmarkInstance] = Json.writes[BenchmarkInstance]
-  implicit private val benchmarkOOTSerieWrites: OWrites[BenchmarkOverTimeNSerie] = Json.writes[BenchmarkOverTimeNSerie]
+  implicit val problemSizeWrites = Json.writes[ProblemSize]
+  implicit val bennchmarkMeasurementWrites = Json.writes[BenchmarkMeasurement]
+  implicit val benchmarkSerieWrites = Json.writes[BenchmarkSerie]
+  implicit val benchmarkWrites: OWrites[BenchmarkInstance] = Json.writes[BenchmarkInstance]
+  implicit val benchmarkOOTNSerieWrites: OWrites[BenchmarkOverTimeNSerie] = Json.writes[BenchmarkOverTimeNSerie]
+  implicit val benchmarkOOTSerieWrites: OWrites[BenchmarkOverTimeSerie] = Json.writes[BenchmarkOverTimeSerie]
 
   def serialize (benchmark: BenchmarkInstance): String => Unit = {
     val json = Json.toJson(benchmark)

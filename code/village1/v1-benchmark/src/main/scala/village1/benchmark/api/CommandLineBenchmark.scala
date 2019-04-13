@@ -69,7 +69,6 @@ class CommandLineBenchmark extends App {
 
         opt[Long]("seed")
           .action((x, c) => c.copy(seed = x))
-          .validate(x => positiveOrZero(x, "seed must be postive or zero"))
       )
     }
 
