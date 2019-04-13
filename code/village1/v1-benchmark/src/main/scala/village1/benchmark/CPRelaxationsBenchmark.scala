@@ -13,8 +13,8 @@ object CPRelaxationsBenchmark extends CommandLineBenchmark {
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
 
   val benchmark = new BenchmarkRunner(options = options)
-  val (t0, o0) = benchmark.run("CP-Random", solveCP(benchmark))
-  val (t1, o1) = benchmark.run("CP-Prop", solveCP(benchmark, applyToSearch = search => {
+  val (t0, o0, _) = benchmark.run("CP-Random", solveCP(benchmark))
+  val (t1, o1, _) = benchmark.run("CP-Prop", solveCP(benchmark, applyToSearch = search => {
 //    search.relax {
 //      val relaxation = new PropagationGuidedRelaxation()
 //      () => relaxation.propagationGuidedRelax(search.solver, search.flatWorkers, search.currentSolution, search.flatWorkers.length / 2)

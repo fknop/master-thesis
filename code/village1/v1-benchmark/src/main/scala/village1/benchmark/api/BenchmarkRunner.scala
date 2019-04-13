@@ -1,8 +1,9 @@
 package village1.benchmark.api
 
+import village1.benchmark.util.MathUtils._
 import village1.generator.{InstanceGenerator, InstanceOptions}
 import village1.modeling.{Problem, VillageOneModel}
-import village1.benchmark.util.MathUtils._
+import village1.search.SolutionEmitter
 
 import scala.util.Random
 
@@ -67,6 +68,71 @@ class BenchmarkRunner(
     )
   }
 
+  private def normalizeSerie(serie: BenchmarkOverTimeSerie, t: Int, bests: Array[Int]): BenchmarkOverTimeNSerie = {
+    val results = serie.results
+    val normalized: Array[Array[(Int, Double)]] = Array.fill(t * 10, serie.results.length)(null)
+
+
+    for (j <- results.indices) {
+      val best = bests(j)
+      val result = results(j)
+      val first = result.last._2
+      var values = result
+
+      var time = values.last._1
+
+      var value = 1.0
+      for (i <- 0 until (t * 10)) {
+        while (i * 100 >= time) {
+          if (values.last._2 == best) {
+            value = 0.0
+          }
+          else {
+            value = (values.last._2 - best).toDouble / (first - best).toDouble
+          }
+
+          values = values.init
+          if (values.nonEmpty) {
+            time = values.last._1
+          }
+          else {
+            time = Long.MaxValue
+          }
+        }
+
+        normalized(i)(j) = (i, value)
+      }
+    }
+
+    val measurements = Array.fill[BenchmarkMeasurement](t * 10)(null)
+    for (i <- 0 until (t * 10)) {
+      val measures = normalized(i).map(_._2)
+      measurements(i) = BenchmarkMeasurement(
+        measures.min,
+        measures.max,
+        mean(measures),
+        stdDev(measures)
+      )
+    }
+
+    for (i <- 1 until measurements.length) {
+      assert(measurements(i).mean <= measurements(i - 1).mean)
+    }
+
+    BenchmarkOverTimeNSerie(serie.name, measurements)
+  }
+
+  def normalize(t: Int, series: BenchmarkOverTimeSerie*): Array[BenchmarkOverTimeNSerie] = {
+    val results: Array[Array[List[(Long, Int)]]] = series.map(_.results).toArray
+    val bests = Array.fill[Int](results(0).length)(0)
+
+    for (i <- bests.indices) {
+      bests(i) = results.map(_(i).head._2).min
+    }
+
+    series.map(s => normalizeSerie(s, t, bests)).toArray
+  }
+
   def lowerBoundSerie(): BenchmarkSerie = {
     val results = Array.fill[BenchmarkMeasurement](T.length * D.length * W.length)(null)
     var i = 0
@@ -87,19 +153,21 @@ class BenchmarkRunner(
   }
 
 
-  def run (name: String, solve: VillageOneModel => (Long, Int)): (BenchmarkSerie, BenchmarkSerie) = {
+
+  def run (name: String, solver: VillageOneModel => (SolutionEmitter, () => (Long, Int))): (BenchmarkSerie, BenchmarkSerie, BenchmarkOverTimeSerie) = {
     val timeMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
     val objectiveMeasurements = Array.fill(T.length, D.length, W.length)(Array.fill(Repeat)(0L))
+    val objectiveOverTime = Array.fill(T.length * D.length * W.length * Repeat)(List[(Long, Int)]())
 
     log("Start Dry Runs")
     for (_ <- 0 until DryRun) {
       val model = baseModels(0)(0)(0)
-      solve(model)
+      solver(model)._2()
     }
     log("End Dry Run")
-
     log("Start Runs")
 
+    var l = 0
     for (r <- 0 until Repeat) {
       log(s"Start Run $r")
 
@@ -107,7 +175,16 @@ class BenchmarkRunner(
         for (j <- D.indices) {
           for (k <- W.indices) {
             val baseModel = baseModels(i)(j)(k)
-            val result = solve(baseModel)
+
+            val (emitter, solve) = solver(baseModel)
+
+            emitter.onSolutionFound {
+              solution =>
+                objectiveOverTime(l) ::= (solution.time, solution.objective)
+            }
+
+            val result = solve()
+
             if (result == null) {
               timeMeasurements(i)(j)(k)(r) = -1
               objectiveMeasurements(i)(j)(k)(r) = -1
@@ -117,6 +194,8 @@ class BenchmarkRunner(
               timeMeasurements(i)(j)(k)(r) = time
               objectiveMeasurements(i)(j)(k)(r) = objective
             }
+
+            l += 1
           }
         }
       }
@@ -144,7 +223,7 @@ class BenchmarkRunner(
 
     log("End measurements")
 
-    (BenchmarkSerie(name, timeSerie), BenchmarkSerie(name, objectiveSerie))
+    (BenchmarkSerie(name, timeSerie), BenchmarkSerie(name, objectiveSerie), BenchmarkOverTimeSerie(name, objectiveOverTime))
   }
 
   private def getMeasurements(measurements: Array[Long]): BenchmarkMeasurement = {

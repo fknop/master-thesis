@@ -94,17 +94,7 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       branching
     }
 
-    onSolution {
-      bestObjective =  objective1.value
-      bestObjective1 = objective1.value
-      bestObjective2 = objective2.value
-      bestObjective3 = objective3.value
-      currentSolution = new CPIntSol(flatWorkers.map(_.value), bestObjective, 0L)
 
-      heuristic.onSolution()
-
-      emitSolution(createSolution())
-    }
   }
 
 
@@ -136,6 +126,19 @@ class VillageOneLNS(problem: Problem, options: CPModelOptions = CPModelOptions()
       var limit = opt.limit
       var totalTime = 0L
       var totalSol = 0
+
+      onSolution {
+        bestObjective =  objective1.value
+        bestObjective1 = objective1.value
+        bestObjective2 = objective2.value
+        bestObjective3 = objective3.value
+        currentSolution = new CPIntSol(flatWorkers.map(_.value), bestObjective, 0L)
+
+        heuristic.onSolution()
+
+        emitSolution(createSolution().copy(time = totalTime))
+      }
+
 
       val stat =
         if (currentSolution != null)

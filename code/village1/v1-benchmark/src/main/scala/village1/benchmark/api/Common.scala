@@ -21,6 +21,12 @@ case class ProblemSize(T: Int, D: Int, W: Int) extends Comparable[ProblemSize] {
 case class BenchmarkSerie(name: String, results: Array[BenchmarkMeasurement]) {
   def means: Array[Double] = results.map(_.mean)
 }
+
+case class BenchmarkOverTimeSerie(name: String, results: Array[List[(Long, Int)]])
+case class BenchmarkOverTimeNSerie(name: String, results: Array[BenchmarkMeasurement]) {
+  def means: Array[Double] = results.map(_.mean)
+}
+
 case class BenchmarkInstance(
     repeat: Int,
     dryRun: Int,

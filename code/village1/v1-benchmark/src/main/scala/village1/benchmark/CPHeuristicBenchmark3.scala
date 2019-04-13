@@ -22,9 +22,9 @@ object CPHeuristicBenchmark3 extends CommandLineBenchmark with Branchings {
   val benchmark = new BenchmarkRunner(options = options)
 
   val names = Array("MD", "COS", "MS")
-  val (t0, o0) = benchmark.run(names(0), solveCP(benchmark))
+  val (t0, o0, oot0) = benchmark.run(names(0), solveCP(benchmark))
 
-  val (t1, o1) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
+  val (t1, o1, oot1) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
     class H extends MostAvailableHeuristicDynamic(search, search.flatWorkers, search.workerVariables) {
       override def branching: Branching = conflictOrderingSearch(x, varHeuristic, valueHeuristic)
     }
@@ -32,7 +32,7 @@ object CPHeuristicBenchmark3 extends CommandLineBenchmark with Branchings {
     search.heuristic = new H()
   }))
 
-  val (t2, o2) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
+  val (t2, o2, oot2) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
     class H extends MostAvailableHeuristicDynamic(search, search.flatWorkers, search.workerVariables) {
       override def branching: Branching = binaryIdx(x, i => x(i).max, valueHeuristic)
     }
