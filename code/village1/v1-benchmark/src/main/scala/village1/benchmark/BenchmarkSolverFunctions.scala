@@ -9,19 +9,18 @@ import village1.search.mip.MIPSearch
 
 object BenchmarkSolverFunctions {
   def solveMIP (b: BenchmarkRunner): VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
-     base: VillageOneModel => {
-      val search = new MIPSearch(base)
+    base: VillageOneModel =>
+      val solver = new VillageOneSolver(base)
 
-       def solve(): (Long, Int) = {
-        val results: SearchResult = search.solve(silent = true, timeLimit = b.TimeLimit, solutionLimit = b.SolutionLimit)
+      def solve(): (Long, Int) = {
+        val options = SolverOptions(method = SolverType.MIP)
+        val results = solver.solve(b.TimeLimit, b.SolutionLimit, silent = true, Some(options))
+        (results.time, results.solution.get.objective)
+      }
 
-        if (results.solution.isEmpty) null
-        else (results.time, results.solution.get.objective)
-       }
-
-       (search, solve)
+      (solver, solve)
     }
-  }
+
 
 
 

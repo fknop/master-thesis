@@ -46,7 +46,10 @@ class VillageOneSolver(problem: Problem, base: Option[VillageOneModel] = None) e
 
   private def onSol(solution: Solution): Unit = {
     val curr = System.currentTimeMillis()
-    emitSolution(solution.copy(time = curr - currentTime))
+    val last = this.lastSolution
+    if ((last.isDefined && last.get.objective >= solution.objective) || last.isEmpty)  {
+      emitSolution(solution.copy(time = curr - currentTime))
+    }
     currentTime = curr
   }
 
