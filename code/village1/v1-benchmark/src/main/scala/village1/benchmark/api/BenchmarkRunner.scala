@@ -115,10 +115,6 @@ class BenchmarkRunner(
       )
     }
 
-    for (i <- 1 until measurements.length) {
-      assert(measurements(i).mean <= measurements(i - 1).mean)
-    }
-
     BenchmarkOverTimeNSerie(serie.name, measurements)
   }
 
