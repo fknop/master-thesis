@@ -3,7 +3,7 @@ package village1.benchmark
 import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.api._
-import village1.benchmark.charts.PerformanceProfileChart
+import village1.benchmark.charts.{OOTChart, PerformanceProfileChart}
 import village1.benchmark.util.MathUtils
 import village1.util.Utils
 
@@ -15,9 +15,15 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   println(MathUtils.estimatedTime(options, 3))
 
   val benchmark = new BenchmarkRunner(options = options)
-  val (t0, o0, _) = benchmark.run("CP", solveCP(benchmark))
-  val (t1, o1, _) = benchmark.run("MIP", solveMIP(benchmark))
-  val (t2, o2, _) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))
+  val (t0, o0, oot0) = benchmark.run("CP", solveCP(benchmark))
+  val (t1, o1, oot1) = benchmark.run("MIP", solveMIP(benchmark))
+  val (t2, o2, oot2) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))
+
+
+  val normalized = benchmark.normalize(options.timeLimit, oot0, oot1, oot2)
+
+
+  OOTChart.generate(normalized)(s"data/benchmark/html/oot-$name.html")
 
   val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1, t2), objectiveSeries = Seq(o0, o1, o2, benchmark.lowerBoundSerie()))
 
