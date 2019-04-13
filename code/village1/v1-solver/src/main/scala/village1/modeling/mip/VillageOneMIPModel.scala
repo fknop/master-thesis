@@ -3,7 +3,6 @@ package village1.modeling.mip
 import gurobi._
 import village1.modeling.Constants._
 import village1.modeling.{Problem, Solution, UnsolvableException, VillageOneModel}
-import village1.util.Utils
 
 import scala.util.Random
 
@@ -426,7 +425,7 @@ class VillageOneMIPModel(problem: Problem, options: MipModelOptions = MipModelOp
       minimizeShiftChange(model, workerVariables, sentinelVariables)
     )
 
-    minimizeObjectives(objective, weights = Array(100, 5, 1))
+    minimizeObjectives(objective, weights = Array(100, 15, 1))
   }
 
   private def applyConstraints (): Unit = {
