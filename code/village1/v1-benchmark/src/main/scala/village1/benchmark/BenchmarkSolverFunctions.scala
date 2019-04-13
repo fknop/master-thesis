@@ -3,47 +3,56 @@ package village1.benchmark
 import village1.benchmark.api.BenchmarkRunner
 import village1.modeling.VillageOneModel
 import village1.modeling.cp.CPModelOptions
-import village1.search.SearchResult
+import village1.search.{SearchResult, SolutionEmitter}
 import village1.search.cp.{LNSOptions, VillageOneLNS, VillageOneSearch}
 import village1.search.mip.MIPSearch
 
 object BenchmarkSolverFunctions {
-  def solveMIP (b: BenchmarkRunner): VillageOneModel => (Long, Int) = {
+  def solveMIP (b: BenchmarkRunner): VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
      base: VillageOneModel => {
       val search = new MIPSearch(base)
-      val results: SearchResult = search.solve(silent = true, timeLimit = b.TimeLimit, solutionLimit = b.SolutionLimit)
 
-      if (results.solution.isEmpty) null
-      else (results.time, results.solution.get.objective)
+       def solve(): (Long, Int) = {
+        val results: SearchResult = search.solve(silent = true, timeLimit = b.TimeLimit, solutionLimit = b.SolutionLimit)
+
+        if (results.solution.isEmpty) null
+        else (results.time, results.solution.get.objective)
+       }
+
+       (search, solve)
     }
   }
 
-//  def solveCPWithSymmetries (b: SolverBenchmark): VillageOneModel => (Long, Int) = {
-//   base: VillageOneModel => {
-//      val options = CPModelOptions(symmetryBreaking = false)
-//      val search = new VillageOneLNS(base = base, options = options)
-//      val stats = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
-//      assert(search.lastSolution != null)
-//      (stats, search.lastSolution.objective)
-//    }
-//  }
 
-  def solveCP (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions(), lnsOptions: LNSOptions = LNSOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}): VillageOneModel => (Long, Int) = {
+
+  def solveCP (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions(), lnsOptions: LNSOptions = LNSOptions(), applyToSearch: VillageOneLNS => Unit = _ => {}):
+      VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
     base: VillageOneModel => {
       val search = new VillageOneLNS(base, options)
       applyToSearch(search)
-      val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true, options = Some(lnsOptions))
-      if (results.solution.isEmpty) null
-      else (results.time, results.solution.get.objective)
+
+
+      def solve(): (Long, Int) = {
+        val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true, options = Some(lnsOptions))
+        if (results.solution.isEmpty) null
+        else (results.time, results.solution.get.objective)
+      }
+
+      (search, solve)
     }
   }
 
-  def solveCP_NoLNS (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions()): VillageOneModel => (Long, Int) = {
+  def solveCP_NoLNS (b: BenchmarkRunner, options: CPModelOptions = CPModelOptions()): VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
     base: VillageOneModel => {
       val search = new VillageOneSearch(base, options)
-      val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
-      if (results.solution.isEmpty) null
-      else (results.time, results.solution.get.objective)
+
+      def solve(): (Long, Int) = {
+        val results = search.solve(solutionLimit = b.SolutionLimit, timeLimit = b.TimeLimit, silent = true)
+        if (results.solution.isEmpty) null
+        else (results.time, results.solution.get.objective)
+      }
+
+      (search, solve)
     }
   }
 
@@ -62,26 +71,32 @@ object BenchmarkSolverFunctions {
     }
   }
 
-    def solveCP_MIP (b: BenchmarkRunner, startMipProbability: Double = 0.5): VillageOneModel => (Long, Int) = {
+    def solveCP_MIP (b: BenchmarkRunner, startMipProbability: Double = 0.5):  VillageOneModel => (SolutionEmitter, () => (Long, Int)) = {
 
       base: VillageOneModel => {
         val cp = new VillageOneSearch(base)
-        val cpResults = cp.solve(solutionLimit = 1, timeLimit = b.TimeLimit, silent = true)
-
-        val remaining = (((b.TimeLimit * 1000.0) - cpResults.time) / 1000.0).round.toInt
-
         val mip = new MIPSearch(base)
 
-        if (cpResults.solution.isDefined) {
-          mip.setInitialSolution(cpResults.solution.get, startMipProbability)
+
+        def solve(): (Long, Int) = {
+          val cpResults = cp.solve(solutionLimit = 1, timeLimit = b.TimeLimit, silent = true)
+
+          val remaining = (((b.TimeLimit * 1000.0) - cpResults.time) / 1000.0).round.toInt
+
+
+          if (cpResults.solution.isDefined) {
+            mip.setInitialSolution(cpResults.solution.get, startMipProbability)
+          }
+
+          val nSols = if (cpResults.solution.isDefined) 1 else 0
+
+          val results = mip.solve(silent = true, timeLimit = remaining, solutionLimit = math.max(b.SolutionLimit - nSols, 1))
+          if (mip.lastSolution.isEmpty && cp.lastSolution.isEmpty) null
+          else if (mip.lastSolution.isEmpty && cp.lastSolution.isDefined) (cpResults.time + results.time, cp.lastSolution.get.objective)
+          else (cpResults.time + results.time, mip.lastSolution.get.objective)
         }
 
-        val nSols = if (cpResults.solution.isDefined) 1 else 0
-
-        val results = mip.solve(silent = true, timeLimit = remaining, solutionLimit = math.max(b.SolutionLimit - nSols, 1))
-        if (mip.lastSolution.isEmpty && cp.lastSolution.isEmpty) null
-        else if (mip.lastSolution.isEmpty && cp.lastSolution.isDefined) (cpResults.time + results.time, cp.lastSolution.get.objective)
-        else (cpResults.time + results.time, mip.lastSolution.get.objective)
+        (mip, solve)
       }
     }
 

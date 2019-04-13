@@ -1,8 +1,6 @@
 package village1.benchmark.api
 
 import play.api.libs.json.Json
-import village1.benchmark.api.json.JsonBenchmark
-import village1.benchmark.charts.PerformanceProfileChart
 
 object PerformanceProfile extends App {
 
@@ -70,25 +68,25 @@ object PerformanceProfile extends App {
     json(names.zip(results))
   }
 
-  val name = "cp,mip,cp+mip106"
-  val benchmark = JsonBenchmark.parse(s"data/benchmark/$name.json")
-  val values: Array[Array[Double]] = benchmark.objectiveSeries.map(_.results.map(_.mean)).toArray
-
-  val names = Array("CP", "MIP", "CP+MIP")
-
-  val baselines = Array(
-    Array(0, 1, 2),
-    Array(0),
-    Array(1),
-    Array(2),
-    Array(0, 1),
-    Array(0, 2),
-    Array(1, 2)
-  )
-
-  for (baseline <- baselines) {
-    val profile = generate(baseline.map(values(_)), values, names)
-    val bName = baseline.map(names(_)).mkString(",")
-    PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name-B=$bName.html")
-  }
+//  val name = "cp,mip,cp+mip106"
+//  val benchmark = JsonBenchmark.parse(s"data/benchmark/$name.json")
+//  val values: Array[Array[Double]] = benchmark.objectiveSeries.map(_.results.map(_.mean)).toArray
+//
+//  val names = Array("CP", "MIP", "CP+MIP")
+//
+//  val baselines = Array(
+//    Array(0, 1, 2),
+//    Array(0),
+//    Array(1),
+//    Array(2),
+//    Array(0, 1),
+//    Array(0, 2),
+//    Array(1, 2)
+//  )
+//
+//  for (baseline <- baselines) {
+//    val profile = generate(baseline.map(values(_)), values, names)
+//    val bName = baseline.map(names(_)).mkString(",")
+//    PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name-B=$bName.html")
+//  }
 }

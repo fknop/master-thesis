@@ -43,8 +43,13 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
       branching
     }
 
+    var currentTime = System.currentTimeMillis()
+
     onSolution {
-      emitSolution(createSolution())
+      val current = System.currentTimeMillis()
+      val totalTime = current - currentTime
+      currentTime = current
+      emitSolution(createSolution().copy(time = totalTime))
     }
 
 

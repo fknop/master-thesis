@@ -15,8 +15,8 @@ object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
 
   val benchmark = new BenchmarkRunner(options = options)
-  val (t0, o0) = benchmark.run("CP-MA", solveCP(benchmark))
-  val (t1, o1) = benchmark.run("CP-FF", solveCP(benchmark, applyToSearch = search => {
+  val (t0, o0, oot0) = benchmark.run("CP-MA", solveCP(benchmark))
+  val (t1, o1, oot1) = benchmark.run("CP-FF", solveCP(benchmark, applyToSearch = search => {
 //    search.heuristic {
 //      new Heuristic {
 //        override def branching: Branching = binaryFirstFailIdx(search.flatWorkers, i => {

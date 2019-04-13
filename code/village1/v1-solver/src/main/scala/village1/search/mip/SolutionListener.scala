@@ -139,7 +139,9 @@ class SolutionListener(model: VillageOneMIPModel) extends GRBCallback with Solut
   override def callback(): Unit = {
     if (where == GRB.CB_MIPSOL) {
       _solution = createSolution()
-      emitSolution(solution)
+
+      val runtime = model.model.get(GRB.DoubleAttr.Runtime)
+      emitSolution(solution.copy(time = (runtime * 1000).round))
     }
   }
 }

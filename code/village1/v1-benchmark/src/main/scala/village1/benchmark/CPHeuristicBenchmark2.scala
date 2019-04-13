@@ -21,8 +21,8 @@ object CPHeuristicBenchmark2 extends CommandLineBenchmark with Branchings {
   val benchmark = new BenchmarkRunner(options = options)
 
   val names = Array("CP-MA-D", "CP-MA")
-  val (t0, o0) = benchmark.run(names(0), solveCP(benchmark))
-  val (t1, o1) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
+  val (t0, o0, oot0) = benchmark.run(names(0), solveCP(benchmark))
+  val (t1, o1, oot1) = benchmark.run(names(1), solveCP(benchmark, applyToSearch = search => {
     search.heuristic = new MostAvailableHeuristic(search, search.flatWorkers, search.workerVariables)
   }))
 

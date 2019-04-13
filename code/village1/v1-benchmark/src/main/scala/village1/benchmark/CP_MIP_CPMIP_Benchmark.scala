@@ -15,9 +15,9 @@ object CP_MIP_CPMIP_Benchmark extends CommandLineBenchmark {
   println(MathUtils.estimatedTime(options, 3))
 
   val benchmark = new BenchmarkRunner(options = options)
-  val (t0, o0) = benchmark.run("CP", solveCP(benchmark))
-  val (t1, o1) = benchmark.run("MIP", solveMIP(benchmark))
-  val (t2, o2) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))
+  val (t0, o0, _) = benchmark.run("CP", solveCP(benchmark))
+  val (t1, o1, _) = benchmark.run("MIP", solveMIP(benchmark))
+  val (t2, o2, _) = benchmark.run("CP+MIP", solveCP_MIP(benchmark))
 
   val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1, t2), objectiveSeries = Seq(o0, o1, o2, benchmark.lowerBoundSerie()))
 
