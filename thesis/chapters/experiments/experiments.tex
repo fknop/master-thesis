@@ -49,6 +49,100 @@ The \texttt{BenchmarkSerie} class is simply a class that takes a name and a list
 
 This implementation allows us to create a variety of benchmark by simply changing the \texttt{solve} function.
 
+\subsection{Hardware}
+
+All the experiments were performed on a UCLouvain server \cite{jabba} from the INGI department.
+
+\begin{itemize}
+  \item Intel(R) Xeon(R) CPU E5-2687W v3 \@ 3.10GHz with 20 cores and 40 threads.
+  \item 128 Go RAM
+\end{itemize}
+
+\subsection{Benchmark Instances}
+
+For our experiments, we generated 216 instances of different sizes.
+\autoref{instances:proportions} shows the size proportions for the 216 instances used in the experiments. $T$ represents the number of time period, $D$ the number of demands and $W$ the number of workers. The generated instances also have varying probabilities as presented in \autoref{instance:options}. These probabilities are referenced in \autoref{instances:probabilities} and follow a uniform distribution where $P_{\mu} = \frac{P_{min} + P_{max}}{2}$.
+
+\begin{table}[H]
+  \caption{Proportions of instance sizes for 216 instances}
+  \label{instances:proportions}
+  \centering
+  \begin{tabular}[t]{|lcr | r r|}
+    \hline
+    \multicolumn{3}{|c|}{Size} & \multicolumn{2}{|c|}{Prop.} \\
+    \hline 
+    $T$ & $D$ & $W$ & $n$ & $\%$ \\
+    \hline 
+    5 & 30 & 125 & 8 & 3.7 \\ 
+    5 & 40 & 125 & 8 & 3.7 \\ 
+    5 & 50 & 125 & 8 & 3.7 \\ 
+    5 & 30 & 200 & 8 & 3.7 \\ 
+    5 & 40 & 200 & 8 & 3.7 \\ 
+    5 & 50 & 200 & 8 & 3.7 \\ 
+    5 & 30 & 300 & 8 & 3.7 \\ 
+    5 & 40 & 300 & 8 & 3.7 \\ 
+    5 & 50 & 300 & 8 & 3.7 \\ 
+    \hline
+  \end{tabular}
+  \hfill
+  \begin{tabular}[t]{|lcr | r r|}
+    \hline
+    \multicolumn{3}{|c|}{Size} & \multicolumn{2}{|c|}{Prop.} \\
+    \hline 
+    $T$ & $D$ & $W$ & $n$ & $\%$ \\
+    \hline 
+    10 & 30 & 125 & 8 & 3.7 \\ 
+    10 & 40 & 125 & 8 & 3.7 \\ 
+    10 & 50 & 125 & 8 & 3.7\\ 
+    10 & 30 & 200 & 8 & 3.7\\ 
+    10 & 40 & 200 & 8 & 3.7\\ 
+    10 & 50 & 200 & 8 & 3.7\\ 
+    10 & 30 & 300 & 8 & 3.7\\ 
+    10 & 40 & 300 & 8 & 3.7\\ 
+    10 & 50 & 300 & 8 & 3.7\\ 
+    \hline
+  \end{tabular}
+  \hfill
+  \begin{tabular}[t]{|lcr | r r|}
+    \hline
+    \multicolumn{3}{|c|}{Size} & \multicolumn{2}{|c|}{Prop.} \\
+    \hline 
+    $T$ & $D$ & $W$ & $n$ & $\%$ \\
+    \hline 
+    15 & 30 & 125 & 8 & 3.7\\ 
+    15 & 40 & 125 & 8 & 3.7\\ 
+    15 & 50 & 125 & 8 & 3.7\\ 
+    15 & 30 & 200 & 8 & 3.7\\ 
+    15 & 40 & 200 & 8 & 3.7\\ 
+    15 & 50 & 200 & 8 & 3.7\\ 
+    15 & 30 & 300 & 8 & 3.7\\ 
+    15 & 40 & 300 & 8 & 3.7\\ 
+    15 & 50 & 300 & 8 & 3.7\\ 
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+  \caption{Probability range for generated instances}
+  \label{instances:probabilities}
+  \centering
+  \begin{tabular}[t]{|l r r|}
+    \hline 
+    $P_{name}$ & $P_{min}$ & $P_{max}$ \\
+    \hline
+    assignSkill & 0.1 & 0.3 \\
+    assignWorkerSkill & 0.1 & 0.3 \\
+    assignPeriod & 0.4 & 0.8 \\
+    assignLocation & 0.3 & 0.7 \\
+    assignMachines & 0.1 & 0.5 \\
+    takeMachine & 0.1 & 0.3 \\
+    assignWorkingRequirements & 0.1 & 0.3 \\
+    assignWWI & 0 & 0.1 \\
+    assignWCI & 0 & 0.1 \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \section{Constraint Programming}
 
