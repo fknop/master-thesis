@@ -17,13 +17,13 @@ class VillageOneSolver(problem: Problem, base: Option[VillageOneModel] = None) e
 
   def this(base: VillageOneModel) = this(base.problem, Some(base))
 
-  private var currentTime = 0L
+  private var startTime = 0L
 
   override def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[SolverOptions]): SearchResult = {
 
     val opts = if (options.isDefined) options.get else SolverOptions()
 
-    currentTime = System.currentTimeMillis()
+    startTime = System.currentTimeMillis()
 
     opts.method match {
       case SolverType.CP => solve(timeLimit, solutionLimit, silent, opts.cp)
@@ -48,9 +48,8 @@ class VillageOneSolver(problem: Problem, base: Option[VillageOneModel] = None) e
     val curr = System.currentTimeMillis()
     val last = this.lastSolution
     if ((last.isDefined && last.get.objective >= solution.objective) || last.isEmpty)  {
-      emitSolution(solution.copy(time = curr - currentTime))
+      emitSolution(solution.copy(time = curr - startTime))
     }
-    currentTime = curr
   }
 
   private def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, cp: LNSOptions, mip: MipSearchOptions): SearchResult = {
