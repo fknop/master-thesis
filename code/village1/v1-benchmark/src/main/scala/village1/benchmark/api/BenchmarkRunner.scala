@@ -1,11 +1,12 @@
 package village1.benchmark.api
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsResultException, JsSuccess, Json}
 import village1.benchmark.api.json.JsonBenchmark
-import village1.benchmark.charts.{OOTChart, PerformanceProfileChart}
+import village1.benchmark.charts.{LineChart, OOTChart, PerformanceProfileChart}
 import village1.benchmark.util.MathUtils
 import village1.benchmark.util.MathUtils._
 import village1.generator.{InstanceGenerator, InstanceOptions}
+import village1.json.JsonUtils
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.SolutionEmitter
 import village1.util.FileUtils
@@ -73,7 +74,7 @@ class BenchmarkRunner(
     )
   }
 
-  private def normalizeSerie(serie: BenchmarkOverTimeSerie, t: Int, bests: Array[Int]): BenchmarkOverTimeNSerie = {
+  private def normalizeSerie(serie: BenchmarkOverTimeSerie, t: Int, bests: Array[Int], worsts: Array[Int]): BenchmarkOverTimeNSerie = {
     val results = serie.results
     val normalized: Array[Array[(Int, Double)]] = Array.fill(t * 10, serie.results.length)(null)
 
@@ -126,12 +127,14 @@ class BenchmarkRunner(
   def normalize(series: BenchmarkOverTimeSerie*): Array[BenchmarkOverTimeNSerie] = {
     val results: Array[Array[List[(Long, Int)]]] = series.map(_.results).toArray
     val bests = Array.fill[Int](results(0).length)(0)
+    val worsts = Array.fill[Int](results(0).length)(0)
 
     for (i <- bests.indices) {
       bests(i) = results.map(_(i).head._2).min
+      worsts(i) = results.map(_(i).last._2).max
     }
 
-    series.map(s => normalizeSerie(s, options.timeLimit, bests)).toArray
+    series.map(s => normalizeSerie(s, options.timeLimit, bests, worsts)).toArray
   }
 
   def lowerBoundSerie(): BenchmarkSerie = {
@@ -315,6 +318,9 @@ object BenchmarkRunner {
     val writer = JsonBenchmark.serialize(instance)
     writer(s"$path/$name/instance.json")
 
+    import JsonBenchmark._
+    LineChart.generate(Json.prettyPrint(Json.toJson(instance)))(s"$path/$name/line-charts.html")
+
 
     val values = series.map(_._2.means)
 
@@ -328,4 +334,26 @@ object BenchmarkRunner {
       PerformanceProfileChart.generate(profile)(s"$path/$name/profile-B=$bName.html")
     }
   }
+}
+
+object Test extends App {
+  import JsonBenchmark._
+  val path = "data/benchmark/cp,mip,cp+mip685/oot2.json"
+  val json = JsonUtils.parseJsonFile(path)
+  val result = Json.fromJson[Seq[BenchmarkOverTimeSerie]](json)
+  var series: Seq[BenchmarkOverTimeSerie] = null
+  result match {
+    case JsSuccess(b: Seq[BenchmarkOverTimeSerie], _) =>  series = b
+    case e: JsError => throw JsResultException(e.errors)
+  }
+
+
+  val runner = new BenchmarkRunner(options = BenchmarkArgs(timeLimit = 30))
+  val normalized = runner.normalize(series: _*)
+
+  println(series.map(_.results(0).map(_._2)).mkString("\n"))
+  println(normalized.map(_.means.mkString(" ")).mkString("\n"))
+
+  OOTChart.generate(normalized)("data/benchmark/test.html")
+
 }
