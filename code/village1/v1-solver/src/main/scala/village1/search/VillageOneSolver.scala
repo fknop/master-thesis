@@ -48,7 +48,9 @@ class VillageOneSolver(problem: Problem, base: Option[VillageOneModel] = None) e
     val curr = System.currentTimeMillis()
     val last = this.lastSolution
     if ((last.isDefined && last.get.objective >= solution.objective) || last.isEmpty)  {
-      emitSolution(solution.copy(time = curr - startTime))
+      if (!solution.partial) {
+        emitSolution(solution.copy(time = curr - startTime))
+      }
     }
   }
 
