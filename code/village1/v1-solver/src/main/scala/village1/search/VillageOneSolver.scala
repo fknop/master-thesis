@@ -54,11 +54,17 @@ class VillageOneSolver(problem: Problem, base: Option[VillageOneModel] = None) e
   }
 
   private def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, cp: LNSOptions, mip: MipSearchOptions): SearchResult = {
-    val results = solve(timeLimit, 1, silent, cp)
+    val search = new VillageOneLNS(problem, base = Some(this))
+    search.onSolutionFound(this.onSol)
+    val results = search.solve(timeLimit, 1, silent, Some(cp))
 
     if (results.solution.isDefined) {
       val remaining = (((timeLimit * 1000.0) - results.time) / 1000.0).round.toInt
-      val mipResults = solve(timeLimit = remaining, math.max(solutionLimit - 1, 1), silent, mip)
+      val mipSearch = new MIPSearch(problem, base = Some(this))
+      mipSearch.onSolutionFound(this.onSol)
+      mipSearch.setInitialSolution(results.solution.get)
+      val mipResults = mipSearch.solve(timeLimit = remaining, math.max(solutionLimit - 1, 1), silent, Some(mip))
+
       if (mipResults.solution.isDefined) {
         SearchResult(mipResults.solution, mipResults.time + results.time)
       }
