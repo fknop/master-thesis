@@ -287,17 +287,53 @@ TODO: FIGURE + PERF ANALYSIS
 
 \section{Comparison between solvers}
 
-We now start by comparing different solvers together. \autoref{experiments:solvers:3} 
-shows a performance profile generated from 216 instances of various sizes.
-This benchmark was set to a time limit of 30s per instance. The baseline of this 
-profile is the CP solver. We observe that the CP solver performs better than MIP in more than 80\% of instances.
-However, we also tested the MIP solver by giving it a first solution obtained from CP, we can see that it slightly outperforms CP and MIP in 80\% of instances.
+We now start by comparing different solvers together. We present three solvers: 
+
+\begin{itemize}
+  \item The Constraint Programming (CP) solver.
+  \item The Mixed Integer Programming (MIP) solver.
+  \item A combination of CP and MIP (CP+MIP) solvers. We take an initial solution from the CP solver 
+  and give it to the MIP solver as start solution. 
+\end{itemize}
+
+
+
+\autoref{experiments:solvers:profile} 
+shows a performance profile with the CP solver as baseline. We can clearly see that 
+the MIP solver underperforms for most instance. However, it outperforms the CP solver for approximately
+20\% of instances. [TODO insert figure] shows that MIP has trouble finding good objectives when the 
+problem grows. Too many variables (\char`\~ 1,000,000 binary variables for the biggest instances) make it hard for a MIP model to perform well.
+
+We can also observe from that performance profile, and in \autoref{experiments:solvers:profile2}, that 
+the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by maximum 10\%. 
+The MIP solver performs a lot better when given an initial solution to work with.
+
+\autoref{experiments:solvers:oot} gives the objective per time for the three solvers. As expected from our previous results, the MIP solver does not 
+give a good solution after the elapsed time. However, while the CP+MIP solver is slightly better in terms of final objective, it takes in average 10 seconds 
+to reach such objective while the CP solver only takes 1 second to reach an objective really close to the final one.
+
+% Those 20\% match with the small instances proportions in \autoref{instances:proportions}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/solvers.png}
+  \includegraphics[scale=0.55]{experiments/solvers-profile.png}
   \caption{CP, MIP and CP+MIP solvers [216 instances/30s].}
-  \label{experiments:solvers:3}
+  \label{experiments:solvers:profile}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/cp,cp+mip-profile.png}
+  \caption{CP, MIP and CP+MIP solvers [216 instances/30s].}
+  \label{experiments:solvers:profile2}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/solvers-oot.png}
+  \caption{CP, MIP and CP+MIP solvers [216 instances/30s].}
+  \label{experiments:solvers:oot}
 \end{figure}
 
 
