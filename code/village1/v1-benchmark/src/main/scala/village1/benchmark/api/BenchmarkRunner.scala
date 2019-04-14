@@ -31,6 +31,7 @@ class BenchmarkRunner(
 
   val seed: Long = if (options.seed == -1L) Random.nextLong() else options.seed
   private val generator = new InstanceGenerator(seed)
+  private val rand = new Random(seed)
 
   log(options)
   log(s"Seed=$seed")
@@ -40,6 +41,19 @@ class BenchmarkRunner(
   }
 
   private def generate(t: Int, d: Int, w: Int): Problem = {
+
+    val probabilities = Map(
+      "assignSkill" -> randDouble(rand, 0.1, 0.3),
+      "assignWorkerSkill" -> randDouble(rand, 0.1, 0.3),
+      "assignPeriod" -> randDouble(rand, 0.4, 0.8),
+      "assignLocation" -> randDouble(rand, 0.3, 0.7),
+      "assignMachines" -> randDouble(rand, 0.1, 0.5),
+      "takeMachine" -> randDouble(rand, 0.1, 0.3),
+      "assignWorkingRequirements" -> randDouble(rand, 0.1, 0.3),
+      "assignWWI" -> randDouble(rand, 0, 0.1),
+      "assignWCI" -> randDouble(rand, 0, 0.1)
+    )
+
     val instanceOptions = InstanceOptions(
         t = T(t),
         clients = D(d), // This parameter doesn't really matter
@@ -51,7 +65,7 @@ class BenchmarkRunner(
       )
 
     generator.generate(
-      instanceOptions.copy(probabilities = instanceOptions.probabilities ++ options.probabilities)
+      instanceOptions.copy(probabilities = probabilities ++ options.probabilities)
     )
   }
 
@@ -249,43 +263,7 @@ class BenchmarkRunner(
 }
 
 object BenchmarkRunner {
-  /*
 
-  val name = s"cp-lns-${Utils.randomInt(0, 1000)}"
-
-  val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
-  println(MathUtils.estimatedTime(options, 2))
-
-
-  val benchmark = new BenchmarkRunner(options = options)
-
-  val names = Array("CP-LNS", "CP")
-  val (t0, o0, oot0) = benchmark.run(names(0), solveCP(benchmark))
-  val (t1, o1, oot1) = benchmark.run(names(1), solveCP_NoLNS(benchmark))
-
-  val normalized = benchmark.normalize(options.timeLimit, oot0, oot1)
-
-
-//  val lb = benchmark.lowerBoundSerie()
-//  val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1), objectiveSeries = Seq(o0, o1, lb))
-
-
-  OOTChart.generate(normalized)(s"data/benchmark/html/oot-${name}.html")
-
-  val values = Array(o0.means, o1.means)
-
-  val baselines = Array(
-    Array(0),
-    Array(1),
-    Array(0, 1)
-  )
-
-  for (baseline <- baselines) {
-    val profile = PerformanceProfile.generate(baseline.map(values(_)), values, names)
-    val bName = baseline.map(names(_)).mkString(",")
-    PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name-B=$bName.html")
-  }
-   */
 
   def run(
      name: String,

@@ -2,6 +2,8 @@ package village1.benchmark.util
 
 import village1.benchmark.api.BenchmarkOptions
 
+import scala.util.Random
+
 object MathUtils {
   import Numeric.Implicits._
 
@@ -48,5 +50,9 @@ object MathUtils {
     val minutes = totalMinutes % 60
 
     s"Estimated Time: ${totalHours}h ${minutes}m ${seconds}s"
+  }
+
+  def randDouble(rand: Random, min: Double, max: Double): Double = {
+    min + (max - min) * rand.nextDouble()
   }
 }
