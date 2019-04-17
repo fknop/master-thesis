@@ -59,7 +59,7 @@ class SoftContiguousSpec extends CommonSpec {
     val ctr = new SoftContiguous(Array(w, x, y, z), diff)
     s.post(ctr)
 
-    it("should have [0, 3] bounds") {
+    it("should have [0] bounds") {
       w.assign(3)
       x.assign(3)
       y.assign(3)

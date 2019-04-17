@@ -3,11 +3,12 @@ package village1.search.cp.relaxations
 import oscar.algo.Inconsistency
 import oscar.cp.searches.lns.CPIntSol
 import oscar.cp.{CPIntVar, CPSolver}
+import village1.search.cp.VillageOneLNS
 
 import scala.collection.mutable
 import scala.util.Random
 
-class PropagationGuidedRelaxation {
+class PropagationGuidedRelaxation(search: VillageOneLNS, vars: Iterable[CPIntVar], s: Double) extends Relaxation {
   var N = 0
   lazy val closeness: PropagationGuidedRelax = new PropagationGuidedRelax(N) // Closeness store used for propagation guided relax
 
@@ -99,7 +100,6 @@ class PropagationGuidedRelaxation {
     var size = math.log(avgSize) //Current estimation of the search space obtained
     var subset = closeness.getCloseSubset(next, (math.round(s - size) / avgSize).toInt) //Subset of next
 
-    println(s)
     while (size < s && relaxStart > 0) {
 
       if(subset.isEmpty){ //No more element in subset:
@@ -126,6 +126,8 @@ class PropagationGuidedRelaxation {
 
     //    println("relaxation done, " + relaxStart + " vars frozen")
   }
+
+  override def relax(): Unit = propagationGuidedRelax(search.solver, vars, search.currentSolution, s)
 }
 
 /**

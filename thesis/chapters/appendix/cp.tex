@@ -5,7 +5,26 @@
 \begin{document}
 
 \chapter{Complete Constraint Programming model}
+ 
+\begin{align*}
+  \text{min} \quad &\delta_0 \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \\
+  \text{s.t.} \quad &\texttt{at\_least\_nvalue}(\{ w_{ijk} \mid i \in d^T_j \}, N_{jk}) &\forall j \in D, k \in d^P_j \\
+  &\texttt{softgcc}(\{ w_{ijk} \}, \sigma \rightarrow \sigma, [0], [0], v_{\sigma})  \\ 
+  &\texttt{softgcc}(\{ w_{ijk} \}, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) \\
+  &\texttt{alldifferent\_except}(\{w_{ijk} \mid j \in D, k \in d_j^P \}, \{ \sigma \}), &\forall i \in T \\ 
+  &\texttt{not\_equal}(w_{ijk}, w),  &\forall (w, c) \in I_{wc}, \forall \ i, j, k \\
+  &\texttt{negative\_table}(x, y, I_{ww}),  &\forall (x, y) \in P_{ij} \\ 
+  &\texttt{gcc}(\{ w_{ijk} \mid k \in d^P_j \}, o_{ijs}) \\ 
+  &\texttt{sum}(o_{ijs}) \geq 1 \\
+  &\texttt{alldifferent}(\{ m_{ij} \mid j \in |d_i^M| \} \cup \{ m_{kj} \mid j \in |d_k^M| \}), &\forall i \in D, k \in d^O_i \\
+  &\texttt{not_equal}(l_{i}, l_{k}), &\forall i \in D, k \in d^O_i \\
+  \text{with} \quad & o_{ijs} \in \{ 0, 1 \}, & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j \\ 
+  &w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \},& \forall j \in D, i \in d^T_j, k \in d^P_j \\ 
+  &m_{ij} \in M, & \forall i \in D, j \in |d^M| \\ 
+  &l_{i} \in L, & \forall i \in D \\
+  &\bm{\delta} = (\delta_0, \delta_1, \delta_2) = (1, 15, 100)
+\end{align*}
+
 
 
 \end{document}
-

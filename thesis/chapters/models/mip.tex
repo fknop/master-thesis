@@ -128,8 +128,11 @@ Some workers (demands) are not available (occurring) at one time period. We need
 \begin{align}
   t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D &\label{wc3} \\
   t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W &\label{wc4} \\
-  t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} 
+  t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} \\ 
+  l_i \notin d^L_j \implies l_{ij} = 0, && \forall i \in L, j \in D& \label{lc1} \\ 
+  m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D& \label{mc1} 
 \end{align}
+
 
 \subsubsection{Incompatibilities between workers and clients}
 
@@ -200,9 +203,106 @@ $W_{d^{s_l}_k}$ define the workers that satisfy skill(s) $s_l$ of demand $k$.
 
 \subsubsection{Additional skills must be satisfied}
 
+An additional skill must be satisfied by at least one worker in a team. We sum 
+over all the workers that satisfy the skill to check if at least one is working in the team.
+
 \begin{align}
   \sum_{l \in d_k^P} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in d^{S^+}_k, i \in W_{d^{S^+}_k}& \label{wc8}
 \end{align}
+
+
+\subsubsection{Location assignments should be satisfied}
+
+For each demand that requires a location, we sum over all the location variables for this demand and check if only one is assigned.
+
+\begin{align}
+  |d^L_j| > 0 \implies \sum_{i \in L} l_{ij} = 1, && \forall j \in D& \label{lc2}
+\end{align}
+
+\subsubsection{No location should be assigned to overlapping demands}
+
+For each demand and its overlapping demands, we check that a location is not assigned to both demands.
+We do this with a sum lower or equal than one.
+
+\begin{align}
+  l_{ij} + l_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in L \label{lc3}
+\end{align}
+
+
+\subsubsection{Machine assignments should be satisfied}
+
+For each demand, we check that each required machine is assigned to that demand.
+In the set of machines $M$, we can have multiple machines equal to the same value $k$.
+We define $M_k \subseteq M$ the set of all machines in $M$ equal to $k$.
+
+\begin{align}
+  \sum_{i \in M_k} m_{ij} = | \{ m \mid m \in d_j^M, m = k \} |, && j \in D, k \in d^M_j \label{mc2}
+\end{align}
+
+
+As an example, let us take a demand $d_0$ with $d_0^M = \{ 1, 1, 2, 3 \}$. This demand needs 
+two machines of type $1$, one machine of type $2$ and one machine of type $3$.
+Let us now imagine that we have in total three machines of type 1, two machines of type 2 and one machine of type 3.
+We have six variables associated with this demand: $m_{00}, \dots, m_{50}$ with 
+$m_{00}$ through $m_{20}$ the variables associated with the machines of type 1, $m_{30}$ and $m_{40}$ the variables 
+associated with the machines of type 2 and $m_{50}$ the variable associated with the machine of type 3.
+\autoref{mc2:visu} shows a visualization of this example.
+
+
+\begin{figure}[]
+  \centering
+  \begin{tikzpicture}[
+    node distance=1mm and 0mm,
+    baseline]
+    \matrix (M1) [matrix of math nodes,row sep=0.2em, column sep=0.3em]
+    {
+      m_{00}  &  +  &  m_{10} &  +  & m_{20}  & = & 2    \\
+      m_{30}  &  +  &  m_{40} &  \   &    \     & = & 1    \\
+      m_{50}  &  \  &    \     &  \   &    \    & = & 1    \\ 
+    };
+    % \draw  (M1-1-6.north west) -- (M1-3-6.south west);
+    \draw[red,very thick] 
+            (M1-1-1.north west) -| (M1-1-5.south east) -| (M1-1-1.north west);
+    \draw[red,thick] 
+    (M1-1-7.north west) -| (M1-1-7.south east) -| (M1-1-7.north west);
+    \draw[blue,very thick] 
+      (M1-2-1.north west) -| (M1-2-3.south east) -| (M1-2-1.north west);
+    \draw[blue,thick] 
+      (M1-2-7.north west) -| (M1-2-7.south east) -| (M1-2-7.north west);
+    \draw[purple,thick] 
+      (M1-3-1.north west) -| (M1-3-1.south east) -| (M1-3-1.north west);
+    \draw[purple,thick] 
+      (M1-3-7.north west) -| (M1-3-7.south east) -| (M1-3-7.north west);
+    % \draw[blue!60,very thick,shorten >=1mm,-{Stealth[bend]}] 
+    %         (fv.west) to [out=180,in=270] (M1-8-3.south);
+    \node (fv) [left=of M1-1-1.west,align=left,
+    font=\sffamily\bfseries] {Type 1};
+    \node (fv2) [left=of M1-2-1.west,align=left,
+    font=\sffamily\bfseries] {Type 2};
+    \node (fv3) [left=of M1-3-1.west,align=left,
+     font=\sffamily\bfseries] {Type 3};
+    % \draw[red!60,very thick,shorten >=1mm,-{Stealth[bend]}] 
+    %  (fv2.west) to [out=180,in=180] (M1-1-1.west);
+    %  \node (fv3) [right=1cm of M1.east,align=left,
+    %  font=\sffamily\bfseries] {Worker $n$ for\\demand $m$};
+    %  \draw[purple!60,thick,shorten >=1mm,-{Stealth[bend]}] 
+    %  (fv3.west) to [out=180,in=0] (M1-7-7.north east);
+  \end{tikzpicture}
+
+  \caption{Visualization example for (\ref{mc2}).}
+  \label{mc2:visu}
+\end{figure}
+
+
+\subsubsection{No machine should be assigned to overlapping demands}
+
+Following the same principle of (\ref{lc3}), we check that two machines are not assigned 
+to two overlapping demands.
+
+\begin{align}
+  m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  
+\end{align}
+
 
 \subsubsection{Binary constraints}
 
@@ -214,6 +314,9 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
   m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D& \label{binary3} \\ 
   l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D& \label{binary4} 
 \end{align}
+
+
+
 
 \subsection{Objective}
 
@@ -243,80 +346,7 @@ The objective function is stated in (\ref{obj}), it is a weighted sum split in m
 
 $occ_i$ represents the occurrences of worker $i$ while the penalties $\bm{\delta}$ are representative of the importance of each sub-objectives.
 
-% \subsection{Complete Model}
 
-
-
-% \begingroup
-% \allowdisplaybreaks
-% \begin{subequations}
-%   \label{obj}
-%   \begin{align}
-%     \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) & \qquad & \quad \label{obj:1} \\ 
-%      & + \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl}  & \qquad &  \quad \label{obj:2} \\ 
-%      & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  & \qquad &  \quad \label{obj:3}
-%   \end{align}
-% \end{subequations}
-% \begin{align}
-%     % \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) &+&  \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl} \nonumber \\
-%     % & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) &+&   max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj} \\
-%     \textrm{s.t} \qquad & \sum_{i \in W} w_{ijkl} + s_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \label{wc1} \\
-%     & \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T \label{wc2} \\
-%     & t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D \label{wc3} \\
-%     & t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W \label{wc4} \\ 
-%     & t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D \label{sc1} \\
-%     & t_j \notin w^T_{i} \implies \forall l \ s_{jkl} = 0, && \forall j \in T, i \in W \label{sc2} \\ 
-%     & \sum_{l \in d^P_k} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{ww}}, j \in T, k \in D \label{wc5} \\
-%     & d^c_{k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D \label{wc6} \\ 
-%     & w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k, \nonumber \\
-%     & && i \in W \setminus W_{d^{s_l}_k} \label{wc7} \\
-%     & \sum_{l \in d_k^P} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in d^{S^+}_k, i \in W_{d^{S^+}_k} \label{wc8} \\
-%     & z_i \notin d^Z_j \implies z_{ij} = 0, && \forall i \in Z, j \in D \label{zc1}  \\
-%     & |d^Z_j| > 0 \implies \sum_{i \in Z} z_{ij} = 1, && \forall j \in D \label{zc2} \\
-%     & z_{ij} + z_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in Z \label{zc3} \\
-%     & m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D  \label{mc1} \\
-%     & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \label{mc2} \\
-%     & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \label{mc3} \\
-%     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k \label{binary1} \\
-%     & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k \label{binary2} \\
-%     & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D \label{binary3} \\ 
-%     & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D \label{binary4} \\ 
-%     & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, && \forall i \in W \label{occ}
-% \end{align}
-% \endgroup
-
-    
-% The objective function is stated in (\ref{obj}), it is split in multiple parts, it minimizes 
-% \begin{enumerate*}[label=(\roman*)]
-%   \item the number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all worker will be equal to the number of worker for that shift;
-%   \item the number of \emph{sentinel} worker assigned to demands (\ref{obj:2});
-%   \item the number of violations of working requirements (\ref{obj:3}).
-% \end{enumerate*}
-
-
-
-
-% Constraint (\ref{wc1}) ensures that each position is filled by only one worker. The sentinel worker being a valid assignment is also part of the sum.
-
-% Constraint (\ref{wc2}) ensures that no worker works for multiple demands at the same time period. 
-
-% The constraints (\ref{wc3}) and (\ref{wc4}) ensures that no worker is working for a demand thais not occurring or when is himself not available. 
-
-% The constraints (\ref{sc1}) and (\ref{sc2}) fullfil the same role as (\ref{wc3}) and (\ref{wc4}) but for sentinel variables. 
-
-
-
-% Constraint (\ref{wc5}) ensures that no incompatible workers work together while (\ref{wc6}) ensures that no incompatible pair of worker and client work together. 
-
-% Constraint (\ref{wc7}) ensures that no worker work for a position in which they are not qualified to work at. 
-% Constraint (\ref{wc8}) ensures that for each additional skills, at least one worker in the group has that skill.
-
-% Constraint (\ref{zc1}) ensures that no zone is assigned to a demand in which this zone is not a possible assignment. (\ref{zc2}) ensures that only one zone is assigned to this demand if this demand is in need of a zone. Constraint (\ref{zc3}) ensures that no zone is assigned to two overlapping demands in time.
-
-% Constraint (\ref{mc1}) ensures that no machine is assigned to a demand not in need of that machine. Constraint (\ref{mc2}) ensures that the required number for each machine is satisfied. And again, (\ref{mc3}) ensures that no machine is assigned to two overlapping demands in time.
-
-
-% Finally (\ref{binary1}), (\ref{binary2}), (\ref{binary3}) and (\ref{binary4}) ensure the variables only takes binary values.
 
 
 \end{document}

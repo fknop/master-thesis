@@ -60,8 +60,8 @@ class BenchmarkRunner(
         demands = D(d),
         workers = W(w),
         skills = 10,
-        machines = 0,
-        locations = 0
+        machines = 30,
+        locations = 30
       )
 
     generator.generate(

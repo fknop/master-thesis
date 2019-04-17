@@ -4,7 +4,7 @@ import oscar.cp._
 import village1.json.{JsonParser, JsonSerializer}
 import village1.modeling.cp.{CPModelOptions, VillageOneCPModel}
 import village1.modeling.{Problem, VillageOneModel}
-import village1.search.cp.heuristic.MostAvailableHeuristic
+import village1.search.cp.heuristic.MostAvailableHeuristicDynamic
 import village1.search.{Search, SearchOptions, SearchResult}
 
 class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOptions(), base: Option[VillageOneModel] = None)
@@ -26,7 +26,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
     val flatMachines: Array[CPIntVar] = machineVariables.flatten
     val flatLocations: Array[CPIntVar] = locationVariables.filter(_ != null)
 
-    val heuristic = new MostAvailableHeuristic(this, flatWorkers, workerVariables)
+    val heuristic = new MostAvailableHeuristicDynamic(this, flatWorkers, workerVariables)
 
     minimize(objective)
     search {
@@ -49,6 +49,7 @@ class VillageOneSearch(problem: Problem, options: CPModelOptions = CPModelOption
       val current = System.currentTimeMillis()
       val totalTime = current - currentTime
       currentTime = current
+      heuristic.onSolution()
       emitSolution(createSolution().copy(time = totalTime))
     }
 

@@ -27,15 +27,15 @@ First, we need to express the set of workers for each demand at each time period
 \end{split}
 \end{equation}
 
-(\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k^{\text{th}}$ position 
-with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reasoning is used for zones and machines:
+(\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k$th position 
+with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reasoning is used for locations and machines:
 
 \begin{align}
     m_{ij} &\in M \label{cpmachinevariable} \\ 
-    z_i &\in Z \label{cpzonevariable} 
+    l_i &\in L \label{cpzonevariable} 
 \end{align}
 
-(\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the zone used for demand $i$
+(\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the location used for demand $i$
 
 
 
@@ -50,10 +50,28 @@ per demand. We also satisfy the required skills and availabilities for each posi
 possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
 
 \begin{equation}
+  \label{wdomain}
   w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
 \end{equation}
 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
+
+
+We also follow the same principle for the locations and machines. We reduce the domain at initialization instead of adding constraints.
+For each required machine in a demand, we take all possible machines of this type in $M$.
+
+\begin{equation}
+  \label{mdomain}
+  m_{ij} \in \{ m \mid m \in M, m = d_i^{M_j}  \}, \forall i \in D, j \in |d_i^M|
+\end{equation}
+
+For each location of a demand, the domain will be the possible locations of that demand.
+
+\begin{equation}
+  \label{ldomain}
+  l_i \in d_i^L, \forall i \in D
+\end{equation}
+
 
 \subsection{Constraints}
 
@@ -124,6 +142,31 @@ variables and assign the occurrences of values to them. In this case, the \textt
 occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint will ensure that 
 these occurrences sum to at least one.
 
+
+\subsubsection{Machines can only be assigned once per period}
+
+As machines can only be assigned once per period and are assigned for the entirety of a demand. We need 
+to ensure that a machine is not assigned to two overlapping demands in time.
+For each pair of overlapping demands,
+we add a \texttt{alldifferent} constraint with all the machine variables associated to the two demands.
+
+\begin{equation}
+  \label{}
+  \texttt{alldifferent}(\{ m_{ij} \mid j \in |d_i^M| \} \cup \{ m_{kj} \mid j \in |d_k^M| \}), \forall i \in D, k \in d^O_i
+\end{equation}
+
+\subsubsection{Locations can only be assigned once per period}
+
+As with machines, locations can only be assigned once per period and are assigned for the entirety of a demand. We need 
+to ensure that a location is not assigned to two overlapping demands in time. For each pair of overlapping demands,
+we add a \texttt{not_equal} constraint with the two associated location variables.
+
+\begin{equation}
+  \label{}
+  \texttt{not_equal}(l_{i}, l_{k}), \forall i \in D, k \in d^O_i
+\end{equation}
+
+
 \subsubsection{Minimizing violations of working requirements}
 
 A worker might have working requirements. He has to work a minimum (maximum) number of times, hence the total 
@@ -138,6 +181,7 @@ $v_r$ the total number of violations.
 
 Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ will be 0 and $r_{max}$ will be $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
 
+
 \subsubsection{Minimizing the number of fictitious worker}
 
 A solution might not always be possible, leading to a partial solution containing fictitious workers.
@@ -151,6 +195,8 @@ we will use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violatio
 
 This syntax is a little bit different than what was introduced before. We specify $\sigma \rightarrow \sigma$ to check only the occurrences of values 
 in that range, hence only $\sigma$ in our case.
+
+
 
 
 \subsubsection{Objective Function}

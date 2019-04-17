@@ -8,6 +8,8 @@ thesis/**/*.bbl
 thesis/**/*.blg
 thesis/**/*.out
 thesis/.spellignore
+thesis/*.lof
+thesis/*.lot
 
 **/*.idea
 

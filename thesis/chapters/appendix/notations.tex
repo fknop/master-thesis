@@ -35,6 +35,19 @@
     C = \{ c_0, \dots, c_n \mid n \in \mathbb{N} \}
 \end{equation*}
 
+\paragraph{Set of locations}
+
+\begin{equation*}
+  L = \{ l_0, \dots, l_n \mid n \in \mathbb{N} \}
+\end{equation*}
+
+\paragraph{Set of machines}
+
+\begin{equation*}
+  M = \{ m_0, \dots, m_n \mid n \in \mathbb{N}, m_n \in \mathbb{N} \}
+\end{equation*}
+
+
 \paragraph{Set of demands}
 
 \begin{align*}
@@ -46,7 +59,10 @@
   d^{s_i} \in d^S && \text{The $i$th skill of $d^S$} \\ 
   d^{S^+} \subseteq S && \text{List of additional skills} \\ 
   d^{S^+_i} \in d^{S^+} && \text{The $i$th skill of $d^{S^+}$} \\ 
-  d^P \in \{ 0, \dots, d^w - 1 \} && \text{List of positions}
+  d^P \in \{ 0, \dots, d^w - 1 \} && \text{List of positions} \\
+  d^M \subseteq M && \text{List of required machines} \\ 
+  d^L \subseteq L && \text{List of possible locations} \\
+  d^O = \{ d_i \mid d_i^T \cap d^T \neq \varnothing, \forall \ d_i \in D, d_i \neq d \} && \text{List of overlapping demands}
 \end{align*}
 
 \paragraph{Working requirements}

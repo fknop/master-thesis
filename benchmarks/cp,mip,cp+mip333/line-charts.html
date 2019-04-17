@@ -12,7 +12,7 @@
   <style>
     #container0, #container1 {
       min-width: 310px;
-      max-width: 1000px;
+      max-width: 1500px;
       height: 400px;
       margin: 0 auto
     }
@@ -8482,7 +8482,7 @@
   } ]
 }
 
-    const categories = data.problems
+    const categories = data.problems.filter((e, i) => i % 8 == 0)
     const titles = ['Runtime', 'Objective']
     const yAxis = ['Runtime (ms)', 'Objective (lower is better)']
 
@@ -8502,13 +8502,13 @@
     const timeSeries = data.timeSeries.map(s => ({
       name: s.name,
       id: s.name,
-      data: s.results.map(t => t.mean)
+      data: s.results.filter((e, i) => i % 8 == 0).map(t => t.mean)
     }))
 
     const objectiveSeries = data.objectiveSeries.map(s => ({
       name: s.name,
       id: s.name,
-      data: s.results.map(t => t.mean)
+      data: s.results.filter((e, i) => i % 8 == 0).map(t => t.mean)
     }))
 
  
@@ -8533,7 +8533,7 @@
     // }))
 
 
-    const series = [lineSeries(timeSeries), lineSeries(objectiveSeries)]
+    const series = [columnSeries(timeSeries), columnSeries(objectiveSeries)]
     // const errors = [timeErrors, objectiveErrors]
 
     console.log(categories)

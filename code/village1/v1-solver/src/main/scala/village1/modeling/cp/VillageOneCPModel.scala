@@ -32,20 +32,20 @@ class VillageOneCPModel(problem: Problem, options: CPModelOptions = CPModelOptio
   val workerVariables: WorkerVariables = generateWorkerVariables()
   val machineVariables: MachineVariables = generateMachineVariables()
   val locationVariables: LocationVariables = generateLocationVariables()
-  val dual = new VillageOneCPDualModel(this)
+//  val dual = new VillageOneCPDualModel(this)
 
 
   val shiftNWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(1 to demands(d).periods.size)))
-//  val contiguousWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(0 until demands(d).periods.size)))
+  val contiguousWorkers: Array[Array[CPIntVar]] = Array.tabulate(D)(d => Array.tabulate(demands(d).requiredWorkers)(_ => CPIntVar(0 until demands(d).periods.size)))
   var workingRequirementsViolations: CPIntVar = CPIntVar(0, if (problem.workingRequirements.nonEmpty) CPIntVar.MaxValue else 0)
   val sentinelViolations = CPIntVar(0, workerVariables.flatten.flatten.length)
 
   initialize()
 
   val objective1: CPIntVar = sum(shiftNWorkers.flatten)
+//  val objective1: CPIntVar = sum(contiguousWorkers.flatten)
   val objective2: CPIntVar = if (options.allowPartial) sentinelViolations else CPIntVar(Set(0))
   val objective3: CPIntVar = if (workingRequirementsViolations != null) workingRequirementsViolations else CPIntVar(Set(0))
-//  val objective4: CPIntVar = sum(contiguousWorkers.flatten)
 
   val objective: CPIntVar = sum(List(objective1, objective2 * 100, objective3 * 15/*, objective4*/)) //sum(List(objective1, objective2, objective3, objective4))
 

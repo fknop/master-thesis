@@ -30,16 +30,16 @@
     & w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k,  \\
     & && i \in W \setminus W_{d^{s_l}_k} \\
     & \sum_{l \in d_k^P} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in d^{S^+}_k, i \in W_{d^{S^+}_k}  \\
-    & z_i \notin d^Z_j \implies z_{ij} = 0, && \forall i \in Z, j \in D   \\
-    & |d^Z_j| > 0 \implies \sum_{i \in Z} z_{ij} = 1, && \forall j \in D \\
-    & z_{ij} + z_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in Z \\
+    & l_i \notin d^L_j \implies l_{ij} = 0, && \forall i \in L, j \in D   \\
+    & |d^L_j| > 0 \implies \sum_{i \in L} l_{ij} = 1, && \forall j \in D \\
+    & l_{ij} + l_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in L \\
     & m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D   \\
     & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \\
     & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \\
     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k  \\
     & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k  \\
     & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D  \\ 
-    & z_{ij} \in \{0, 1\}, && \forall i \in Z, j \in D  \\ 
+    & l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D  \\ 
     & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, && \forall i \in W 
 \end{align*}
 \endgroup
