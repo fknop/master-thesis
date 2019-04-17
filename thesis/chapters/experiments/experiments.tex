@@ -4,7 +4,7 @@
  
 \begin{document}
 
-In this chapter, we experiment our solvers and discuss the results. 
+In this chapter, we experiment with our solvers and discuss the results. 
 
 \section{Benchmark process}
 
@@ -42,11 +42,11 @@ For each time $t$, we take the average of all normalized objectives over all ins
 \begin{figure}
   \centering
   \includegraphics[scale=0.50]{experiments/solvers-oot.png}
-  \caption{Example of timeline.}
+  \caption{Example of a timeline.}
   \label{timeline-example}
 \end{figure}
 
-\autoref{timeline-example} shows an example of timeline with three solvers. The $x$ axis is the time in seconds and the $y$ axis is the normalized objective 
+\autoref{timeline-example} shows an example of a timeline with three solvers. The $x$ axis is the time in seconds and the $y$ axis is the normalized objective 
 value. In practice, we do not compute the normalized objective for every second but for every 1/10th second for more accurate results.
 
 
@@ -94,18 +94,18 @@ of having a performance ratio within a factor $\tau$ of the best possible ratio.
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/cp,cp+mip-profile.png}
-  \caption{Example of performance profile.}
+  \caption{Example of a performance profile.}
   \label{example-profile}
 \end{figure}
 
 We can plot multiple performance profiles of different solvers, with different baselines, to compare them.
-\autoref{example-profile} shows an example of performance profile with the objective as performance metric.
+\autoref{example-profile} shows an example of a performance profile with the objective as performance metric.
 This profile represents the objective after a fixed amount of time 
 with two solvers CP and CP+MIP with CP as 
 baseline.
 We can see on the $y$ axis the percentage of instances solved by the solvers and on the $x$ the objective expressed
 as a ratio of the objective obtained by the baseline. We can see in this example that for around 60\% of instances,
-the objective is better or equal for the CP+MIP solver with an improvement up to 10\% compared to the baseline.
+the objective is better or equal for the CP+MIP solver with an improvement of up to 10\% compared to the baseline.
 In the remaining 40\% of instances, we can see that the CP+MIP solver is worse also up to around 10\%.
 
 
@@ -133,7 +133,7 @@ All the experiments were performed on a UCLouvain server \cite{jabba} from the I
   \item 128 Go RAM
 \end{itemize}
 
-The tests were ran mostly during the night due to the long running times and to avoid having 
+The tests were run mostly during the night due to the long running times and to avoid having 
 perturbations from other users. However, as this machine has a high number of cores, running tests 
 during the day did not impact the tests. 
 The server load was still monitored from the INGI website \cite{jabba:monitoring} and the server was never overloaded.
@@ -263,7 +263,7 @@ We compare multiple value heuristics:
 
 \begin{itemize}
   \item The Max Value heuristic. This heuristic simply takes the maximum value in the domain of the variable. We 
-  take the maximum instead of the minimum because of the sentinel value being equal to -1 in every domain. 
+  take the maximum instead of the minimum because of the sentinel value is equal to -1 in every domain. 
   \item The Most Available heuristic discussed in \autoref{section:cpmodel}.
   \item The Dynamic Most Available heuristic also discussed in \autoref{section:cpmodel}.
 \end{itemize}
@@ -289,8 +289,8 @@ the lack of knowledge of the problem.
 
 We now compare our static and dynamic Most Available heuristics together.
 \autoref{experiments:heuristic2} shows the performance profile of the dynamic and static \texttt{mostavailable} heuristics.
-We can see that the dynamic version of the heuristic outperforms the static one in every instances.
-Even though the dynamic version need to process more during the search, we can see that the time lost 
+We can see that the dynamic version of the heuristic outperforms the static one in every instance.
+Even though the dynamic version needs to process more during the search, we can see that the time lost 
 by this processing is gained back during the search.
 
 \paragraph{}
@@ -311,7 +311,7 @@ that the value heuristic for the Constraint Programming solver is the dynamic \t
 
 In addition to our \texttt{mostavailable} heuristic, we use a variation of the \texttt{maxdegree} heuristic. 
 This heuristic is a first-fail variable heuristic that selects the most constrained unbound variable. However,
-as stated in our model in \autoref{section:cpmodel}, skills are not represented with constraints but instead values 
+as stated in our model in \autoref{section:cpmodel}, skills are not represented with constraints but instead, values 
 are removed from the domain at initialization. To express skills as part of the max degree, we simply add the number of 
 skills required by a variable to the degree of that variable.
 
@@ -331,7 +331,7 @@ It is a variant to the Last Conflict heuristic that selects the variable which c
 COS was shown to be the most performant on scheduling problems. We will now see how it performs in our problem.
 
 \autoref{experiments:heuristics:3} shows a performance profile for the objective after 30s for each solver.
-We can see that the three heuristics are very close of each other. However, the Min Size heuristic performs slightly better the Max Degree heuristic with the 
+We can see that the three heuristics are very close to each other. However, the Min Size heuristic performs slightly better the Max Degree heuristic with the 
 COS heuristic coming last.
 
 
@@ -356,7 +356,7 @@ relaxations method.
 
 \autoref{experiments:lns} shows the performance profile for the final objective after 30s of search 
 between a standard search and LNS. As expected, we can see that LNS outperforms the standard search 
-in every instances. \autoref{experiments:lns-oot} shows that the standard search quickly get stuck
+in every instance. \autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
 while the LNS manages to find better solutions quickly after relaxing the initial solution.
 
 
@@ -391,10 +391,10 @@ We also experimented with multiple relaxations in the LNS framework. We compared
 \autoref{experiments:relax-profile} shows the performance profile for the objective after 30s with 
 CP-Prop as baseline.
 We can observe that overall, CP-Random-40 finds a better objective in 80\% of instances. However,
-no relaxation finds a better solution in every instances. 
+no relaxation finds a better solution in every instance. 
 
 
-\autoref{experiments:relax-profile} shows that in average CP-Random-40 is the fastest to find a solution close 
+\autoref{experiments:relax-profile} shows that on average CP-Random-40 is the fastest to find a solution close 
 to the best one with CP-Random-50 close behind.
 
 \begin{figure}
@@ -434,7 +434,7 @@ the MIP solver underperforms for most instance. However, it outperforms the CP s
 problem grows. Too many variables (\char`\~ 1,000,000 binary variables for the biggest instances) make it hard for a MIP model to perform well.
 
 We can also observe from that performance profile, and in \autoref{experiments:solvers:profile2}, that 
-the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by maximum 10\%. 
+the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by a maximum of 10\%. 
 The MIP solver performs a lot better when given an initial solution to work with.
 
 \begin{figure}
@@ -454,7 +454,7 @@ The MIP solver performs a lot better when given an initial solution to work with
 
 
 \autoref{experiments:solvers:oot} gives the objective per time for the three solvers. As expected from our previous results, the MIP solver does not 
-give a good solution after the elapsed time. However, while the CP+MIP solver is slightly better in terms of final objective, it takes in average 10 seconds 
+give a good solution after the elapsed time. However, while the CP+MIP solver is slightly better in terms of the final objective, it takes on average 10 seconds 
 to reach such objective while the CP solver only takes 1 second to reach an objective really close to the final one.
 
 % Those 20\% match with the small instances proportions in \autoref{instances:proportions}

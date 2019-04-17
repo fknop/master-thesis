@@ -19,7 +19,7 @@ that can be passed to it.
 
 \section{Input and output format}
 
-For consistency, both solvers take the same input format and returns the same output format.
+For consistency, both solvers take the same input format and return the same output format.
 We created a JSON (JavaScript Object Notation) Schema \cite{json:schema} to formulate our problems and solution assignments.
 Those schemas allow us to create a typed data structure for JSON objects. All the typing validation 
 is handled by the JSON Schema library. A small example of JSON schema can be found in \autoref{json:example}. 
@@ -76,11 +76,11 @@ The implementation did not change from the theoretical model presented in \autor
 MIP solvers are less flexible in their modeling abilities than CP solvers as we discuss later. The Gurobi solver 
 comes with default parameters \cite{gurobi:parameters}, it is advised to keep default parameters as 
 changing them do not give much gain. Multiple different parameters were tested but as advised from the Gurobi website, 
-no change were noticed.
+no change was noticed.
 
 \section{Constraint Programming solver}
 
-The Constraint Programming implementation differ in some parts from the theoretical model 
+The Constraint Programming implementation differs in some parts from the theoretical model 
 presented in \autoref{section:cpmodel}. In Constraint Programming, the constraint propagation 
 takes the most time in the solving algorithm. Propagations might be unnecessary too strong for a model.
 This is what happened with our model and the use of \texttt{softgcc} constraints. 
@@ -185,7 +185,7 @@ the \texttt{assignSkill} value is responsible for the probability of a position 
 We can increase this value if we want more skilled positions and vice-versa.
 
 We also needed to be able to reproduce instances, the \texttt{InstanceGenerator} API can 
-take a seed which default at $0$.
+take a seed which defaults at $0$.
 
   
 \begin{lstlisting}[style=scalaStyle,caption={Instance generator API},captionpos=b]
@@ -195,8 +195,8 @@ class InstanceGenerator(val seed: Long = 0L) {
 \end{lstlisting}
 
 The generator makes sure that a solution is always possible by assigning periods to workers 
-that have been assigned to demands. It also add the demand periods to $k$ random workers
-where $k$ is the number of required workers for that demand. This allow having more solutions variety.
+that have been assigned to demands. It also adds the demand periods to $k$ random workers
+where $k$ is the number of required workers for that demand. This allows having more solutions variety.
     
 The generator tries as much as possible to create meaningful instances but it is of course not able to replicate the importance of real data properly.
 
@@ -204,8 +204,8 @@ The generator tries as much as possible to create meaningful instances but it is
 \label{section:benchmark-runner}
 
 A benchmark API is created on top of the instances generation API. The API takes an options structure (\autoref{benchmark:options}).
-The arrays \texttt{T}, \texttt{D} and \texttt{W} determines the sizes of the instances. The benchmark runner 
-will create instances with a combinations of those parameters. For example, with the values in \autoref{benchmark:options},
+The arrays \texttt{T}, \texttt{D} and \texttt{W} determine the sizes of the instances. The benchmark runner 
+will create instances with a combination of those parameters. For example, with the values in \autoref{benchmark:options},
 the benchmark runner will create 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
 three values being $(T, D, W)$.
 
@@ -239,7 +239,7 @@ class BenchmarkRunner(val options: BenchmarkOptions) {
 }
 \end{lstlisting}
 
-This functions returns a pair of benchmark series: one serie for the time values and one serie for the objective values.
+This function returns a pair of benchmark series: one serie for the time values and one serie for the objective values.
 The \texttt{BenchmarkSerie} class is simply a class that takes a name and a list of benchmark measurements (i.e. mean, standard deviation, min and max).
 
 This implementation allows us to create a variety of benchmark by simply changing the \texttt{solve} function.

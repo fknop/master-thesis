@@ -33,13 +33,13 @@ As described in more depth in \cite{Hentenryck:2003}:
   of constraints that is “semantically equivalent” to $C$.
 \end{quotation}
 
-The author also defines three types of constraint globality, we are mostly interested in what he refers to \emph{operatinal globality}. 
+The author also defines three types of constraint globality, we are mostly interested in what he refers to \emph{operational globality}. 
 Those constraints can be decomposed into multiple simpler constraints but the filtering quality of the decomposition
 is often worse than its global counterpart. 
 
 There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
 a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a CSP.
-Instead the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
+Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
 \subsubsection{AllDifferent Constraint}
 \label{sota:alldifferent}
 
@@ -48,7 +48,7 @@ This is usually done in Constraint Programming by using the \texttt{alldifferent
 
 \paragraph{}
 
-The \texttt{alldifferent} constraint \cite{Rgin1994AFA} is one of of the most famous global constraint used in Constraint 
+The \texttt{alldifferent} constraint \cite{Rgin1994AFA} is one of the most famous global constraint used in Constraint 
 Programming.
 This constraint is defined over a subset of variables for which values must be different. More formally:
 
@@ -66,7 +66,7 @@ $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decom
 \subsubsection{Global Cardinality Constraint}
 \label{sota:gcc}
 
-As described in \autoref{chapter:problem}, our resource allocation problem need to take into account working requirements, i.e. a minimum 
+As described in \autoref{chapter:problem}, our resource allocation problem needs to take into account working requirements, i.e. a minimum 
 and a maximum number of times that a worker can work. For this, we need to count the occurrences that a worker is assigned to a position and 
 limit those occurrences to a minimum and maximum. 
 
@@ -100,7 +100,7 @@ The violation associated with this constraint is the sum of excess or shortage \
 
 \subsection{Large Neighborhood Search}
 
-A Constraint Programming solver can often get stuck in a search tree that do not lead to good solutions.
+A Constraint Programming solver can often get stuck in a search tree that does not lead to good solutions.
 We want instead to explore as much of the search space as possible. 
 
 Large Neighborhood Search (LNS) is a technique that makes use of the principles of \emph{Local Search}.
@@ -127,9 +127,9 @@ single objective.
   \text{s.t.} \quad & constraints
 \end{align*}
 
-Our resource allocation problem (\ref{chapter:problem}) uses such objective. One issue with this objective modeling is how 
+Our resource allocation problem (\ref{chapter:problem}) uses such an objective. One issue with this objective modeling is how 
 to prioritize sub-objectives (e.g. is it more important to minimize contiguous workers or requirements). This is 
-usually solved by assigning more weight to more important objectives, however the pruning of such method alone is inefficient.
+usually solved by assigning more weight to more important objectives. However, the pruning of such method alone is inefficient.
 
 \paragraph{}
 

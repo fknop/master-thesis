@@ -11,7 +11,7 @@
 We now present our Constraint Programming model. This model contains some differences
 with the mathematical model described in \autoref{section:mipmodel}.
 For example, a Constraint Programming model usually does not contain binary variables to refer to multiples values 
-of a domain. Instead it uses integer variables having the entire domain. 
+of a domain. Instead, it uses integer variables having the entire domain. 
 Typically, binary variables $w_0, \dots, w_i, \dots, w_n$ where $i \in W$ and $w = i$ if $w_i = 1$ are equivalent to 
 one variable $w \in \{0, \dots, n\}$.
 
@@ -111,7 +111,7 @@ A worker might have an incompatibility with a worker or a set of workers. This c
 with a series of \texttt{not\_equal} like the worker - client incompatibilities. We will use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
-The forbidden combinations of values is expressed by the table $I_{ww}$. 
+The forbidden combinations of values are expressed by the table $I_{ww}$. 
 We will add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
@@ -126,7 +126,7 @@ satisfied by any of the workers in the demand. Unlike required skills by differe
 we cannot pre-assign possible values to domain of variables. The worker can be assigned to any number of variables in the demand.
 We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
-the sum will state that at least one worker need to be assigned.
+the sum will state that at least one worker needs to be assigned.
 
 Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
 
@@ -182,7 +182,7 @@ $v_r$ the total number of violations.
 Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ will be 0 and $r_{max}$ will be $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
 
 
-\subsubsection{Minimizing the number of fictitious worker}
+\subsubsection{Minimizing the number of fictitious workers}
 
 A solution might not always be possible, leading to a partial solution containing fictitious workers.
 We defined this fictitious worker by the value $\sigma$. This is again a case of soft constraint where 
@@ -235,13 +235,13 @@ We define those penalties in (\ref{penalties:objective}).
 We define a heuristic that allows:
 \begin{enumerate*}[label=(\roman*)]
   \item the fictitious worker to never be selected if there is another value available in the domain of the variable;
-  \item the worker chosen for a variable is the most available for that demand but is also the less available for other demands.
+  \item the chosen worker for a variable is the most available for that demand but is also the less available for other demands.
 \end{enumerate*}
 
 \subsubsection{Variable Heuristic}
 
 The variable heuristic used for the search is a first-fail heuristic. In other words, the heuristic 
-will chose the variable will the smallest domain. This allows variable with only one value alongside the 
+will choose the variable will the smallest domain. This allows variable with only one value alongside the 
 fictitious value $\sigma$ to always be selected first.
 
 \subsubsection{Most Available Value Heuristic}
@@ -251,7 +251,7 @@ This heuristic consists of two value ordering.
 \begin{enumerate}
   \item The first ordering orders the workers from most available to least available throughout the duration of the demand.
         This allows the search to select workers that are more likely to work for that demand throughout all periods.
-  \item If workers have the same availabilities for a demand, they are ordering in respect to their remaining availabilities in other demands. This 
+  \item If workers have the same availabilities for a demand, they are ordered with respect to their remaining availabilities in other demands. This 
         second ordering is important for smaller demands, the search will choose workers that are less likely to be needed in other demands.
 \end{enumerate}
 
@@ -270,14 +270,14 @@ $w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is
   \texttt{mostavailable}(d_2) &= [w_3 = (5, 0), w_3 = (3, 0), w_2 = (2, 0)] \\ 
 \end{align*}
 
-First we can see that $w_2$ will never be considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
-$w_3$ has two remaining availabilities. This heuristic guess that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
+First, we can see that $w_2$ will never be considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
+$w_3$ has two remaining availabilities. This heuristic guesses that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
 The search will always consider $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
 
 \subsubsection{Dynamic Value Heuristic}
 
 The \emph{most available} heuristic works fairly well in practice as seen in \autoref{chapter:experiments}. 
-We can however improve it by making it more dynamic to the search. Instead of one static ordering at the start of the search,
+We can, however, improve it by making it more dynamic to the search. Instead of one static ordering at the start of the search,
 we can reorder values at each value selection to select the best worker in the current search tree.
 
 To achieve this, we need to store some state during the search that will backtrack automatically.
@@ -288,7 +288,7 @@ To achieve this, we need to store some state during the search that will backtra
   \item $a_{w} \subseteq w^T$: the set of remaining availabilities of the worker.
 \end{enumerate}
 
-We now have three level of ordering in the heuristic:
+We now have three levels of ordering in the heuristic:
 
 \begin{enumerate}
   \item The first ordering is now the occurrences $occ_{wpd}$ from greatest to smallest values. We prioritize workers that already work for this demand for the longest time.
@@ -303,10 +303,10 @@ We now have three level of ordering in the heuristic:
 \subsubsection{Breaking symmetries}
 
 It is fairly easy to see that our problem contains a lot of symmetries between different positions within the same demand. 
-Two positions might require no skill and thus have the same possible workers. We want to avoid as much as possible to consider every permutations of those workers.
-For this, we use the \texttt{lexleq} constraint \cite{Alan:Lex}. This constraints takes two vectors of variables $X$ and $Y$. It ensures that 
+Two positions might require no skill and thus have the same possible workers. We want to avoid as much as possible to consider every permutation of those workers.
+For this, we use the \texttt{lexleq} constraint \cite{Alan:Lex}. This constraint takes two vectors of variables $X$ and $Y$. It ensures that 
 $x_i \leq y_i \ \forall i$. As we already have an \texttt{alldifferent} constraint applied, it ensures $x_i < y_i \ \forall i$.
-Let $x_i \in X$ be a variable symmetric to $y_i \in Y$ where $x_i$ and $y_i$ are two variables from the same demand occuring at the same time period.
+Let $x_i \in X$ be a variable symmetric to $y_i \in Y$ where $x_i$ and $y_i$ are two variables from the same demand occurring at the same time period.
 
 
 \begin{equation}
@@ -379,7 +379,7 @@ We wish to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial soluti
   \item Once $o_2$ is optimized, keep it in \emph{Weak-Filtering} for the rest of the search and switch $o_3$ to \emph{Strong-Filtering}.
 \end{enumerate}
 
-$o_4$ is also kept in \emph{Strong-Filtering} mode for the entire duration of the search to avoid having a weaker model than the original weighted-sum.
+$o_4$ is also kept in \emph{Strong-Filtering} mode for the entire duration of the search to avoid having a weaker model than the original weighted sum.
 
 \end{document}
 
