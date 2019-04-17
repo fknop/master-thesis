@@ -8,60 +8,141 @@ In this chapter, we experiment our solvers and discuss the results.
 
 \section{Benchmark process}
 
-Our benchmark API takes an options structure (\autoref{benchmark:options}).
-The arrays \texttt{T}, \texttt{D} and \texttt{W} determines the sizes of the instances. The benchmark runner 
-will create instances with a combinations of those parameters. For example, with the values in \autoref{benchmark:options},
-the benchmark runner will create 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
-three values being $(T, D, W)$.
+We used our benchmark runner described in \autoref{section:benchmark-runner} to run our experiments.
+Once all the tested solvers have finished their run, we extract the results and create a JSON file 
+with the final results (objective, time, etc.). We can then create plots that make it 
+easier to analyze and discuss the results. Two of those plots are \emph{timelines} and \emph{performance profiles}.
 
-\begin{lstlisting}[style=scalaStyle,label={benchmark:options},caption={Benchmark options},captionpos=b]
-trait BenchmarkOptions {
-  val solutionLimit: Int = Int.MaxValue
-  val timeLimit: Int = 20
-  val repeat: Int = 1
-  val dryRun: Int = 1
-  val T: Array[Int] = Array(5)
-  val D: Array[Int] = Array(30, 50)
-  val W: Array[Int] = Array(100, 200, 300)
-  val probabilities: Map[String, Double] = Map()
-  val seed: Long = -1L
-}
-\end{lstlisting}
+\subsection{Timelines}
 
-We can specify a solution limit as well as a time limit. We can also repeat our benchmark and takes 
-the average of results. We can also have dry runs to warm up the JVM (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
-we can specify the probabilities for our instances as explained in \autoref{section:instance-gen}.
+A timeline is a decreasing function of the objective over time. 
+They represent the average evolution of the objective of all instances over time.
+However, as objectives can be 
+significantly different from one instance to another, all objectives are normalized to a $[0, 1]$ range.
+We call this the relative distance to the best objective. 
+The normalized objective ($no$) for instance $i$ at each timestamp $t$ can 
+be computed with the following formula:
 
-Our benchmark runner has a function \texttt{run} that takes a name (e.g. solver name, serie name, etc), and a solving function 
-which takes a generic model and returns a pair with the time spent in milliseconds and the objective value respectively.
+\begin{equation*}
+  no_i(t) = \frac{objective_i(t) - best_i}{objective_i(0) - best_i}
+\end{equation*}
 
-\begin{lstlisting}[style=scalaStyle,label={benchmark:run},caption={Benchmark run function},captionpos=b]
-class BenchmarkRunner(val options: BenchmarkOptions) {
-  def run (
-    name: String, 
-    solve: VillageOneModel => (Long, Int)
-  ): (BenchmarkSerie, BenchmarkSerie)
-}
-\end{lstlisting}
+A value of $1$ will always be the initial solution for each solver, even though they might not be equal. A value of 
+$0$ is the best solution found at the end of the search. 
 
-This functions returns a pair of benchmark series: one serie for the time values and one serie for the objective values.
-The \texttt{BenchmarkSerie} class is simply a class that takes a name and a list of benchmark measurements (i.e. mean, standard deviation, min and max).
+For each time $t$, we take the average of all normalized objectives over all instances:
 
-This implementation allows us to create a variety of benchmark by simply changing the \texttt{solve} function.
+
+\begin{equation*}
+   no(t) = \frac{\sum_{i \in \mathcal{I}} no_{i}(t)}{|\mathcal{I}|}
+\end{equation*}
+
+
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.50]{experiments/solvers-oot.png}
+  \caption{Example of timeline.}
+  \label{timeline-example}
+\end{figure}
+
+\autoref{timeline-example} shows an example of timeline with three solvers. The $x$ axis is the time in seconds and the $y$ axis is the normalized objective 
+value. In practice, we do not compute the normalized objective for every second but for every 1/10th second for more accurate results.
+
+
+
+\subsection{Performance profiles}
+
+A performance profile \cite{Dolan2002} is a cumulative distribution function of a performance metric (i.e. objective, time, etc.).
+In our case, we are mostly interested in the objective metric after a fixed amount of time.
+This is how a performance profile is computed:
+
+For each problem $p$ and solver $s$, we define two performance metrics:
+
+\begin{align*}
+  t_{p, s} &= \text{time required to solve $p$ by solver $s$} \\
+  o_{p, s} &= \text{objective of $p$ obtained by solver $s$}
+\end{align*}
+
+
+From these results, we can compute a performance ratio $r_{p, s}$ for a performance metric.
+We use $m_{p, s}$ in the following formulas which refers to a performance metric such as $t_{p, s}$ or $o_{p, s}$.
+
+\begin{equation}
+  r_{p, s} = \frac{m_{p, s}}{min\{ m_{p, s} : s \in \mathcal{S} \}}
+\end{equation}
+
+This ratio is the comparison between the performance of a solver $s$ with the best solver for $p$.
+This means that the best solver is used as baseline. However, it can be interesting to change 
+the baseline to change the comparison. For this, we change the formula \cite{Cauwelaert2017AVW} to:
+
+\begin{equation}
+  r_{p, s} = \frac{m_{p, s}}{min\{ m_{p, b} : b \in \mathcal{B} \} }
+\end{equation}
+
+where $\mathcal{B} \subseteq \mathcal{S}$ is the set of baselines.
+The performance profile of a solver is then given by:
+
+
+\begin{equation}
+  F_s(\tau) = \frac{1}{|\mathcal{P}|} \left| \left\{ p \in \mathcal{P} : r_{p, s} \leq \tau \right\} \right|
+\end{equation}
+
+with $\tau \in \mathbb{R}$ being a performance factor. In other words, $F_s(\tau)$ is the cumulative probability
+of having a performance ratio within a factor $\tau$ of the best possible ratio.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/cp,cp+mip-profile.png}
+  \caption{Example of performance profile.}
+  \label{example-profile}
+\end{figure}
+
+We can plot multiple performance profiles of different solvers, with different baselines, to compare them.
+\autoref{example-profile} shows an example of performance profile with the objective as performance metric.
+This profile represents the objective after a fixed amount of time 
+with two solvers CP and CP+MIP with CP as 
+baseline.
+We can see on the $y$ axis the percentage of instances solved by the solvers and on the $x$ the objective expressed
+as a ratio of the objective obtained by the baseline. We can see in this example that for around 60\% of instances,
+the objective is better or equal for the CP+MIP solver with an improvement up to 10\% compared to the baseline.
+In the remaining 40\% of instances, we can see that the CP+MIP solver is worse also up to around 10\%.
+
+
+We can also have multiple solvers as baseline as we can see in \autoref{example-profile2} where all the solvers 
+are used as baselines. In this type of profile, the objective used in the objective ratio is the best objective between all solvers.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/cos-md-ms.png}
+  \caption{Example of performance profile with all solvers as baselines.}
+  \label{example-profile2}
+\end{figure}
+
 
 \subsection{Hardware}
 
 All the experiments were performed on a UCLouvain server \cite{jabba} from the INGI department.
 
 \begin{itemize}
-  \item Intel(R) Xeon(R) CPU E5-2687W v3 \@ 3.10GHz with 20 cores and 40 threads.
+  \item Intel(R) Xeon(R) CPU E5-2687W v3 \verb+@+ 3.10GHz 
+    \begin{itemize}
+      \item 20 cores available.
+      \item 40 threads.
+    \end{itemize}
   \item 128 Go RAM
 \end{itemize}
 
+The tests were ran mostly during the night due to the long running times and to avoid having 
+perturbations from other users. However, as this machine has a high number of cores, running tests 
+during the day did not impact the tests. 
+The server load was still monitored from the INGI website \cite{jabba:monitoring} and the server was never overloaded.
+
 \subsection{Benchmark Instances}
 
-For our experiments, we generated 216 instances of different sizes.
+For our experiments, we generated 216 instances of different sizes. The problem sizes were based on the needs of the \vone\ company.
 \autoref{instances:proportions} shows the size proportions for the 216 instances used in the experiments. $T$ represents the number of time period, $D$ the number of demands and $W$ the number of workers. The generated instances also have varying probabilities as presented in \autoref{instance:options}. These probabilities are referenced in \autoref{instances:probabilities} and follow a uniform distribution where $P_{\mu} = \frac{P_{min} + P_{max}}{2}$.
+
 
 \begin{table}[H]
   \caption{Proportions of instance sizes for 216 instances}
