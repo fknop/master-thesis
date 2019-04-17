@@ -99,7 +99,7 @@ We will use this constraint to ignore the $\sigma$ value from the propagation. L
 
 A worker might have an incompatibility with a client or a set of clients. 
 Clients are statically assigned to demands, we can solve this constraint by adding 
-a series of \texttt{not\_equal} constraints for each incompatible worker - client pair.
+a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
   \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, \forall \ i, j, k
@@ -108,7 +108,7 @@ a series of \texttt{not\_equal} constraints for each incompatible worker - clien
 \subsubsection{Incompatibilities between workers}
 
 A worker might have an incompatibility with a worker or a set of workers. This constraint cannot be solved 
-with a series of \texttt{not\_equal} like the worker - client incompatibilities. We will use a constraint 
+with a series of \texttt{not\_equal} like the worker-client incompatibilities. We will use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
 The forbidden combinations of values are expressed by the table $I_{ww}$. 
@@ -123,7 +123,7 @@ be the permutations of worker variables for demand $j$ at period $i$:
 
 A demand can have what we call \emph{additional skills}. Those skills can be 
 satisfied by any of the workers in the demand. Unlike required skills by different workers,
-we cannot pre-assign possible values to domain of variables. The worker can be assigned to any number of variables in the demand.
+we cannot pre-assign possible values to the domain of variables. The worker can be assigned to any number of variables in the demand.
 We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
 the sum will state that at least one worker needs to be assigned.
@@ -138,7 +138,7 @@ Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in
 \end{align}
 
 This is a different syntax for \texttt{gcc} that we introduced before. This variant takes 
-variables and assign the occurrences of values to them. In this case, the \texttt{gcc} will assign 
+variables and assigns the occurrences of values to them. In this case, the \texttt{gcc} will assign 
 occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint will ensure that 
 these occurrences sum to at least one.
 
@@ -247,7 +247,7 @@ fictitious value $\sigma$ to always be selected first.
 \subsubsection{Most Available Value Heuristic}
 
 We define a value heuristic that we call the \emph{most available heuristic}. 
-This heuristic consists of two value ordering.
+This heuristic consists of two value orderings.
 \begin{enumerate}
   \item The first ordering orders the workers from most available to least available throughout the duration of the demand.
         This allows the search to select workers that are more likely to work for that demand throughout all periods.
@@ -256,7 +256,7 @@ This heuristic consists of two value ordering.
 \end{enumerate}
 
 It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
-for most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
+for the most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
 
 Let us take an example to show how this heuristic works in practice, let us define 
 $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ that only need one worker each.

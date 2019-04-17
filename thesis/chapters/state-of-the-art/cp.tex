@@ -74,9 +74,9 @@ limit those occurrences to a minimum and maximum.
 
 
 The global cardinality constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
-\texttt{alldifferent} constraint. It does not enforces (although it can) the uniqueness of values of its variables
+\texttt{alldifferent} constraint. It does not enforce (although it can) the uniqueness of values of its variables
 but instead enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
-between a lowerbound and a upperbound, respectively $l_i$ and $u_i$. 
+between a lower bound and an upper bound, respectively $l_i$ and $u_i$. 
 
 \begin{equation*}
   \texttt{gcc}(X, l, u) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), l_d \leq |\{ d_i \mid d_i = d \}| \leq u_d, \forall d \in D(X) \}

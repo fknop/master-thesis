@@ -88,7 +88,7 @@ This is what happened with our model and the use of \texttt{softgcc} constraints
 The minimization of fictitious workers described in (\ref{cp:fictitious}) used a \texttt{softgcc} in the model.
 However, this constraint is slow to propagate in practice due to the high number of variables.
 Using a CPU profiler, we noticed the \texttt{softgcc} constraint took up to 20\% of the solver runtime. 
-OscaR proposes a variant of the \texttt{gcc} constraint which simply count the number of occurrences of values.
+OscaR proposes a variant of the \texttt{gcc} constraint which simply counts the number of occurrences of values.
 
 
 \begin{lstlisting}[style=scalaStyle,label={gcc_oscar},caption={Variant of \texttt{gcc} implemented in OscaR},captionpos=b]
@@ -179,7 +179,7 @@ case class InstanceOptions(
 )
 \end{lstlisting}
 
-This represent almost all the parameters that an instance can have. We created a
+This represents almost all the parameters that an instance can have. We created a
 map of probabilities to generate easier or harder instances. For example,
 the \texttt{assignSkill} value is responsible for the probability of a position to be assigned a skill. 
 We can increase this value if we want more skilled positions and vice-versa.
