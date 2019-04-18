@@ -14,13 +14,13 @@ $\{x_1, \dots, x_n \}$; a domain $D(x_i)$ of possible values for each variable $
 $1 \leq i \leq n$; and a collection of $m$ constraints $\{ C_1, \dots, C_m \}$. 
 Each constraint $C_j$, $1 \leq j \leq m$, is a constraint over some set of variables called the scheme 
 of the constraint. The size of this set is known as the arity of the constraint. 
-A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all of the constraints. \cite{cp-definition}
+A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all the constraints. \cite{cp-definition}
 
 Problems are sometimes over-constrained and hard to solve with a CSP. In those cases, we can transform our 
 CSP to a Constraint Optimization Problem (COP) where we try to optimize one or multiple objectives coming 
 from the transformation of hard constraints into soft constraints.
 
-\subsection{Global Constraints}
+\subsection{Global constraints}
 
 
 We now describe the principle of global constraints and how they are useful for our resource allocation problem 
@@ -40,7 +40,7 @@ is often worse than its global counterpart.
 There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
 a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a CSP.
 Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
-\subsubsection{AllDifferent Constraint}
+\subsubsection{Alldifferent constraint}
 \label{sota:alldifferent}
 
 In our resource allocation problem (\ref{chapter:problem}), we need to assign different workers to demands during the same time period. 
@@ -63,7 +63,7 @@ The global constraint would be able to successfully filter $1$ and $2$ from the 
 $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decomposition is not able to filter those values.
 
 
-\subsubsection{Global Cardinality Constraint}
+\subsubsection{Global cardinality constraint}
 \label{sota:gcc}
 
 As described in \autoref{chapter:problem}, our resource allocation problem needs to take into account working requirements, i.e. a minimum 
@@ -75,7 +75,7 @@ limit those occurrences to a minimum and maximum.
 
 The global cardinality constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
 \texttt{alldifferent} constraint. It does not enforce (although it can) the uniqueness of values of its variables
-but instead enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
+but enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
 between a lower bound and an upper bound, respectively $l_i$ and $u_i$. 
 
 \begin{equation*}
@@ -105,7 +105,7 @@ We want instead to explore as much of the search space as possible.
 
 Large Neighborhood Search (LNS) is a technique that makes use of the principles of \emph{Local Search}.
 LNS uses Constraint Programming as a tool to find solutions and local search to expand the exploration of the search space. 
-The LNS framework often goes as follow:
+The LNS framework often goes as follows:
 
 \begin{enumerate}
   \item Use Constraint Programming to find a solution 

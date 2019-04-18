@@ -43,14 +43,14 @@
       yaxis: {
         title: 'Instances (%)',
         zeroline: false,
-        dtick: 0.1
+        dtick: 10
       }
     }
 
     Plotly.plot(container, series.map(serie => ({
       name: serie.name,
       x: [minX, ...serie.x, maxX],
-      y: [minY, ...serie.y, maxY],
+      y: [minY, ...serie.y, maxY].map(y => y * 100),
       mode: 'lines',
       line: {shape: 'hv'},
     })), layout)

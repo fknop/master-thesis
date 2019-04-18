@@ -5,12 +5,12 @@
 \begin{document}
 
 
-\section{Constraint Programming Model}
+\section{Constraint Programming model}
 \label{section:cpmodel}
 
 We now present our Constraint Programming model. This model contains some differences
 with the mathematical model described in \autoref{section:mipmodel}.
-For example, a Constraint Programming model usually does not contain binary variables to refer to multiples values 
+For example, a Constraint Programming model rarely contains binary variables to refer to multiple values 
 of a domain. Instead, it uses integer variables having the entire domain. 
 Typically, binary variables $w_0, \dots, w_i, \dots, w_n$ where $i \in W$ and $w = i$ if $w_i = 1$ are equivalent to 
 one variable $w \in \{0, \dots, n\}$.
@@ -45,7 +45,7 @@ We will add this value to every worker variable domain but ignore it during the 
 this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we will define $\sigma = -1$.
 
 
-Some constraints are already satisfied by the modeling of the variables, like the number of required resources (i.e. worker, location, machine)
+The variables modeling already satisfies some constraints, like the number of required resources (i.e. worker, location, machine)
 per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
 possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
 
@@ -107,8 +107,8 @@ a series of \texttt{not\_equal} constraints for each incompatible worker-client 
 
 \subsubsection{Incompatibilities between workers}
 
-A worker might have an incompatibility with a worker or a set of workers. This constraint cannot be solved 
-with a series of \texttt{not\_equal} like the worker-client incompatibilities. We will use a constraint 
+A worker might have an incompatibility with a worker or a set of workers. 
+We cannot solve this constraint with a series of \texttt{not\_equal} like the worker-client incompatibilities. We will use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
 The forbidden combinations of values are expressed by the table $I_{ww}$. 
@@ -123,7 +123,7 @@ be the permutations of worker variables for demand $j$ at period $i$:
 
 A demand can have what we call \emph{additional skills}. Those skills can be 
 satisfied by any of the workers in the demand. Unlike required skills by different workers,
-we cannot pre-assign possible values to the domain of variables. The worker can be assigned to any number of variables in the demand.
+we cannot pre-assign possible values to the domain of variables. Any number of worker in the demand can have an additional skill.
 We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
 the sum will state that at least one worker needs to be assigned.
@@ -263,7 +263,7 @@ $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ t
 The availabilities are defined as
 $w_1^T = \{ 0, 1, 2 \}$, $w_2^T = \{ 0, 2 \}$, $w_3^T = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
 $d_1^T = \{ 0, 1, 2 \}$, $d_2^T = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can see that worker 
-$w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand will be as follow:
+$w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand will be as follows:
 
 \begin{align*}
   \texttt{mostavailable}(d_1) &= [w_1 = (3, 0), w_3 = (3, 2), w_2 = (2, 0)] \\ 

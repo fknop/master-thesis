@@ -76,7 +76,7 @@ Each resource can only be assigned once per time period and needs to satisfy all
 % The possible objective is to assign workers in such a way that they work for the longest time possible at the same position.
 
 \section{Constraints}
-\subsection{Hard Constraints}
+\subsection{Hard constraints}
 
 \subsubsection{A worker can only work when available}
 
@@ -123,7 +123,7 @@ for a demand to be satisfied.
 \subsubsection{No machines should be assigned twice for the same period}
 
 A machine is assigned for the entirety of a demand. Moreover, it cannot be assigned twice 
-for the same period. In other words, it cannot be assigned for two overlappings (in time) demands.
+for the same period. In other words, it cannot be assigned for two overlapping (in time) demands.
 
 
 \subsubsection{The location assigned must be in the set of possible locations}
@@ -136,18 +136,18 @@ to that demand.
 As with machines, locations must be assigned only once per time period.
 
 
-\subsection{Soft Constraints}
+\subsection{Soft constraints}
 
 \subsubsection{Satisfy the most assignments possible}
 
 Each demand needs a required number of workers. However, we can assign a fictitious worker to demands 
-and minimize the number of fictitious workers. This is done in the case where there is not enough workers
-or no worker that satisfy a particular skill. From a modeling point of view, the hard constraint which states
-that the required number of workers must be satisfied is still satisfied with a fictitious worker.
+and minimize the number of fictitious workers. This is done in the case where there are not enough workers
+or no worker that satisfy a particular skill. From a modeling point of view, the hard constraint which states that 
+a demand must have a required number of workers is still satisfied with a fictitious worker.
 
 \subsubsection{Contiguous shifts}
 
-A demand consists of multiple positions over a period of time. 
+A demand comprises of multiple positions over a period of time. 
 For each position, a worker should keep working at that position for the longest time possible. 
 We want to avoid the hassle of changing shift every time. 
 As this constraint is harder to solve, we express it as a soft constraint and minimize the number of 

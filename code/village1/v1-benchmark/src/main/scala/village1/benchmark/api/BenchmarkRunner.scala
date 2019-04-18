@@ -1,12 +1,11 @@
 package village1.benchmark.api
 
-import play.api.libs.json.{JsError, JsResultException, JsSuccess, Json}
+import play.api.libs.json.Json
 import village1.benchmark.api.json.JsonBenchmark
 import village1.benchmark.charts.{LineChart, OOTChart, PerformanceProfileChart}
 import village1.benchmark.util.MathUtils
 import village1.benchmark.util.MathUtils._
 import village1.generator.{InstanceGenerator, InstanceOptions}
-import village1.json.JsonUtils
 import village1.modeling.{Problem, VillageOneModel}
 import village1.search.SolutionEmitter
 import village1.util.FileUtils
@@ -315,23 +314,45 @@ object BenchmarkRunner {
 }
 
 object Test extends App {
-  import JsonBenchmark._
-  val path = "data/benchmark/cp,mip,cp+mip685/oot2.json"
-  val json = JsonUtils.parseJsonFile(path)
-  val result = Json.fromJson[Seq[BenchmarkOverTimeSerie]](json)
-  var series: Seq[BenchmarkOverTimeSerie] = null
-  result match {
-    case JsSuccess(b: Seq[BenchmarkOverTimeSerie], _) =>  series = b
-    case e: JsError => throw JsResultException(e.errors)
+//  import JsonBenchmark._
+//  val path = "data/benchmark/cp,mip,cp+mip685/oot2.json"
+//  val json = JsonUtils.parseJsonFile(path)
+//  val result = Json.fromJson[Seq[BenchmarkOverTimeSerie]](json)
+//  var series: Seq[BenchmarkOverTimeSerie] = null
+//  result match {
+//    case JsSuccess(b: Seq[BenchmarkOverTimeSerie], _) =>  series = b
+//    case e: JsError => throw JsResultException(e.errors)
+//  }
+//
+//
+//  val runner = new BenchmarkRunner(options = BenchmarkArgs(timeLimit = 30))
+//  val normalized = runner.normalize(series: _*)
+//
+//  println(series.map(_.results(0).map(_._2)).mkString("\n"))
+//  println(normalized.map(_.means.mkString(" ")).mkString("\n"))
+//
+//  OOTChart.generate(normalized)("data/benchmark/test.html")
+
+
+  val instance = JsonBenchmark.parse("data/benchmark/instance.json")
+
+  val series = instance.objectiveSeries.map(serie => (serie.name, serie.means)).filterNot(_._1 == "Lowerbound")
+  val sizes = instance.problems
+  var bySize: Map[ProblemSize, List[Double]] = Map()
+
+
+  var results = Map[String, Int]()
+  var sizesBySolver = Map[String, List[ProblemSize]]()
+
+  for (j <- sizes.indices) {
+    val best = series.minBy(_._2(j))
+    val name = best._1
+    results = results.updated(name, results.getOrElse(name, 0) + 1)
+
+    sizesBySolver = sizesBySolver.updated(name, sizes(j) :: sizesBySolver.getOrElse(name, List[ProblemSize]()))
+
   }
 
-
-  val runner = new BenchmarkRunner(options = BenchmarkArgs(timeLimit = 30))
-  val normalized = runner.normalize(series: _*)
-
-  println(series.map(_.results(0).map(_._2)).mkString("\n"))
-  println(normalized.map(_.means.mkString(" ")).mkString("\n"))
-
-  OOTChart.generate(normalized)("data/benchmark/test.html")
-
+  println(results)
+  println(sizesBySolver("MIP").groupBy(identity).mapValues(_.size))
 }
