@@ -361,10 +361,12 @@ $x_1$ is assigned the value $2$, we will ignore the permutation $x_1 = 2, x_2 = 
 \subsubsection{Large Neighborhood Search}
 
 We use LNS to ensure that we explore as much of the search space as possible. 
-We use the Propagation Guided Relaxation \cite{Propagation:LNS} to relax our best solutions.
-We discuss and compare more relaxations options in a future chapter.
+We used both Random Relaxation and Propagation Guided Relaxation \cite{Propagation:LNS} to relax 
+our best solution. We discuss and compare these relaxations in \autoref{chapter:experiments}.
+
 
 \subsubsection{Variable Objective LNS}
+\label{cp:volns}
 
 Our problem uses a multi-objective (\ref{cp:objective}) model. 
 Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in D^P_j} N_{jk}}$

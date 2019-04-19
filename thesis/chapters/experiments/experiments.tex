@@ -115,7 +115,7 @@ are used as baselines. In this type of profile, the objective used in the object
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/cos-md-ms.png}
-  \caption{Example of performance profile with all solvers as baselines.}
+  \caption{Example of performance profiles with all solvers as baselines.}
   \label{example-profile2}
 \end{figure}
 
@@ -288,14 +288,14 @@ the lack of knowledge of the problem.
 \paragraph{}
 
 We now compare our static and dynamic Most Available heuristics together.
-\autoref{experiments:heuristic2} shows the performance profile of the dynamic and static \texttt{mostavailable} heuristics.
+\autoref{experiments:heuristic2} shows the performance profiles of the dynamic and static \texttt{mostavailable} heuristics.
 We can see that the dynamic version of the heuristic outperforms the static one in every instance.
 Even though the dynamic version needs to process more during the search, we can see that the time lost 
 by this processing is gained back during the search.
 
 \paragraph{}
 
-As our dynamic value heuristic outperforms other tested value heuristics, we will assume for the rest of this chapter 
+As our dynamic value heuristic outperforms other tested value heuristics, we assume for the rest of this chapter 
 that the value heuristic for the Constraint Programming solver is the dynamic \texttt{mostavailable}.
 
 
@@ -330,7 +330,7 @@ reorders variables based on the number of conflicts that happen during the searc
 It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
 COS was shown to be the most performant on scheduling problems. We will now see how it performs in our problem.
 
-\autoref{experiments:heuristics:3} shows a performance profile for the objective after 30s for each solver.
+\autoref{experiments:heuristics:3} shows the performance profiles of the objective after 30s for each solver.
 We can see that the three heuristics are very close to each other. However, the Min Size heuristic performs slightly better the Max Degree heuristic with the 
 COS heuristic coming last.
 
@@ -348,13 +348,15 @@ TODO: Solution/time
 
 \subsection{Comparison between searches}
 
+\subsubsection{Large neighborhood search}
+
 
 As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, LNS is used to expand the exploration
 of the search tree. We now compare our solver with the use of LNS and without. We also compare multiple 
 relaxations method.
 
 
-\autoref{experiments:lns} shows the performance profile for the final objective after 30s of search 
+\autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
 between a standard search and LNS. As expected, we can see that LNS outperforms the standard search 
 in every instance. \autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
 while the LNS manages to find better solutions quickly after relaxing the initial solution.
@@ -375,43 +377,68 @@ while the LNS manages to find better solutions quickly after relaxing the initia
 \end{figure}
 
 
+The trouble of the standard search to find good solutions is also due to the lack of VO-LNS (\autoref{cp:volns}) as 
+this method is an extension of the LNS framework. The standard search can only minimize the weighted sum of sub-objectives
+which causes issues when trying to minimize more important (more weighted) sub-objectives first.
+
+
+\subsubsection{Relaxations}
 
 We also experimented with multiple relaxations in the LNS framework. We compared:
 
 \begin{itemize}
-  \item Random relaxation with 40\% relaxation (CP-Random-40)
-  \item Random relaxation with 50\% relaxation (CP-Random-50)
-  \item Random relaxation with 60\% relaxation (CP-Random-60)
-  \item Random relaxation with 70\% relaxation (CP-Random-70)
-  \item Random relaxation with 80\% relaxation (CP-Random-80)
+  \item Random relaxation 
+    \begin{itemize}
+      \item 10\% through 90\% relaxation (CP-Random-N\%)
+    \end{itemize}
   \item Propagation based relaxation (CP-Prop)
 \end{itemize}
 
+\autoref{experiments:random-relax-profile} first shows performance profiles of all random relaxations 
+from 10\% through 90\% relaxation. We observe a trend on this graph that the more relaxation we have,
+the worst the objective is. The 10\% and 20\% relaxations offer the best performances after 30s out of all 
+the parameters. However, as we can see from \autoref{experiments:random-relax-oot}, the 40\% relaxation 
+offers a slightly better objective at the start and the 10\% and 20\% catch up after 9 seconds of search.
 
-\autoref{experiments:relax-profile} shows the performance profile for the objective after 30s with 
-CP-Prop as baseline.
-We can observe that overall, CP-Random-40 finds a better objective in 80\% of instances. However,
-no relaxation finds a better solution in every instance. 
 
-
-\autoref{experiments:relax-profile} shows that on average CP-Random-40 is the fastest to find a solution close 
-to the best one with CP-Random-50 close behind.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/relax-profile.png}
+  \includegraphics[scale=0.55]{experiments/random-relax-profile.png}
   \caption{Performance profiles of multiple random relaxations [216 instances/30s].}
-  \label{experiments:relax-profile}
+  \label{experiments:random-relax-profile}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/relax-oot.png}
-  \caption{Timeline of multiple random relaxations [216 instances/30s].}
-  \label{experiments:relax-oot}
+  \includegraphics[scale=0.55]{experiments/random-relax-oot.png}
+  \caption{Timeline of multiple random relaxations [216 instances/15s].}
+  \label{experiments:random-relax-oot}
 \end{figure}
 
 
+We now compare our best random relaxation with a propagation based relaxation.
+We choose CP-Random-20 to compare our propagation based relaxation with, as the performances of 
+the two best random relaxations are almost the same.
+We compare three parameters for the propagation based relaxation:
+
+\begin{itemize}
+  \item CP-Prop-1: the size of the neighborhood to attain is the size of variables.
+  \item CP-Prop-2: the size of the neighborhood to attain is half the size of variables.
+  \item CP-Prop-3: the size of the neighborhood to attain is one third of the size of variables.
+\end{itemize}
+
+\autoref{experiments:random-prop-profile} shows the three propagation based relaxations with CP-Random-20 as baseline.
+We can see that all parameters of the propagation based relaxations all have the same performances and 
+are overall worse than the best random relaxation. Only 10\% of instances are best solved by a propagation based 
+relaxation.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/random-prop-profile.png}
+  \caption{Performance profiles of multiple propagation based relaxations in comparison with the best random relaxation [216 instances/30s].}
+  \label{experiments:random-prop-profile}
+\end{figure}
 
 
 \section{Comparison between solvers}
@@ -428,8 +455,8 @@ We now start by comparing different solvers together. We experiment with three s
 
 
 \autoref{experiments:solvers:profile} 
-shows a performance profile with the CP solver as baseline. We can clearly see that 
-the MIP solver underperforms for most instance. However, it outperforms the CP solver for approximately
+shows performance profiles with the CP solver as baseline. We can clearly see that 
+the MIP solver underperforms for most instances. However, it outperforms the CP solver for approximately
 20\% of instances. 
 
 From \autoref{instances:mip}, we can observe that only small instances are best solved by the MIP solver. 
@@ -440,7 +467,7 @@ we obtain 675.000 binary variables which is more than ten times the number of va
 in \autoref{instances:mip}. MIP is NP-complete and this high number of variables makes it hard for the solver to find good solutions.
 
 
-We can also observe from that performance profile, and in \autoref{experiments:solvers:profile2}, that 
+We can also observe from these performance profiles, and in \autoref{experiments:solvers:profile2}, that 
 the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by a maximum of 10\%. 
 The MIP solver performs a lot better when given an initial solution to work with.
 

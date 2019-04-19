@@ -334,7 +334,7 @@ object Test extends App {
 //  OOTChart.generate(normalized)("data/benchmark/test.html")
 
 
-  val instance = JsonBenchmark.parse("data/benchmark/instance.json")
+  val instance = JsonBenchmark.parse("data/remote/benchmark/cp-relaxations-589/instance.json")
 
   val series = instance.objectiveSeries.map(serie => (serie.name, serie.means)).filterNot(_._1 == "Lowerbound")
   val sizes = instance.problems
@@ -353,6 +353,13 @@ object Test extends App {
 
   }
 
-  println(results)
-  println(sizesBySolver("MIP").groupBy(identity).mapValues(_.size))
+
+  for (key <- sizesBySolver.keys) {
+    val values = sizesBySolver(key).groupBy(identity).mapValues(_.size)
+    println(key)
+    val sizes = values.keys.toArray.sorted
+    for (size <- sizes) {
+      println(size, values(size))
+    }
+  }
 }

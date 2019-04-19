@@ -326,9 +326,9 @@ object MainLNS extends App {
     //  val problem = JsonParser.parse(path)
 
     val search = new VillageOneLNS(problem)
-    search.relaxation = new RandomRelaxation(search, 0.3)
+    search.relaxation = new RandomRelaxation(search, 0.2)
 
-    val stats = search.solve(timeLimit = 20, options = Some(LNSOptions(limit = 5000)))
+    val stats = search.solve(timeLimit = 30)
 
     val solution = search.lastSolution
 

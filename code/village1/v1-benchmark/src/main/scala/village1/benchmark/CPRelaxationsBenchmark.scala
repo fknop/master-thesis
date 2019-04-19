@@ -13,15 +13,19 @@ object CPRelaxationsBenchmark extends CommandLineBenchmark {
 
   val names = Array(
     "CP-Random-20",
-    "CP-Random-30",
-    "CP-Prop-1",
+    "CP-Prop-3",
     "CP-Prop-2",
-    "CP-Prop-3"
+    "CP-Prop-1",
+    "CP-Prop-1/2",
+    "CP-Prop-1/3"
   )
 
   val solvers = Array(
     (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation = new RandomRelaxation(search, 0.2)),
-    (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation = new RandomRelaxation(search, 0.3)),
+    (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation =
+      new PropagationGuidedRelaxation(search, search.flatWorkers, search.flatWorkers.length * 3)),
+    (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation =
+      new PropagationGuidedRelaxation(search, search.flatWorkers, search.flatWorkers.length * 2)),
     (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation =
       new PropagationGuidedRelaxation(search, search.flatWorkers, search.flatWorkers.length)),
     (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => search.relaxation =
