@@ -1,11 +1,11 @@
 package village1.benchmark
 
+import oscar.algo.search.Branching
 import oscar.cp.modeling.Branchings
 import village1.benchmark.BenchmarkSolverFunctions._
 import village1.benchmark.api._
-import village1.benchmark.api.json.JsonBenchmark
-import village1.benchmark.charts.PerformanceProfileChart
-import village1.util.{FileUtils, Utils}
+import village1.search.cp.heuristic.{Heuristic, MostAvailableHeuristic}
+import village1.util.Utils
 
 
 object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
@@ -14,33 +14,19 @@ object CPHeuristicBenchmark extends CommandLineBenchmark with Branchings {
 
   val options = parseArgs(BenchmarkArgs(out = s"data/benchmark/$name.json"))
 
-  val benchmark = new BenchmarkRunner(options = options)
-  val (t0, o0, oot0) = benchmark.run("CP-MA", solveCP(benchmark))
-  val (t1, o1, oot1) = benchmark.run("CP-FF", solveCP(benchmark, applyToSearch = search => {
-//    search.heuristic {
-//      new Heuristic {
-//        override def branching: Branching = binaryFirstFailIdx(search.flatWorkers, i => {
-//          search.flatWorkers(i).max
-//        })
-//      }
-//    }
-  }))
+  val names = Array("CP-MA", "CP-MV")
+  val solvers = Array(
+    (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => {
+      search.heuristic = new MostAvailableHeuristic(search, search.flatWorkers, search.workerVariables)
+    }),
+    (b: BenchmarkRunner) => solveCP(b, applyToSearch = search => {
+      search.heuristic = new Heuristic {
+        override def branching: Branching = binaryFirstFailIdx(search.flatWorkers, i => {
+          search.flatWorkers(i).max
+        })
+      }
+    })
+  )
 
-  val lb = benchmark.lowerBoundSerie()
-  val instance = benchmark.makeInstance(timeSeries = Seq(t0, t1), objectiveSeries = Seq(o0, o1, lb))
-
-  def m(s: BenchmarkSerie) = s.results.map(_.mean)
-
-  val values = Array(m(o0), m(o1))
-
-  val profile = PerformanceProfile.generate(values, values, Array("CP-MA", "CP-FF"))
-  val profile2 = PerformanceProfile.generate(Array(values(0)), values, Array("CP-MA", "CP-FF"))
-  val profile3 = PerformanceProfile.generate(Array(values(1)), values, Array("CP-MA", "CP-FF"))
-
-  FileUtils.writeFile(s"data/benchmark/profile/$name.json", profile)
-  PerformanceProfileChart.generate(profile)(s"data/benchmark/html/$name.html")
-  PerformanceProfileChart.generate(profile2)(s"data/benchmark/html/$name-CP-MA.html")
-  PerformanceProfileChart.generate(profile3)(s"data/benchmark/html/$name-CP-FF.html")
-  val writer = JsonBenchmark.serialize(instance)
-  writer(options.out)
+  BenchmarkRunner.run(name, options, names, solvers)
 }

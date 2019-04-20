@@ -269,47 +269,68 @@ We compare multiple value heuristics:
 \end{itemize}
 
 We first start by comparing the Max Value and the static Most Available heuristics together.
-\autoref{experiments:heuristic1} shows the objective ratio between the implemented custom Most Available heuristic and a standard 
-Max Value heuristic after the first solution.
-The two heuristics were tested on 72 instances of various sizes from small to big instances.
-The performance profile shows a clear gain of about $2$ to $3.4$ for our custom heuristic.
 
-Heuristics like Max Value are ones of the simpler heuristics to implement but often offer bad performance due to 
-the lack of knowledge of the problem.
-
+\autoref{experiments:ma-mv-profile} shows performance profiles of the max value heuristic compared to the most available heuristic 
+as baseline. We observe that our custom heuristic outperforms a max value heuristic in almost every instances with 
+up to a $4.8$ times improvement after 30s of search.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/heuristic.png}
-  \caption{Performance profiles of Most Available and First Fail heuristics [72 instances/first solution].}
-  \label{experiments:heuristic1}
+  \includegraphics[scale=0.55]{experiments/ma-mv-profile.png}
+  \caption{Performance profiles of Most Available and Max Value heuristics [216 instances/30s].}
+  \label{experiments:ma-mv-profile}
 \end{figure}
+
+We can also see from \autoref{experiments:ma-mv-timeline} that, as the search moves forward, our custom heuristic manages to 
+find better solutions faster.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/ma-mv-timeline.png}
+  \caption{Timeline of Most Available and Max Value heuristics [216 instances/30s].}
+  \label{experiments:ma-mv-timeline}
+\end{figure}
+
+Heuristics like the max value are ones of the simpler heuristics to implement but often offer bad performance due to 
+the lack of knowledge of the problem.
 
 \paragraph{}
 
-We now compare our static and dynamic Most Available heuristics together.
-\autoref{experiments:heuristic2} shows the performance profiles of the dynamic and static \texttt{mostavailable} heuristics.
-We can see that the dynamic version of the heuristic outperforms the static one in every instance.
-Even though the dynamic version needs to process more during the search, we can see that the time lost 
-by this processing is gained back during the search.
+We now compare our static and dynamic most available heuristics together.
+\autoref{experiments:ma-ma-d-profile} shows the performance profiles of the dynamic and static most available heuristics.
+We can see that the dynamic version of the heuristic outperforms the static one in 90\% of instances after 30s of search.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/ma-ma-d-profile.png}
+  \caption{Performance profiles of static and dynamic most available heuristics [216 instances/30s].}
+  \label{experiments:ma-ma-d-profile}
+\end{figure}
+
+Even though the dynamic version needs to process more during the search, we can see from \autoref{experiments:ma-ma-d-timeline} that the time lost 
+by this processing is gained back during the search. The earlier solutions are almost of the same quality but 
+as the search moves forward, better solutions are found with the dynamic version. 
+This is expected from the implementation of the dynamic version which finds the best worker to assign 
+at the current state of the search.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/ma-ma-d-timeline.png}
+  \caption{Timeline of static and dynamic most available heuristics [216 instances/30s].}
+  \label{experiments:ma-ma-d-timeline}
+\end{figure}
+
 
 \paragraph{}
 
 As our dynamic value heuristic outperforms other tested value heuristics, we assume for the rest of this chapter 
-that the value heuristic for the Constraint Programming solver is the dynamic \texttt{mostavailable}.
+that the value heuristic for the Constraint Programming solver is the dynamic most available.
 
-
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.55]{experiments/static-dynamic-heuristic.png}
-  \caption{Performance profiles of static and dynamic most available heuristics [486 instances/15s].}
-  \label{experiments:heuristic2}
-\end{figure}
 
 
 \subsubsection{Variable heuristic}
 
-In addition to our \texttt{mostavailable} heuristic, we use a variation of the \texttt{maxdegree} heuristic. 
+In addition to our most available heuristic, we use a variation of the max degree heuristic. 
 This heuristic is a first-fail variable heuristic that selects the most constrained unbound variable. However,
 as stated in our model in \autoref{section:cpmodel}, skills are not represented with constraints but instead, values 
 are removed from the domain at initialization. To express skills as part of the max degree, we simply add the number of 
@@ -328,23 +349,30 @@ We compare multiple variable heuristics:
 Conflict Ordering Search (COS) \cite{Gay:COS} is a variable ordering heuristic that 
 reorders variables based on the number of conflicts that happen during the search.
 It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
-COS was shown to be the most performant on scheduling problems. We will now see how it performs in our problem.
+COS was shown to be the most performant on scheduling problems. 
+We will now see how it performs in our problem in comparison with the aforementioned heuristics.
 
-\autoref{experiments:heuristics:3} shows the performance profiles of the objective after 30s for each solver.
-We can see that the three heuristics are very close to each other. However, the Min Size heuristic performs slightly better the Max Degree heuristic with the 
-COS heuristic coming last.
+\autoref{experiments:v-heuristics-profile} shows the performance profiles of the objective after 30s for each solver.
+We can see that the conflict ordering search and min size heuristics are underperforming in comparison to the max degree heuristic.
 
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/cos-md-ms.png}
+  \includegraphics[scale=0.55]{experiments/v-heuristics-profile.png}
   \caption{Performance profiles of COS, Max Degree and Min Size heuristics [216 instances/30s].}
-  \label{experiments:heuristics:3}
+  \label{experiments:v-heuristics-profile}
 \end{figure}
 
-The three heuristics perform well and changing between these heuristics will not show a significant improvement.
+However, as we can see from the first five seconds of search in \autoref{experiments:v-heuristics-timeline}, the 
+max degree heuristics performs slightly worse than COS and MS for the first second of search. If a solver only runs for 
+one second, using COS or MS would be preferable.
 
-TODO: Solution/time
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/v-heuristics-timeline.png}
+  \caption{Timeline of COS, Max Degree and Min Size heuristics for the first five seconds of search [216 instances/5s].}
+  \label{experiments:v-heuristics-timeline}
+\end{figure}
 
 \subsection{Comparison between searches}
 
@@ -358,9 +386,9 @@ relaxations method.
 
 \autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
 between a standard search and LNS. As expected, we can see that LNS outperforms the standard search 
-in every instance. \autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
+in every instance. 
+\autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
 while the LNS manages to find better solutions quickly after relaxing the initial solution.
-
 
 \begin{figure}
   \centering
@@ -368,6 +396,7 @@ while the LNS manages to find better solutions quickly after relaxing the initia
   \caption{Performance profiles of CP with and without Large Neighborhood Search [216 instances/30s].}
   \label{experiments:lns}
 \end{figure}
+
 
 \begin{figure}
   \centering
@@ -420,22 +449,24 @@ offers a slightly better objective at the start and the 10\% and 20\% catch up a
 We now compare our best random relaxation with a propagation based relaxation.
 We choose CP-Random-20 to compare our propagation based relaxation with, as the performances of 
 the two best random relaxations are almost the same.
-We compare three parameters for the propagation based relaxation:
+Propagation Guided relaxation takes a neighborhood size parameter, compare five values for this parameter:
 
 \begin{itemize}
+  \item CP-Prop-1/3: the size of the neighborhood to attain is one third of the size of variables.
+  \item CP-Prop-1/2: the size of the neighborhood to attain is half the size of variables.
   \item CP-Prop-1: the size of the neighborhood to attain is the size of variables.
-  \item CP-Prop-2: the size of the neighborhood to attain is half the size of variables.
-  \item CP-Prop-3: the size of the neighborhood to attain is one third of the size of variables.
+  \item CP-Prop-2: the size of the neighborhood to attain is twice the size of variables.
+  \item CP-Prop-3: the size of the neighborhood to attain is thrice the size of variables.
 \end{itemize}
 
-\autoref{experiments:random-prop-profile} shows the three propagation based relaxations with CP-Random-20 as baseline.
-We can see that all parameters of the propagation based relaxations all have the same performances and 
-are overall worse than the best random relaxation. Only 10\% of instances are best solved by a propagation based 
-relaxation.
+\autoref{experiments:random-prop-profile} shows the three propagation based relaxations in comparison to CP-Random-20 as baseline.
+We can see that all parameters of the propagation based relaxations almost all have the same performances and 
+are overall worse than the best random relaxation. Approximately only 5\% of instances are best solved by a propagation based 
+relaxation. This makes the random relaxation with 20\% relaxed variables the best out of all tested relaxations.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/random-prop-profile.png}
+  \includegraphics[scale=0.55]{experiments/rand-prop-profile.png}
   \caption{Performance profiles of multiple propagation based relaxations in comparison with the best random relaxation [216 instances/30s].}
   \label{experiments:random-prop-profile}
 \end{figure}
@@ -459,18 +490,6 @@ shows performance profiles with the CP solver as baseline. We can clearly see th
 the MIP solver underperforms for most instances. However, it outperforms the CP solver for approximately
 20\% of instances. 
 
-From \autoref{instances:mip}, we can observe that only small instances are best solved by the MIP solver. 
-This highlights the fact that MIP has trouble finding good objectives as the problem size grows.
-The problem size directly correlates with the number of binary variables of the MIP model. As an example,
-if the problem contains 50 demands over 15 periods with 300 workers and we have 3 workers per demand on average,
-we obtain 675.000 binary variables which is more than ten times the number of variables for small instances shown 
-in \autoref{instances:mip}. MIP is NP-complete and this high number of variables makes it hard for the solver to find good solutions.
-
-
-We can also observe from these performance profiles, and in \autoref{experiments:solvers:profile2}, that 
-the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by a maximum of 10\%. 
-The MIP solver performs a lot better when given an initial solution to work with.
-
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/solvers-profile.png}
@@ -478,12 +497,13 @@ The MIP solver performs a lot better when given an initial solution to work with
   \label{experiments:solvers:profile}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.55]{experiments/cp,cp+mip-profile.png}
-  \caption{Performance profiles of CP and CP+MIP solvers [216 instances/30s].}
-  \label{experiments:solvers:profile2}
-\end{figure}
+From \autoref{instances:mip}, we can observe that only small instances are best solved by the MIP solver. 
+This highlights the fact that MIP has trouble finding good objectives as the problem size grows.
+The problem size directly correlates with the number of binary variables of the MIP model. As an example,
+if the problem contains 50 demands over 15 periods with 300 workers and we have 3 workers per demand on average,
+we obtain 675.000 binary variables which is more than ten times the number of variables for small instances shown 
+in \autoref{instances:mip}. MIP is NP-complete and this high number of variables makes it hard for the solver to find good solutions.
+
 
 \begin{table}[H]
   \caption{Instance sizes best solved by the MIP solver over the 216 tested instances.}
@@ -516,6 +536,18 @@ The MIP solver performs a lot better when given an initial solution to work with
   \end{tabular}
 \end{table}
 
+We can also observe from these performance profiles, and in \autoref{experiments:solvers:profile2}, that 
+the CP+MIP solver gives the best objective in 60\% of instances. For the remaining instances, the objective is only worse by a maximum of 10\%. 
+The MIP solver performs a lot better when given an initial solution to work with.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.55]{experiments/solvers-profile-zoom.png}
+  \caption{Performance profiles of CP and CP+MIP solvers [216 instances/30s].}
+  \label{experiments:solvers:profile2}
+\end{figure}
+
 
 
 \autoref{experiments:solvers:oot} gives the objective per time for the three solvers. As expected from our previous results, the MIP solver does not 
@@ -533,20 +565,20 @@ to reach such objective while the CP solver only takes 1 second to reach an obje
 \end{figure}
 
 
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.55]{experiments/time-first-sol.png}
-  \caption{Performance profiles of the time on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
-  \label{experiments:first-sol-time}
-\end{figure}
+% \begin{figure}
+%   \centering
+%   \includegraphics[scale=0.55]{experiments/time-first-sol.png}
+%   \caption{Performance profiles of the time on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
+%   \label{experiments:first-sol-time}
+% \end{figure}
 
 
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.55]{experiments/obj-first-sol.png}
-  \caption{Performance profiles of the objective on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
-  \label{experiments:first-sol-obj}
-\end{figure}
+% \begin{figure}
+%   \centering
+%   \includegraphics[scale=0.55]{experiments/obj-first-sol.png}
+%   \caption{Performance profiles of the objective on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
+%   \label{experiments:first-sol-obj}
+% \end{figure}
 
 
 
