@@ -93,14 +93,14 @@ of having a performance ratio within a factor $\tau$ of the best possible ratio.
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/cp,cp+mip-profile.png}
-  \caption{Example of a performance profile.}
+  \includegraphics[scale=0.55]{experiments/solvers-profile-zoom.png}
+  \caption{Example of performance profiles.}
   \label{example-profile}
 \end{figure}
 
 We can plot multiple performance profiles of different solvers, with different baselines, to compare them.
-\autoref{example-profile} shows an example of a performance profile with the objective as performance metric.
-This profile represents the objective after a fixed amount of time 
+\autoref{example-profile} shows an example of performance profiles with the objective as performance metric.
+These profiles represent the objective after a fixed amount of time 
 with two solvers CP and CP+MIP with CP as 
 baseline.
 We can see on the $y$ axis the percentage of instances solved by the solvers and on the $x$ the objective expressed
@@ -114,7 +114,7 @@ are used as baselines. In this type of profile, the objective used in the object
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.55]{experiments/cos-md-ms.png}
+  \includegraphics[scale=0.55]{experiments/v-heuristics-profile.png}
   \caption{Example of performance profiles with all solvers as baselines.}
   \label{example-profile2}
 \end{figure}
@@ -135,8 +135,8 @@ All the experiments were performed on a UCLouvain server \cite{jabba} from the I
 
 The tests were run mostly during the night due to the long running times and to avoid having 
 perturbations from other users. However, as this machine has a high number of cores, running tests 
-during the day did not impact the tests. 
-The server load was still monitored from the INGI website \cite{jabba:monitoring} and the server was never overloaded.
+during the day did not impact the results. 
+The server load was monitored through the INGI website \cite{jabba:monitoring} and the server was never noticed to be overloaded.
 
 \subsection{Benchmark instances}
 
@@ -252,6 +252,7 @@ For our experiments, we generated 216 instances of different sizes. The problem 
 \section{Constraint Programming}
 
 \subsection{Comparison between heuristics}
+\label{section:experiments:heuristics}
 
 We talked in \autoref{section:cpmodel} about our custom heuristic called Most Available Heuristic.
 We now compare the performance of this heuristic with standard heuristic like the Max Value heuristic.
@@ -263,7 +264,7 @@ We compare multiple value heuristics:
 
 \begin{itemize}
   \item The Max Value heuristic. This heuristic simply takes the maximum value in the domain of the variable. We 
-  take the maximum instead of the minimum because of the sentinel value is equal to -1 in every domain. 
+  take the maximum instead of the minimum because of the sentinel value being equal to -1 in every domain. 
   \item The Most Available heuristic discussed in \autoref{section:cpmodel}.
   \item The Dynamic Most Available heuristic also discussed in \autoref{section:cpmodel}.
 \end{itemize}
@@ -291,7 +292,7 @@ find better solutions faster.
   \label{experiments:ma-mv-timeline}
 \end{figure}
 
-Heuristics like the max value are ones of the simpler heuristics to implement but often offer bad performance due to 
+Heuristics like the max value are ones of the simpler heuristics to implement but often offers bad performance due to 
 the lack of knowledge of the problem.
 
 \paragraph{}
@@ -308,7 +309,7 @@ We can see that the dynamic version of the heuristic outperforms the static one 
 \end{figure}
 
 Even though the dynamic version needs to process more during the search, we can see from \autoref{experiments:ma-ma-d-timeline} that the time lost 
-by this processing is gained back during the search. The earlier solutions are almost of the same quality but 
+by this processing is gained back during the search. The first solutions are almost of the same quality but 
 as the search moves forward, better solutions are found with the dynamic version. 
 This is expected from the implementation of the dynamic version which finds the best worker to assign 
 at the current state of the search.
@@ -342,13 +343,13 @@ We compare multiple variable heuristics:
 \begin{itemize}
   \item Custom Max Degree (MD) heuristic
   \item Min Size (MS) heuristic. The Min Size heuristic simply selects the variable with minimum domain size.
-  \item Conflict Ordering Search (COS) heuristic
+  \item Conflict Ordering Search (COS) heuristic \cite{Gay:COS}
 \end{itemize}
 
 
-Conflict Ordering Search (COS) \cite{Gay:COS} is a variable ordering heuristic that 
+Conflict Ordering Search is a variable ordering heuristic that 
 reorders variables based on the number of conflicts that happen during the search.
-It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
+It is a variant to the Last Conflict heuristic which selects the variable which caused the last conflict first.
 COS was shown to be the most performant on scheduling problems. 
 We will now see how it performs in our problem in comparison with the aforementioned heuristics.
 
@@ -381,7 +382,7 @@ one second, using COS or MS would be preferable.
 
 As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, LNS is used to expand the exploration
 of the search tree. We now compare our solver with the use of LNS and without. We also compare multiple 
-relaxations method.
+relaxation methods.
 
 
 \autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
@@ -413,7 +414,7 @@ which causes issues when trying to minimize more important (more weighted) sub-o
 
 \subsubsection{Relaxations}
 
-We also experimented with multiple relaxations in the LNS framework. We compared:
+We also experiment with multiple relaxations in the LNS framework. We compare:
 
 \begin{itemize}
   \item Random relaxation 
@@ -449,7 +450,7 @@ offers a slightly better objective at the start and the 10\% and 20\% catch up a
 We now compare our best random relaxation with a propagation based relaxation.
 We choose CP-Random-20 to compare our propagation based relaxation with, as the performances of 
 the two best random relaxations are almost the same.
-Propagation Guided relaxation takes a neighborhood size parameter, compare five values for this parameter:
+Propagation Guided relaxation takes a neighborhood size parameter, we compare five values for this parameter:
 
 \begin{itemize}
   \item CP-Prop-1/3: the size of the neighborhood to attain is one third of the size of variables.
@@ -558,10 +559,10 @@ to reach such objective while the CP solver only takes 1 second to reach an obje
 
 
 \begin{figure}
+  \label{experiments:solvers:oot}
+  \caption{Timeline of CP, MIP and CP+MIP solvers [216 instances/30s].}
   \centering
   \includegraphics[scale=0.55]{experiments/solvers-oot.png}
-  \caption{Timeline of CP, MIP and CP+MIP solvers [216 instances/30s].}
-  \label{experiments:solvers:oot}
 \end{figure}
 
 

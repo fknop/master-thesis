@@ -19,7 +19,7 @@ one variable $w \in \{0, \dots, n\}$.
 
 \subsection{Variables}
 
-First, we need to express the set of workers for each demand at each time period in which that demand occurs.
+First, we need to express the set of workers for each demand at each time period at which that demand occurs.
 
 \begin{equation}
 \begin{split}
@@ -35,7 +35,7 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
     l_i &\in L \label{cpzonevariable} 
 \end{align}
 
-(\ref{cpmachinevariable}) is the $j^{\text{th}}$ machine used for demand $i$ while (\ref{cpzonevariable}) is the location used for demand $i$
+(\ref{cpmachinevariable}) is the $j$th machine used for demand $i$ while (\ref{cpzonevariable}) is the location used for demand $i$
 
 
 
@@ -57,7 +57,7 @@ possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
 
 
-We also follow the same principle for the locations and machines. We reduce the domain at initialization instead of adding constraints.
+We also follow the same principle for the locations and machines by reducing the domain at initialization instead of adding constraints.
 For each required machine in a demand, we take all possible machines of this type in $M$.
 
 \begin{equation}
@@ -119,11 +119,13 @@ be the permutations of worker variables for demand $j$ at period $i$:
   \texttt{negative\_table}(x, y, I_{ww}),  \forall (x, y) \in P_{ij}
 \end{equation}
 
+In practice, we can slightly reduce the number of constraints by checking first if each pair of workers are indeed working for these positions.
+
 \subsubsection{Additional skills must be satisfied}
 
 A demand can have what we call \emph{additional skills}. Those skills can be 
-satisfied by any of the workers in the demand. Unlike required skills by different workers,
-we cannot pre-assign possible values to the domain of variables. Any number of worker in the demand can have an additional skill.
+satisfied by any workers in the demand. Unlike required skills by different workers,
+we cannot pre-assign possible values to the domains of variables. Any number of worker in the demand can have an additional skill.
 We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
 the sum will state that at least one worker needs to be assigned.
@@ -137,7 +139,7 @@ Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in
   & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j
 \end{align}
 
-This is a different syntax for \texttt{gcc} that we introduced before. This variant takes 
+This is a different syntax for \texttt{gcc} from what we we introduced before. This variant takes 
 variables and assigns the occurrences of values to them. In this case, the \texttt{gcc} will assign 
 occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint will ensure that 
 these occurrences sum to at least one.
@@ -169,8 +171,8 @@ we add a \texttt{not_equal} constraint with the two associated location variable
 
 \subsubsection{Minimizing violations of working requirements}
 
-A worker might have working requirements. He has to work a minimum (maximum) number of times, hence the total 
-occurrences of this worker must be above (below) or equal the requirement. As a solution cannot always be 
+Workers might have working requirements. They have to work for a minimum (maximum) number of times, hence the total 
+occurrences of these workers must be above (below) or equal the requirements. As a solution cannot always be 
 achieved with these requirements, we use a soft constraint and minimize the number of violations. In this case,
 we use the \texttt{softgcc} constraint introduced in \autoref{sota:gcc}. Let $X$ be the entire set of variables and 
 $v_r$ the total number of violations.
@@ -204,7 +206,7 @@ in that range, hence only $\sigma$ in our case.
 We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:fictitious}) as our working requirements and fictitious worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
 of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
-constraint called \texttt{at\_least\_nvalue} to count this number.
+constraint called \texttt{at\_least\_nvalue} \cite{nvalue} count this number.
 Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods of that demand:
 
 \begin{equation}
@@ -235,14 +237,17 @@ We define those penalties in (\ref{penalties:objective}).
 We define a heuristic that allows:
 \begin{enumerate*}[label=(\roman*)]
   \item the fictitious worker to never be selected if there is another value available in the domain of the variable;
-  \item the chosen worker for a variable is the most available for that demand but is also the less available for other demands.
+  \item the chosen worker for a variable is the most available for that demand but is also the least available for other demands.
 \end{enumerate*}
 
 \subsubsection{Variable Heuristic}
 
-The variable heuristic used for the search is a first-fail heuristic. In other words, the heuristic 
-will choose the variable will the smallest domain. This allows variable with only one value alongside the 
-fictitious value $\sigma$ to always be selected first.
+The variable heuristic used for the search is a custom max degree heuristic. 
+The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
+we add the number of required skills for a position to the degree. 
+We also make sure that if a variable is of size 2, it is always selected first to avoid having the fictitious value $\sigma$ assigned to it by 
+propagation.
+
 
 \subsubsection{Most Available Value Heuristic}
 
@@ -256,7 +261,8 @@ This heuristic consists of two value orderings.
 \end{enumerate}
 
 It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
-for the most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic.
+for the most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic 
+(see \autoref{section:experiments:heuristics}).
 
 Let us take an example to show how this heuristic works in practice, let us define 
 $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ that only need one worker each.
@@ -377,8 +383,8 @@ We wish to optimize sub-objectives $o_1$ and $o_2$ first to avoid partial soluti
 
 \begin{enumerate}
   \item First set $o_1$ to \emph{Strong-Filtering} while others are set to \emph{No-Filtering}.
-  \item Once optimized, set $o_2$ to \emph{Strong-Filtering}, $o_1$ to \emph{Weak-Filtering} and others to \emph{No-Filtering}.
-  \item Once $o_2$ is optimized, keep it in \emph{Weak-Filtering} for the rest of the search and switch $o_3$ to \emph{Strong-Filtering}.
+  \item Once optimized or if it met a threshold, set $o_2$ to \emph{Strong-Filtering}, $o_1$ to \emph{Weak-Filtering} and others to \emph{No-Filtering}.
+  \item Once $o_2$ is optimized or met a threshold, keep it in \emph{Weak-Filtering} for the rest of the search and switch $o_3$ to \emph{Strong-Filtering}.
 \end{enumerate}
 
 $o_4$ is also kept in \emph{Strong-Filtering} mode for the entire duration of the search to avoid having a weaker model than the original weighted sum.

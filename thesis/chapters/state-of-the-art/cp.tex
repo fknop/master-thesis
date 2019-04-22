@@ -43,7 +43,7 @@ Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (C
 \subsubsection{Alldifferent constraint}
 \label{sota:alldifferent}
 
-In our resource allocation problem (\ref{chapter:problem}), we need to assign different workers to demands during the same time period. 
+In our resource allocation problem (\autoref{chapter:problem}), we need to assign different workers to demands during the same time period. 
 This is usually done in Constraint Programming by using the \texttt{alldifferent} constraint.
 
 \paragraph{}
@@ -56,7 +56,7 @@ This constraint is defined over a subset of variables for which values must be d
   \texttt{alldifferent}(x_1, \dots, x_n) = \{ (d_1, \dots, d_n) \mid d_i \in D(x_i), d_i \neq d_j \forall i \neq j \}
 \end{equation*}
 
-This constraint can be decomposed into multiple binary inequalities. It makes \texttt{alldifferent} an operational global constraint.
+This constraint can be decomposed into multiple binary inequalities. This makes \texttt{alldifferent} an operational global constraint.
 It can be proven that the filtering of the global constraint cannot be achieved with a decomposition. As 
 an example, let us define three variables $x_1$, $x_2$ and $x_3$ respectively taking domains $\{1,2\}$, $\{1,2\}$, $\{1,2,3,4\}$. 
 The global constraint would be able to successfully filter $1$ and $2$ from the domain of 
@@ -67,7 +67,7 @@ $x_3$ because the values are always taken by $x_1$ and $x_2$. However, the decom
 \label{sota:gcc}
 
 As described in \autoref{chapter:problem}, our resource allocation problem needs to take into account working requirements, i.e. a minimum 
-and a maximum number of times that a worker can work. For this, we need to count the occurrences that a worker is assigned to a position and 
+and a maximum number of times that a worker can work. For this, we need to count the occurrences of a worker being assigned to a position and 
 limit those occurrences to a minimum and maximum. 
 
 \paragraph{}
@@ -127,7 +127,7 @@ single objective.
   \text{s.t.} \quad & constraints
 \end{align*}
 
-Our resource allocation problem (\ref{chapter:problem}) uses such an objective. One issue with this objective modeling is how 
+Our resource allocation problem (\autoref{chapter:problem}) uses such an objective. One issue with this objective modeling is how 
 to prioritize sub-objectives (e.g. is it more important to minimize contiguous workers or requirements). This is 
 usually solved by assigning more weight to more important objectives. However, the pruning of such method alone is inefficient.
 
@@ -136,10 +136,10 @@ usually solved by assigning more weight to more important objectives. However, t
 Variable Objective Large Neighborhood Search (VO-LNS) \cite{Schaus:VOLNS} is an extension of LNS for multi-objective 
 problems which offers
 \begin{enumerate*}[label=(\roman*)]
-  \item Prioritization of sub-objectives;
-  \item Better pruning.
+  \item prioritization of sub-objectives;
+  \item better pruning.
 \end{enumerate*}
-VO-LNS consists of three types of filtering for each objective
+Each objective in the VO-LNS framework has three types of filtering available:
 \begin{enumerate}
   \item \emph{No-Filtering}: The objective has no impact.
   \item \emph{Weak-Filtering}: When a solution is found, it has to be better or equal to the bound of the objective. 
@@ -153,14 +153,14 @@ The VO-LNS formulation is expressed as follows:
   \text{s.t.} \quad & constraints 
 \end{align*}
 
-$obj_1, \dots, obj_n$ are the sub-objectives while $obj_{n+1}$ is the sum of all sub-objectives. We keep $obj_{n+1}$ in 
+$obj_1, \dots, obj_n$ are the sub-objectives while $obj_{n+1}$ is the original weighted sum. We keep $obj_{n+1}$ in 
 \emph{Strong-Filtering} during the search such that the formulation is at least as strong as a sum of sub-objectives.
 We can change the filtering dynamically during the search before each restart depending on the problem and prioritization of sub-objectives.
 
 \subsection{Heuristics}
 
 The backtracking algorithm uses two heuristics for its search. One heuristic chooses the variable while the other chooses 
-the value for the previously selected variable. Good heuristics can drive the search quickly to a good result. 
+the value for the previously selected variable. Good heuristics can drive the search quickly to good solutions. 
 We will present in \autoref{section:mipmodel} a value heuristic created for the needs of our staff scheduling problem.
 
 

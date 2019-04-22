@@ -22,10 +22,10 @@ The most common MIP problems are of the form:
    & \text{Some or all $x_i$ must take integer values} \label{mipinteger}
 \end{align}
 
-(\ref{mipobj}) is the problem objective. $\bm{c}^T$ is the vector of coefficient, $\bm{x}$ is the vector of variables.
+(\ref{mipobj}) is the problem objective. $\bm{c}^T$ is the vector of coefficients, $\bm{x}$ is the vector of variables.
 (\ref{miplinearcst}) are the linear constraints. $\bm{b}$ is a vector of bounds while $A$ is a matrix of coefficients for the constraints.
 (\ref{mipboundcst}) are the bound constraints. Each $x_i$ can only take values between $l_i$ and $u_i$.
-And finally, (\ref{mipinteger}) states the integrality constraints over some or all variables.
+Finally, (\ref{mipinteger}) states the integrality constraints over some or all variables.
 
 
 MIP problems are usually solved using a branch-and-bound algorithm \cite{mip-basics}.
@@ -35,9 +35,9 @@ easily compared to the original problem. The result might satisfy all integralit
 But more often than not, a variable has a fractional value.
 We can then solve two relaxations by imposing two additional constraints. For example, if $x$ takes value 5.5, we add the 
 following linear constraints: $x \leq 5.0$ and $x \geq 6.0$. 
-This process is repeated throughout the search tree (\autoref{mip-tree}) a valid solution is found.
-More techniques are used to find solutions more efficiently. Each solver uses its
-own algorithm (e.g Gurobi Optimizer \cite{mip-basics}).
+This process is repeated throughout the search tree (\autoref{mip-tree}) until a valid solution is found.
+More techniques are used to find solutions more efficiently. Each solver (e.g Gurobi Optimizer \cite{mip-basics}) uses its
+own algorithm.
 
 \begin{figure}
   \centering

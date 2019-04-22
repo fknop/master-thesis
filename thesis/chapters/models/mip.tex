@@ -48,7 +48,7 @@ To represent our problem in MIP, we will need three types of variables, one per 
 
 This is, in fact, a binary Integer Programming model as every variable is a $\{0, 1\}$ integer.
 
-As solution can be partial, we need to introduce a way to allow the absence of worker for a 
+As solutions can be partial, we need to introduce a way to allow the absence of worker for a 
 given position. In MIP, we model this by having the variables $f_{jkl}$, $f$ for \emph{fictitious}. This variable is one, if and only if all the 
 corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal will be to minimize 
 the number of fictitious variables assigned to one.
@@ -114,7 +114,7 @@ However, to simplify, we suppose that demands only need one worker, thus ignorin
 \subsubsection{All workers assigned in a time period must be different}
 
 One worker can only work one time per time period. For each worker, we add the sum of all its variables 
-over each time period. This sum must be less or equal than one to make sure it works at most once in the period.
+over each time period. This sum must be less or equal than one to make sure a worker works at most once in the period.
 
 \begin{align}
   \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T & \label{wc2} 
@@ -123,7 +123,7 @@ over each time period. This sum must be less or equal than one to make sure it w
 
 \subsubsection{Exclude impossible values}
 
-Some workers (demands) are not available (occurring) at one time period. We need to set the variables to 0 if this is the case.
+Some resources (workers, locations, demands) cannot be assigned in some time periods. We need to set the variables to 0 if this is the case.
 
 \begin{align}
   t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D &\label{wc3} \\
@@ -137,7 +137,7 @@ Some workers (demands) are not available (occurring) at one time period. We need
 \subsubsection{Incompatibilities between workers and clients}
 
 For each incompatibility $(i, c) \in I_{wc}$, we set every worker variables of worker $i$ if the client of the 
-demand is $c$.
+demand is $c$ to zero.
 
 \begin{align}
   d^c_{k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D &\label{wc6}
@@ -195,7 +195,7 @@ We define that the sum over all the positions of the two incompatible workers mu
 \subsubsection{Restrict skilled positions to skilled workers}
 
 These constraints ensure that no worker is working for a position at which he is not qualified to work.
-$W_{d^{s_l}_k}$ define the workers that satisfy skill(s) $s_l$ of demand $k$. 
+$W_{d^{s_l}_k}$ defines the workers that satisfy skill(s) $s_l$ of demand $k$. 
 
 \begin{align}
   w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k, i \in W \setminus W_{d^{s_l}_k}  \label{wc6}

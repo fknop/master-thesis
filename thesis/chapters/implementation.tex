@@ -22,7 +22,7 @@ that can be passed to it.
 For consistency, both solvers take the same input format and return the same output format.
 We created a JSON (JavaScript Object Notation) Schema \cite{json:schema} to formulate our problems and solution assignments.
 Those schemas allow us to create a typed data structure for JSON objects. All the typing validation 
-is handled by the JSON Schema library. A small example of JSON schema can be found in \autoref{json:example}. 
+is handled by the JSON Schema library \cite{playjson:validator}. A small example of JSON schema can be found in \autoref{json:example}. 
 This example defines a client structure which takes a required string property called \textit{name}.
 
 
@@ -38,7 +38,7 @@ This example defines a client structure which takes a required string property c
   }
 \end{lstlisting}
 
-The data is parsed into an immutable data structure in Scala which looks like this:
+The data is then parsed into an immutable data structure in Scala which looks like this:
 
 \begin{lstlisting}[style=scalaStyle,caption={Problem structure in Scala},captionpos=b]
 case class Problem(
@@ -60,9 +60,13 @@ case class Problem(
 
 Both solvers implement a \texttt{solve} function which takes the same set of parameters.
 This function can take generic options implemented by the subclasses (i.e. specific MIP or CP options).
+The solve function returns a data structure containing a solution and the time spent in the solver and an optional solution.
 
 \begin{lstlisting}[style=scalaStyle,caption={Solver API},captionpos=b]
+case class SearchResult(solution: Option[Solution], time: Long)
+
 trait SearchOptions
+
 
 trait Search[T <: SearchOptions] {
   def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[T] = None): SearchResult
@@ -75,14 +79,14 @@ We used the Java API \cite{gurobi:java} of the Gurobi Optimizer in Scala to crea
 The implementation did not change from the theoretical model presented in \autoref{section:mipmodel} as 
 MIP solvers are less flexible in their modeling abilities than CP solvers as we discuss later. The Gurobi solver 
 comes with default parameters \cite{gurobi:parameters}, it is advised to keep default parameters as 
-changing them do not give much gain. Multiple different parameters were tested but as advised from the Gurobi website, 
+changing them does not give much gain. Multiple different parameters were tested but as advised from the Gurobi website, 
 no change was noticed.
 
 \section{Constraint Programming solver}
 
 The Constraint Programming implementation differs in some parts from the theoretical model 
 presented in \autoref{section:cpmodel}. In Constraint Programming, the constraint propagation 
-takes the most time in the solving algorithm. Propagations might be unnecessary too strong for a model.
+takes the most time in the solving algorithm. Propagations might be unnecessarily too strong for a model.
 This is what happened with our model and the use of \texttt{softgcc} constraints. 
 
 The minimization of fictitious workers described in (\ref{cp:fictitious}) used a \texttt{softgcc} in the model.
