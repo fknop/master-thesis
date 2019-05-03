@@ -1,0 +1,80 @@
+% !TEX root = ../thesis.tex
+
+\documentclass[../thesis.tex]{subfiles}
+ 
+\begin{document}
+
+In this thesis, we presented a scheduling problem for production planning 
+with resource allocation (\autoref{chapter:problem}).
+
+We introduced two models that try to solve
+this problem (\autoref{chapter:models}): a Mixed Integer Programming and a Constraint Programming model.
+The Constraint Programming model required the most work with custom heuristics that take into account knowledge of the problem.
+
+The models were implemented in Scala using OscaR and Gurobi for the Constraint Programming and Mixed Integer Programming models respectively (\autoref{chapter:implementation}).
+
+We tested our models on generated test instances of different sizes (\autoref{chapter:experiments}).
+We also showed and discussed the results of these tests. We saw from these results that our Constraint Programming model greatly outperforms
+its Mixed Integer Programming counterpart.
+However, the Mixed Integer Programming model performs better in most cases when given an initial solution 
+to work with.
+
+
+Mixed Integer Programming is a great technique to solve combinatorial problems. However, most of our 
+instances have too many variables for Mixed Integer Programming to handle.
+In the other hand,
+our Constraint Programming model has more knowledge of the problem during the search. 
+It allowed us to implement custom heuristics (presented in \autoref{section:cpmodel}). Hence, it manages to find 
+better solutions a lot quicker. Constraint Programming also have better pruning of the search tree overall compared to Mixed Integer Programming.
+
+
+From the work presented in this thesis, we can conclude that Mixed Integer Programming and Constraint Programming both have their advantages and disadvantages.
+
+\paragraph{}
+
+The MIP model has the following advantages:
+\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+  \item Most of the search algorithms are already implemented in the solver (e.g. Gurobi).
+  There is no need for time consuming additional implementation (e.g. custom heuristics in CP).
+\end{enumerate}
+
+
+The MIP model has the following disadvantages:
+\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+  \item Implementing complex constraints complicates the model making it harder to understand.
+  \item Too many variables makes it hard for a solver to find good solutions quickly.
+\end{enumerate}
+
+
+The CP model has the following advantages:
+\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+  \item Better expressiveness for its modeling.
+  \item We can take advantage of local search to explore more of the search space.
+\end{enumerate}
+
+
+The CP model has the following disadvantages:
+\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+  \item Finding optimal solutions is hard (in part due to LNS) but CP is more efficient at 
+        finding good feasible solutions.
+\end{enumerate}
+
+
+
+Finally, we conclude this thesis by discussing some improvements that could be made to our models and solvers.
+
+\section{Improvements}
+
+\paragraph{Contiguous Shifts for the CP model}: Our implementation of the contiguous shifts constraint only take into account 
+the number of different workers working for a position throughout the demand planning period.
+We tested the implementation with real contiguous shifts with a decomposition of equality constraints. However, the results 
+were disappointing as the decomposition slowed the search. While our implementation gives really good results for contiguous shifts,
+we could replace our constraint by another soft global constraint that would be more efficient than 
+a decomposition of equality constraints.
+
+\paragraph{Generic resource allocation}: While our vehicle and machine resources could be replaced with 
+any resources with a one to one and one to many relationship respectively, our implementation only allows to describe
+machines by name. Our model preprocessing could be more complete to allow any properties on a resource.
+
+\end{document}
+
