@@ -22,46 +22,36 @@ to work with.
 
 Mixed Integer Programming is a great technique to solve combinatorial problems. However, most of our 
 instances have too many variables for Mixed Integer Programming to handle.
-In the other hand,
-our Constraint Programming model has more knowledge of the problem during the search. 
-It allowed us to implement custom heuristics (presented in \autoref{section:cpmodel}). Hence, it manages to find 
-better solutions a lot quicker. Constraint Programming also have better pruning of the search tree overall compared to Mixed Integer Programming.
+On the other hand,
+our Constraint Programming model contains more knowledge of the problem during the search. 
+It allows us to implement custom heuristics (presented in \autoref{section:cpmodel}). Hence, it manages to find 
+better solutions a lot quicker. Constraint Programming also has better pruning of the search tree overall compared to Mixed Integer Programming.
 
 
 From the work presented in this thesis, we can conclude that Mixed Integer Programming and Constraint Programming both have their advantages and disadvantages.
 
 \paragraph{}
 
-The MIP model has the following advantages:
-\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+The MIP model has the following advantages / disadvantages:
+\begin{enumerate}[leftmargin=1.5cm]
   \item Most of the search algorithms are already implemented in the solver (e.g. Gurobi).
   There is no need for time consuming additional implementation (e.g. custom heuristics in CP).
-\end{enumerate}
-
-
-The MIP model has the following disadvantages:
-\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+  \item However, the lack of knowledge about the problem makes it harder for MIP to find solutions on bigger instances.
   \item Implementing complex constraints complicates the model making it harder to understand.
-  \item Too many variables makes it hard for a solver to find good solutions quickly.
 \end{enumerate}
 
 
-The CP model has the following advantages:
-\begin{enumerate}[leftmargin=1.5cm,noitemsep]
+The CP model has the following advantages / disadvantages:
+\begin{enumerate}[leftmargin=1.5cm]
   \item Better expressiveness for its modeling.
   \item We can take advantage of local search to explore more of the search space.
-\end{enumerate}
-
-
-The CP model has the following disadvantages:
-\begin{enumerate}[leftmargin=1.5cm,noitemsep]
-  \item Finding optimal solutions is hard (in part due to LNS) but CP is more efficient at 
-        finding good feasible solutions.
+  \item However, due to LNS, finding optimal solutions is hard because of restarts. But CP is more efficient at 
+  finding good feasible solutions in a short amount of time.
 \end{enumerate}
 
 
 
-Finally, we conclude this thesis by discussing some improvements that could be made to our models and solvers.
+Finally, we discuss some improvements that could be made to our models and solvers.
 
 \section{Improvements}
 
@@ -76,5 +66,9 @@ a decomposition of equality constraints.
 any resources with a one to one and one to many relationship respectively, our implementation only allows to describe
 machines by name. Our model preprocessing could be more complete to allow any properties on a resource.
 
+\paragraph{Self-Adaptive LNS}: Our solver only uses one relaxation method during the search. 
+Even though it already performs well, we could make 
+use of the self-adaptive large neighborhood search \cite{thomas:adaptive} to dynamically 
+and automatically change the relaxation method to the best available during the search.
 \end{document}
 
