@@ -375,6 +375,8 @@ one second, using COS or MS would be preferable.
   \label{experiments:v-heuristics-timeline}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Comparison between searches}
 
 \subsubsection{Large neighborhood search}
@@ -388,8 +390,6 @@ relaxation methods.
 \autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
 between a standard search and LNS. As expected, we can see that LNS outperforms the standard search 
 in almost every instance. 
-\autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
-while the LNS manages to find better solutions quickly after relaxing the initial solution.
 
 \begin{figure}
   \centering
@@ -399,6 +399,10 @@ while the LNS manages to find better solutions quickly after relaxing the initia
 \end{figure}
 
 
+\autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
+while the LNS manages to find better solutions quickly after relaxing the initial solution.
+
+
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/lns-oot.png}
@@ -406,6 +410,8 @@ while the LNS manages to find better solutions quickly after relaxing the initia
   \label{experiments:lns-oot}
 \end{figure}
 
+
+\FloatBarrier
 
 The trouble of the standard search to find good solutions is also due to the lack of VO-LNS (\autoref{cp:volns}) as 
 this method is an extension of the LNS framework. The standard search can only minimize the weighted sum of sub-objectives
