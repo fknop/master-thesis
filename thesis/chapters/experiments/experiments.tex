@@ -27,8 +27,8 @@ be computed with the following formula:
   no_i(t) = \frac{objective_i(t) - best_i}{objective_i(0) - best_i}
 \end{equation*}
 
-A value of $1$ will always be the initial solution for each solver, even though they might not be equal. A value of 
-$0$ is the best solution found at the end of the search. 
+A value of $1$ is always the initial solution for each solver, even though each solver might have a different initial solution. 
+A value of $0$ is the best solution found at the end of the search. 
 
 For each time $t$, we take the average of all normalized objectives over all instances:
 
@@ -351,7 +351,7 @@ Conflict Ordering Search is a variable ordering heuristic that
 reorders variables based on the number of conflicts that happen during the search.
 It is a variant to the Last Conflict heuristic which selects the variable which caused the last conflict first.
 COS was shown to be the most performant on scheduling problems. 
-We will now see how it performs in our problem in comparison with the aforementioned heuristics.
+We now see how it performs in our problem in comparison with the aforementioned heuristics.
 
 \autoref{experiments:v-heuristics-profile} shows the performance profiles of the objective after 30s for each solver.
 We can see that the conflict ordering search and min size heuristics are underperforming in comparison to the max degree heuristic.

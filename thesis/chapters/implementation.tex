@@ -6,7 +6,7 @@
 
 In this chapter, we describe our implementation for the models presented in \autoref{chapter:models}. 
 We talk about the difficulties encountered while trying to transform the theoretical model to code. 
-We will also discuss some differences between the models and the implementation and some trade-offs that were taken in order to 
+We also discuss some differences between the models and the implementation and some trade-offs that were taken in order to 
 have the most performant solver.
 
 The implementation was done in Scala using 
@@ -210,7 +210,7 @@ The generator tries as much as possible to create meaningful instances but it is
 A benchmark API is created on top of the instances generation API. The API takes an options structure (\autoref{benchmark:options}).
 The arrays \texttt{T}, \texttt{D} and \texttt{W} determine the sizes of the instances. The benchmark runner 
 will create instances with a combination of those parameters. For example, with the values in \autoref{benchmark:options},
-the benchmark runner will create 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
+the benchmark runner creates 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
 three values being $(T, D, W)$.
 
 \begin{lstlisting}[style=scalaStyle,label={benchmark:options},caption={Benchmark options},captionpos=b]

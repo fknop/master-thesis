@@ -41,8 +41,8 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
 
 As explained in the problem description and in the mathematical model section,
 we need to allow partial solutions where we have a fictitious worker that can work at any time.
-We will add this value to every worker variable domain but ignore it during the constraint propagation. We define 
-this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we will define $\sigma = -1$.
+We add this value to every worker variable domain but ignore it during the constraint propagation. We define 
+this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we define $\sigma = -1$.
 
 
 The variables modeling already satisfies some constraints, like the number of required resources (i.e. worker, location, machine)
@@ -65,7 +65,7 @@ For each required machine in a demand, we take all possible machines of this typ
   m_{ij} \in \{ m \mid m \in M, m = d_i^{M_j}  \}, \forall i \in D, j \in |d_i^M|
 \end{equation}
 
-For each location of a demand, the domain will be the possible locations of that demand.
+For each location of a demand, the domain is the possible locations of that demand.
 
 \begin{equation}
   \label{ldomain}
@@ -80,16 +80,16 @@ For each location of a demand, the domain will be the possible locations of that
 All the worker variables for a given time period must be different. 
 The \texttt{alldifferent} (\autoref{sota:alldifferent}) constraint is well suited to express this. 
 However, as our model has the fictitious worker $\sigma$ in the domain of all worker variables and this value 
-can appear as many times as possible, we will need a slight variant of the \texttt{alldifferent} called \texttt{alldifferent\_except}. 
-This constraint is the same as the original except that we can specify values that will be ignored from 
-the constraint.
+can appear as many times as possible, we need a slight variant of the \texttt{alldifferent} called \texttt{alldifferent\_except}. 
+This constraint has the same behavior as the original except that we can specify values that are ignored from 
+the constraint propagation.
 
 \begin{align*}
    \texttt{alldifferent\_except} (X, v) = \{& (d_1, \dots, d_n) \mid d_i \in D(x_i), \\ 
    & d_i \notin v \ \land \ d_j \ \notin v \implies d_i \neq d_j \ \forall i \neq j \}
 \end{align*}
 
-We will use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of all worker variables for period $i$. For each period, we define:
+We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of all worker variables for period $i$. For each period, we define:
 
 \begin{equation}
   \texttt{alldifferent\_except}(X_i, \{ \sigma \}), \forall i \in T
@@ -108,11 +108,11 @@ a series of \texttt{not\_equal} constraints for each incompatible worker-client 
 \subsubsection{Incompatibilities between workers}
 
 A worker might have an incompatibility with a worker or a set of workers. 
-We cannot solve this constraint with a series of \texttt{not\_equal} like the worker-client incompatibilities. We will use a constraint 
+We cannot solve this constraint with a series of \texttt{not\_equal} like the worker-client incompatibilities. We instead use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
 The forbidden combinations of values are expressed by the table $I_{ww}$. 
-We will add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
+We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
 \begin{equation}
@@ -126,9 +126,9 @@ In practice, we can slightly reduce the number of constraints by checking first 
 A demand can have what we call \emph{additional skills}. Those skills can be 
 satisfied by any workers in the demand. Unlike required skills by different workers,
 we cannot pre-assign possible values to the domains of variables. Any number of worker in the demand can have an additional skill.
-We will use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
-The \texttt{gcc} will act as a counter of occurrences for the workers that satisfy the skills,
-the sum will state that at least one worker needs to be assigned.
+We use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
+The \texttt{gcc} acts as a counter of occurrences for the workers that satisfy the skills,
+the sum states that at least one worker needs to be assigned.
 
 Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
 
@@ -140,8 +140,8 @@ Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in
 \end{align}
 
 This is a different syntax for \texttt{gcc} from what we we introduced before. This variant takes 
-variables and assigns the occurrences of values to them. In this case, the \texttt{gcc} will assign 
-occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint will ensure that 
+variables and assigns the occurrences of values to them. In this case, the \texttt{gcc} assigns 
+occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint ensures that 
 these occurrences sum to at least one.
 
 
@@ -181,14 +181,14 @@ $v_r$ the total number of violations.
   \texttt{softgcc}(X, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) \label{cp:wrequirements} 
 \end{equation}
 
-Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ will be 0 and $r_{max}$ will be $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
+Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ is 0 and $r_{max}$ is $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
 
 
 \subsubsection{Minimizing the number of fictitious workers}
 
 A solution might not always be possible, leading to a partial solution containing fictitious workers.
 We defined this fictitious worker by the value $\sigma$. This is again a case of soft constraint where 
-we will use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations.
+we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations.
 
 
 \begin{equation}
@@ -215,7 +215,7 @@ Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables fo
 
 We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations.
 
-The final objective will be a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
+The final objective is a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
 in values, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
 We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
 We define those penalties in (\ref{penalties:objective}).
@@ -257,7 +257,7 @@ This heuristic consists of two value orderings.
   \item The first ordering orders the workers from most available to least available throughout the duration of the demand.
         This allows the search to select workers that are more likely to work for that demand throughout all periods.
   \item If workers have the same availabilities for a demand, they are ordered with respect to their remaining availabilities in other demands. This 
-        second ordering is important for smaller demands, the search will choose workers that are less likely to be needed in other demands.
+        second ordering is important for smaller demands, the search chooses workers that are less likely to be needed in other demands.
 \end{enumerate}
 
 It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
@@ -269,16 +269,16 @@ $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ t
 The availabilities are defined as
 $w_1^T = \{ 0, 1, 2 \}$, $w_2^T = \{ 0, 2 \}$, $w_3^T = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
 $d_1^T = \{ 0, 1, 2 \}$, $d_2^T = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can see that worker 
-$w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand will be as follows:
+$w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand is as follows:
 
 \begin{align*}
   \texttt{mostavailable}(d_1) &= [w_1 = (3, 0), w_3 = (3, 2), w_2 = (2, 0)] \\ 
   \texttt{mostavailable}(d_2) &= [w_3 = (5, 0), w_3 = (3, 0), w_2 = (2, 0)] \\ 
 \end{align*}
 
-First, we can see that $w_2$ will never be considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
+First, we can see that $w_2$ is never considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
 $w_3$ has two remaining availabilities. This heuristic guesses that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
-The search will always consider $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
+The search always considers $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
 
 \subsubsection{Dynamic Value Heuristic}
 
@@ -320,7 +320,7 @@ Let $x_i \in X$ be a variable symmetric to $y_i \in Y$ where $x_i$ and $y_i$ are
 \end{equation}
 
 As a simple example, let us define $x_1 = x_2 = \{ 1, 2, 3 \}$ with $x_1 < x_2$ for symmetry breaking. If 
-$x_1$ is assigned the value $2$, we will ignore the permutation $x_1 = 2, x_2 = 1$ because it is symmetric to $x_1 = 1, x_2 = 2$. $x_2$ will be instead directly assigned to the value $3$ and thus reducing the search space.
+$x_1$ is assigned the value $2$, we ignore the permutation $x_1 = 2, x_2 = 1$ because it is symmetric to $x_1 = 1, x_2 = 2$. $x_2$ is instead directly assigned to the value $3$ and thus reducing the search space.
 \autoref{tree:symmetry} shows the search trees with and without symmetry breaking. We can see that the search tree with the \texttt{lexleq} constraint is reduced.
 
 \forestset{qtree/.style={for tree={draw, parent anchor=south, 

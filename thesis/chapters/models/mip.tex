@@ -13,7 +13,7 @@ needed to model our problem and the constraints associated to them.
 
 \subsection{Variables}
 
-To represent our problem in MIP, we will need three types of variables, one per resource.
+To represent our problem in MIP, we need three types of variables, one per resource.
 
 
 
@@ -50,7 +50,7 @@ This is, in fact, a binary Integer Programming model as every variable is a $\{0
 
 As solutions can be partial, we need to introduce a way to allow the absence of worker for a 
 given position. In MIP, we model this by having the variables $f_{jkl}$, $f$ for \emph{fictitious}. This variable is one, if and only if all the 
-corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal will be to minimize 
+corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal is to minimize 
 the number of fictitious variables assigned to one.
 
 \subsection{Constraints}
@@ -339,7 +339,7 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
 The objective function is stated in (\ref{obj}), it is a weighted sum split into multiple parts, it minimizes:
 
 \begin{enumerate}
-  \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all worker will be equal to the number of worker for that shift.
+  \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all workers is equal to the number of workers for that shift.
   \item The number of violations of working requirements (\ref{obj:3}).
   \item The number of \emph{fictitious} workers assigned to demands (\ref{obj:2}).
 \end{enumerate}
