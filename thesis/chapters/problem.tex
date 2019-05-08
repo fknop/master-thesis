@@ -76,6 +76,14 @@ Each resource (i.e. worker, machine, location) can only be assigned once per tim
 % The possible objective is to assign workers in such a way that they work for the longest time possible at the same position.
 
 \section{Constraints}
+
+For these constraints, we define three types of assignments:
+
+\begin{itemize}
+  \item A working assignment with a worker assigned to a position at a given time period.
+  We represent this with the tuple $(t, d, k, w)$: the worker $w$ is assigned to position $k$ of demand $d$ at time $t$.
+\end{itemize}
+
 \subsection{Hard constraints}
 
 \subsubsection{A worker can only work when available}
@@ -83,21 +91,31 @@ Each resource (i.e. worker, machine, location) can only be assigned once per tim
 Each worker has a defined set of availabilities and cannot be assigned to a demand when 
 unavailable.
 
+For each worker assignment $(t, d, k, w)$, $t \in w^T$.
+
 \subsubsection{No worker should be assigned to a demand which is not occurring}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
-occurring.
+occurring. 
+
+For each worker assignment $(t, d, k, w)$, $t \in d^T$.
 
 \subsubsection{No worker can be assigned twice for the same period} 
+
 A worker cannot do the work of two different workers at the same time.
 Hence, a worker can only work at most once per time period.
+
+For every two worker assignments $(t_1, d_1, k_1, w_1)$ and $(t_2, d_2, k_2, w_2)$, if $t_1 = t_2$ then $w_1 \neq w_2$.
 
 \subsubsection{Each demand has a required number of workers}
 
 Each demand needs a number of workers to be satisfied. 
 For each time period in which a demand is occurring, it should have the required 
 number of workers assigned to it.
+
+For each demand $d$, there exists $d^w$ worker assignments for demand $d$. 
+For every two assignments for $d$, $(t_1, d, k_1, w_1)$ and $(t_2, d, k_2, w_2)$: if $t_1 = t_2$ then $k_1 \neq k_2$.
 
 \subsubsection{Each assignment must respect skill restrictions}
 
@@ -110,10 +128,16 @@ A worker can also have more skills than the required skills by the position.
 Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
 
+For each incompatibility $(w_1, w_2) \in I_{ww}$ and for each worker assignments for time $t$ and demand $d$,
+there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
+
 \subsubsection{Worker-client incompatibilities}
 
 A worker and a client might be incompatible with each other. 
 If this is the case, the worker must not be assigned at a demand for such client.
+
+For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, k, w)$ where 
+$d^c = c$.
 
 \subsubsection{The required machines must always be assigned}
 
