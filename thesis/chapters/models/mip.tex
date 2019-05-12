@@ -49,16 +49,16 @@ To represent our problem in MIP, we need three types of variables, one per resou
 This is, in fact, a binary Integer Programming model as every variable is a $\{0, 1\}$ integer.
 
 As solutions can be partial, we need to introduce a way to allow the absence of worker for a 
-given position. In MIP, we model this by having the variables $f_{jkl}$, $f$ for \emph{fictitious}. This variable is one, if and only if all the 
+given position. In MIP, we model this by having the variables $f_{jkl}$, $f$ for \emph{dummy}. This variable is one, if and only if all the 
 corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal is to minimize 
-the number of fictitious variables assigned to one.
+the number of dummy variables assigned to one.
 
 \subsection{Constraints}
 
 \subsubsection{All positions must be assigned with one worker}
 
   All positions must have one worker assigned to it. We achieve this by summing all the worker variables 
-  for each position. We also add the fictitious variable associated to this position to allow partial 
+  for each position. We also add the dummy variable associated to this position to allow partial 
   solutions.
 
   \begin{align}
@@ -330,7 +330,7 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
       + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj:3} \\ 
       + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} f_{jkl} \label{obj:2} \\ 
      \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
-                         & \bm{\delta} = (\delta_0, \delta_1, \delta_2) = (1, 15, 100) \nonumber
+                         & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \label{penalties:mip} \nonumber
   \end{align}
 \end{subequations}
 \endgroup
@@ -341,7 +341,7 @@ The objective function is stated in (\ref{obj}), it is a weighted sum split into
 \begin{enumerate}
   \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of that value for all workers is equal to the number of workers for that shift.
   \item The number of violations of working requirements (\ref{obj:3}).
-  \item The number of \emph{fictitious} workers assigned to demands (\ref{obj:2}).
+  \item The number of \emph{dummy} workers assigned to demands (\ref{obj:2}).
 \end{enumerate}
 
 $occ_i$ represents the occurrences of worker $i$ while the penalties $\bm{\delta}$ are representative of the importance of each sub-objectives.

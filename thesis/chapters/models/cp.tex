@@ -40,7 +40,7 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
 
 
 As explained in the problem description and in the mathematical model section,
-we need to allow partial solutions where we have a fictitious worker that can work at any time.
+we need to allow partial solutions where we have a dummy worker that can work at any time.
 We add this value to every worker variable domain but ignore it during the constraint propagation. We define 
 this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we define $\sigma = -1$.
 
@@ -79,7 +79,7 @@ For each location of a demand, the domain is the possible locations of that dema
 
 All the worker variables for a given time period must be different. 
 The \texttt{alldifferent} (\autoref{sota:alldifferent}) constraint is well suited to express this. 
-However, as our model has the fictitious worker $\sigma$ in the domain of all worker variables and this value 
+However, as our model has the dummy worker $\sigma$ in the domain of all worker variables and this value 
 can appear as many times as possible, we need a slight variant of the \texttt{alldifferent} called \texttt{alldifferent\_except}. 
 This constraint has the same behavior as the original except that we can specify values that are ignored from 
 the constraint propagation.
@@ -184,15 +184,15 @@ $v_r$ the total number of violations.
 Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ is 0 and $r_{max}$ is $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
 
 
-\subsubsection{Minimizing the number of fictitious workers}
+\subsubsection{Minimizing the number of dummy workers}
 
-A solution might not always be possible, leading to a partial solution containing fictitious workers.
-We defined this fictitious worker by the value $\sigma$. This is again a case of soft constraint where 
+A solution might not always be possible, leading to a partial solution containing dummy workers.
+We defined this dummy worker by the value $\sigma$. This is again a case of soft constraint where 
 we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations.
 
 
 \begin{equation}
-  \texttt{softgcc}(X, \sigma \rightarrow \sigma, [0], [0], v_{\sigma}) \label{cp:fictitious}
+  \texttt{softgcc}(X, \sigma \rightarrow \sigma, [0], [0], v_{\sigma}) \label{cp:dummy}
 \end{equation}
 
 This syntax is a little bit different than what was introduced before. We specify $\sigma \rightarrow \sigma$ to check only the occurrences of values 
@@ -203,7 +203,7 @@ in that range, hence only $\sigma$ in our case.
 
 \subsubsection{Objective Function}
 
-We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:fictitious}) as our working requirements and fictitious worker violations respectively.
+We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:dummy}) as our working requirements and dummy worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
 of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
 constraint called \texttt{at\_least\_nvalue} \cite{nvalue} count this number.
@@ -218,15 +218,14 @@ We now have the number of different workers for each shift and we need to minimi
 The final objective is a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
 in values, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
 We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
-We define those penalties in (\ref{penalties:objective}).
 
 \begin{equation}
   \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
 \end{equation}
 
 \begin{equation}
-  \label{penalties:objective}
-  \bm{\delta} = (\delta_0, \delta_1, \delta_2) = (1, 15, 100)
+  \label{penalties:cp}
+  \bm{\delta} = (\delta_0, \delta_1, \delta_2)
 \end{equation}
 
 
@@ -234,18 +233,15 @@ We define those penalties in (\ref{penalties:objective}).
 
 \subsection{Search}
 
-We define a heuristic that allows:
-\begin{enumerate*}[label=(\roman*)]
-  \item the fictitious worker to never be selected if there is another value available in the domain of the variable;
-  \item the chosen worker for a variable is the most available for that demand but is also the least available for other demands.
-\end{enumerate*}
+We now define the variable and value heuristics used in our model. The variable heuristic is a variant of the 
+max degree heuristic while the value heuristic is a custom heuristic that selects the most available worker for a position.
 
 \subsubsection{Variable Heuristic}
 
 The variable heuristic used for the search is a custom max degree heuristic. 
 The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
 we add the number of required skills for a position to the degree. 
-We also make sure that if a variable is of size 2, it is always selected first to avoid having the fictitious value $\sigma$ assigned to it by 
+We also make sure that if a variable is of size 2, it is always selected first to avoid having the dummy value $\sigma$ assigned to it by 
 propagation.
 
 
@@ -260,7 +256,7 @@ This heuristic consists of two value orderings.
         second ordering is important for smaller demands, the search chooses workers that are less likely to be needed in other demands.
 \end{enumerate}
 
-It also never considers the fictitious worker $\sigma$ for the worker value as it is not even considered 
+It also never considers the dummy worker $\sigma$ for the worker value as it is not even considered 
 for the most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic 
 (see \autoref{section:experiments:heuristics}).
 

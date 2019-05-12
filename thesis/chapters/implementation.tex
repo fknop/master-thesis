@@ -89,7 +89,7 @@ presented in \autoref{section:cpmodel}. In Constraint Programming, the constrain
 takes the most time in the solving algorithm. Propagations might be unnecessarily too strong for a model.
 This is what happened with our model and the use of \texttt{softgcc} constraints. 
 
-The minimization of fictitious workers described in (\ref{cp:fictitious}) used a \texttt{softgcc} in the model.
+The minimization of dummy workers described in (\ref{cp:dummy}) used a \texttt{softgcc} in the model.
 However, this constraint is slow to propagate in practice due to the high number of variables.
 Using a CPU profiler, we noticed the \texttt{softgcc} constraint took up to 20\% of the solver runtime. 
 OscaR proposes a variant of the \texttt{gcc} constraint which simply counts the number of occurrences of values.
@@ -103,7 +103,7 @@ This definition offers a weaker propagation for the variables but is enough for 
 This definition is used as follows:
 
 
-\begin{lstlisting}[style=scalaStyle,label={gcc_oscar_2},caption={Usage of \texttt{gcc} to count fictitious workers},captionpos=b]
+\begin{lstlisting}[style=scalaStyle,label={gcc_oscar_2},caption={Usage of \texttt{gcc} to count dummy workers},captionpos=b]
   // workerVariables: Array[CPIntVar]
   // sentinelViolations: CPIntVar
   // Constants.SentinelWorker: Int = -1

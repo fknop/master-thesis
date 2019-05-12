@@ -10,9 +10,11 @@
 \allowdisplaybreaks
 \begin{subequations}
   \begin{align*}
-    \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) & \qquad & \quad \\ 
-     & + \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl}  & \qquad &  \quad  \\ 
-     & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  & \qquad &  \quad 
+    \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1)  \\ 
+      + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)   \\ 
+      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} f_{jkl}  \\ 
+     \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
+                         & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \nonumber
   \end{align*}
 \end{subequations}
 \begin{align*}
@@ -38,8 +40,7 @@
     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k  \\
     & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k  \\
     & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D  \\ 
-    & l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D  \\ 
-    & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, && \forall i \in W 
+    & l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D  
 \end{align*}
 \endgroup
 
