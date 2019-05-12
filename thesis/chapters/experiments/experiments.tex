@@ -304,7 +304,7 @@ We can see that the dynamic version of the heuristic outperforms the static one 
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/ma-ma-d-profile.png}
-  \caption{Performance profiles of static and dynamic most available heuristics [216 instances/30s].}
+  \caption{Performance profiles of static and dynamic most available heuristics with CP-MA as baseline [216 instances/30s].}
   \label{experiments:ma-ma-d-profile}
 \end{figure}
 
@@ -350,7 +350,7 @@ We compare multiple variable heuristics:
 Conflict Ordering Search is a variable ordering heuristic that 
 reorders variables based on the number of conflicts that happen during the search.
 It is a variant to the Last Conflict heuristic which selects the variable which caused the last conflict first.
-COS was shown to be the most performant on scheduling problems. 
+COS was shown in \cite{Gay:COS} to be the most performant on scheduling problems. 
 We now see how it performs in our problem in comparison with the aforementioned heuristics.
 
 \autoref{experiments:v-heuristics-profile} shows the performance profiles of the objective after 30s for each solver.
@@ -394,7 +394,7 @@ in almost every instance.
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/lns-profile.png}
-  \caption{Performance profiles of CP with and without Large Neighborhood Search [216 instances/30s].}
+  \caption{Performance profiles of CP with and without Large Neighborhood Search with CP as baseline [216 instances/30s].}
   \label{experiments:lns}
 \end{figure}
 
@@ -437,15 +437,14 @@ the parameters. However, as we can see from \autoref{experiments:random-relax-oo
 offers a slightly better objective at the start and the 10\% and 20\% catch up after 9 seconds of search.
 
 
-
-\begin{figure}
+\begin{figure}[H]
   \centering
   \includegraphics[scale=0.55]{experiments/random-relax-profile.png}
-  \caption{Performance profiles of multiple random relaxations [216 instances/30s].}
+  \caption{Performance profiles of multiple random relaxations with CP-Random-50 as baseline [216 instances/30s].}
   \label{experiments:random-relax-profile}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \includegraphics[scale=0.55]{experiments/random-relax-oot.png}
   \caption{Timeline of multiple random relaxations [216 instances/15s].}

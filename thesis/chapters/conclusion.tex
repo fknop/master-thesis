@@ -5,15 +5,15 @@
 \begin{document}
 
 In this thesis, we presented a scheduling problem for production planning 
-with resource allocation (\autoref{chapter:problem}).
+with resource allocation.
 
 We introduced two models that try to solve
-this problem (\autoref{chapter:models}): a Mixed Integer Programming and a Constraint Programming model.
+this problem: a Mixed Integer Programming and a Constraint Programming model.
 The Constraint Programming model required the most work with custom heuristics that take into account knowledge of the problem.
 
-The models were implemented in Scala using OscaR and Gurobi for the Constraint Programming and Mixed Integer Programming models respectively (\autoref{chapter:implementation}).
+The models were implemented in Scala using OscaR and Gurobi for the Constraint Programming and Mixed Integer Programming models respectively.
 
-We tested our models on generated test instances of different sizes (\autoref{chapter:experiments}).
+We tested our models on generated test instances of different sizes.
 We also showed and discussed the results of these tests. We saw from these results that our Constraint Programming model greatly outperforms
 its Mixed Integer Programming counterpart.
 However, the Mixed Integer Programming model performs better in most cases when given an initial solution 
@@ -24,32 +24,21 @@ Mixed Integer Programming is a great technique to solve combinatorial problems. 
 instances have too many variables for Mixed Integer Programming to handle.
 On the other hand,
 our Constraint Programming model contains more knowledge of the problem during the search. 
-It allows us to implement custom heuristics (presented in \autoref{section:cpmodel}). Hence, it manages to find 
-better solutions a lot quicker. Constraint Programming also has better pruning of the search tree overall compared to Mixed Integer Programming.
-
+It allows us to implement custom heuristics such as the one presented in \autoref{section:cpmodel}. Hence, it manages to find 
+better solutions faster. 
 
 From the work presented in this thesis, we can conclude that Mixed Integer Programming and Constraint Programming both have their advantages and disadvantages.
+MIP has the advantage of having its search algorithms already implemented in the solver (e.g. Gurobi). There is no need 
+to implement additional heuristics which may be time consuming. However, this lack of knowledge about the problem makes 
+it harder to find solution on bigger instances. Implementing complex constraints also complicates the model making it harder to understand. 
 
-\paragraph{}
+The CP model offers a better expressiveness which makes it easier to understand. We can take advantage of the local search 
+framework the explore more of the search space. However, finding optimal solutions with LNS becomes harder because of 
+the nature of the search (i.e. restarts). CP with LNS is instead more efficient at finding good feasible solutions in a 
+short amount of time.
 
-The MIP model has the following advantages / disadvantages:
-\begin{enumerate}[leftmargin=1.5cm]
-  \item Most of the search algorithms are already implemented in the solver (e.g. Gurobi).
-  There is no need for time consuming additional implementation (e.g. custom heuristics in CP).
-  \item However, the lack of knowledge about the problem makes it harder for MIP to find solutions on bigger instances.
-  \item Implementing complex constraints complicates the model making it harder to understand.
-\end{enumerate}
-
-
-The CP model has the following advantages / disadvantages:
-\begin{enumerate}[leftmargin=1.5cm]
-  \item Better expressiveness for its modeling.
-  \item We can take advantage of local search to explore more of the search space.
-  \item However, due to LNS, finding optimal solutions is hard because of restarts. But CP is more efficient at 
-  finding good feasible solutions in a short amount of time.
-\end{enumerate}
-
-
+By taking the fast good feasible solution property from CP and the good optimization property from MIP, we can combine these two 
+search methods and profit from the advantages of both models.
 
 Finally, we discuss in \ref{further-work} some improvements that could be made to our models and solvers.
 
