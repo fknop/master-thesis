@@ -80,8 +80,12 @@ Each resource (i.e. worker, machine, location) can only be assigned once per tim
 For these constraints, we define three types of assignments:
 
 \begin{itemize}
-  \item A working assignment with a worker assigned to a position at a given time period.
-  We represent this with the tuple $(t, d, k, w)$: the worker $w$ is assigned to position $k$ of demand $d$ at time $t$.
+  \item Worker assignment: we represent this with a 4-tuple $(t, d, k, w)$ where the worker $w$ is assigned to position $k$ of demand $d$ at time $t$.
+  \item Machine assignment: we represent this assignment with a 2-tuple $(d, m)$ where the machine $m$ is assigned to the 
+        demand $d$ for the entire duration of that demand.
+  \item Location assignment: we represent this assignment 
+        with a 2-tuple $(d, l)$ where the location $l$ is assigned to the demand $d$ for the entire duration 
+        of that demand.
 \end{itemize}
 
 \subsection{Hard constraints}
@@ -90,7 +94,6 @@ For these constraints, we define three types of assignments:
 
 Each worker has a defined set of availabilities and cannot be assigned to a demand when 
 unavailable.
-
 For each worker assignment $(t, d, k, w)$, $t \in w^T$.
 
 \subsubsection{No worker should be assigned to a demand which is not occurring}
@@ -98,14 +101,12 @@ For each worker assignment $(t, d, k, w)$, $t \in w^T$.
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
 occurring. 
-
 For each worker assignment $(t, d, k, w)$, $t \in d^T$.
 
 \subsubsection{No worker can be assigned twice for the same period} 
 
 A worker cannot do the work of two different workers at the same time.
 Hence, a worker can only work at most once per time period.
-
 For every two worker assignments $(t_1, d_1, k_1, w_1)$ and $(t_2, d_2, k_2, w_2)$, if $t_1 = t_2$ then $w_1 \neq w_2$.
 
 \subsubsection{Each demand has a required number of workers}
@@ -113,7 +114,6 @@ For every two worker assignments $(t_1, d_1, k_1, w_1)$ and $(t_2, d_2, k_2, w_2
 Each demand needs a number of workers to be satisfied. 
 For each time period in which a demand is occurring, it should have the required 
 number of workers assigned to it.
-
 For each demand $d$, there exists $d^w$ worker assignments for demand $d$. 
 For every two assignments for $d$, $(t_1, d, k_1, w_1)$ and $(t_2, d, k_2, w_2)$: if $t_1 = t_2$ then $k_1 \neq k_2$.
 
@@ -127,7 +127,6 @@ A worker can also have more skills than the required skills by the position.
 
 Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
-
 For each incompatibility $(w_1, w_2) \in I_{ww}$ and for each worker assignments for time $t$ and demand $d$,
 there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
 
@@ -135,7 +134,6 @@ there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
 
 A worker and a client might be incompatible with each other. 
 If this is the case, the worker must not be assigned at a demand for such client.
-
 For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, k, w)$ where 
 $d^c = c$.
 
@@ -143,21 +141,28 @@ $d^c = c$.
 
 A demand has machine needs. Such machines should always be assigned 
 for a demand to be satisfied.
+For each required machine, there must exist one machine assignment $(d, m)$ where $m$ is the required machine.
+
 
 \subsubsection{No machines should be assigned twice for the same period}
 
 A machine is assigned for the entirety of a demand. Moreover, it cannot be assigned twice 
 for the same period. In other words, it cannot be assigned for two overlapping (in time) demands.
+For every two machine assignments $(d_1, m_1)$ and $(d_2, m_2)$, if $m_1 = m_2$ then $d_1$ cannot overlap with $d_2$
+($d_1^T \cap d_2^T = \varnothing $).
 
 
 \subsubsection{The location assigned must be in the set of possible locations}
 
 A demand has a set of possible locations. Only one of those locations can be assigned 
 to that demand.
+For each assignment $(d, l)$, $l \in d^L$.
 
 \subsubsection{No location should be assigned twice for the same period}
 
 As with machines, locations must be assigned only once per time period.
+For every two location assignments $(d_1, l_1)$ and $(d_2, l_2)$, if $l_1 = l_2$ then $d_1$ cannot overlap with $d_2$
+($d_1^T \cap d_2^T = \varnothing $).
 
 
 \subsection{Soft constraints}

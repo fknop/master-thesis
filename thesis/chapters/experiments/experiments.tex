@@ -249,7 +249,7 @@ For our experiments, we generated 216 instances of different sizes. The problem 
   \end{tabular}
 \end{table}
 
-\section{Model parameters}
+\subsection{Model parameters}
 
 We presented in \autoref{obj} and \autoref{penalties:cp} the penalties of our sub-objectives.
 We define for our experiments the following penalty vector:
@@ -448,8 +448,8 @@ offers a slightly better objective at the start and the 10\% and 20\% catch up a
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.55]{experiments/random-relax-profile.png}
-  \caption{Performance profiles of multiple random relaxations with CP-Random-50 as baseline [216 instances/30s].}
+  \includegraphics[scale=0.55]{experiments/cp-random-relax-profile.png}
+  \caption{Performance profiles of multiple random relaxations [216 instances/30s].}
   \label{experiments:random-relax-profile}
 \end{figure}
 
@@ -566,34 +566,18 @@ The MIP solver performs a lot better when given an initial solution to work with
 
 
 \autoref{experiments:solvers:oot} gives the objective per time for the three solvers. As expected from our previous results, the MIP solver does not 
-give a good solution after the elapsed time. However, while the CP+MIP solver is slightly better in terms of the final objective, it takes on average 10 seconds 
-to reach such objective while the CP solver only takes 1 second to reach an objective really close to the final one.
-
-% Those 20\% match with the small instances proportions in \autoref{instances:proportions}
+manage to find a good solution after the elapsed time. 
+However, the CP solver manages to find good solutions in less than one second. While the CP+MIP solver find a 
+better objective compared to the CP solver, it takes on average 10 seconds to do so.
 
 
 \begin{figure}
-  \label{experiments:solvers:oot}
-  \caption{Timeline of CP, MIP and CP+MIP solvers [216 instances/30s].}
   \centering
   \includegraphics[scale=0.55]{experiments/solvers-oot.png}
+  \caption{Timeline of CP, MIP and CP+MIP solvers [216 instances/30s].}
+  \label{experiments:solvers:oot}
 \end{figure}
 
-
-% \begin{figure}
-%   \centering
-%   \includegraphics[scale=0.55]{experiments/time-first-sol.png}
-%   \caption{Performance profiles of the time on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
-%   \label{experiments:first-sol-time}
-% \end{figure}
-
-
-% \begin{figure}
-%   \centering
-%   \includegraphics[scale=0.55]{experiments/obj-first-sol.png}
-%   \caption{Performance profiles of the objective on first solution of CP, MIP and CP+MIP solvers [216 instances/First solution].}
-%   \label{experiments:first-sol-obj}
-% \end{figure}
 
 
 
