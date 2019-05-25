@@ -35,7 +35,7 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
     l_i &\in L \label{cpzonevariable} 
 \end{align}
 
-(\ref{cpmachinevariable}) is the $j$th machine used for demand $i$ while (\ref{cpzonevariable}) is the location used for demand $i$
+(\ref{cpmachinevariable}) is the $j$th machine used for demand $i$ while (\ref{cpzonevariable}) is the location used for demand $i$.
 
 
 
@@ -51,7 +51,7 @@ possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that 
 
 \begin{equation}
   \label{wdomain}
-  w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
+  w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cup \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
 \end{equation}
 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
