@@ -12,7 +12,7 @@
   \begin{align*}
     \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1)  \\ 
       + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)   \\ 
-      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} f_{jkl}  \\ 
+      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} d_{jkl}  \\ 
      \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
                          & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \nonumber
   \end{align*}
@@ -20,12 +20,12 @@
 \begin{align*}
     % \textrm{min} \quad & \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) &+&  \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} s_{jkl} \nonumber \\
     % & + \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) &+&   max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj} \\
-    \textrm{s.t} \qquad & \sum_{i \in W} w_{ijkl} + s_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \\
+    \textrm{s.t} \qquad & \sum_{i \in W} w_{ijkl} + d_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P \\
     & \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T  \\
     & t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D \\
     & t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W  \\ 
-    & t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D  \\
-    & t_j \notin w^T_{i} \implies \forall l \ s_{jkl} = 0, && \forall j \in T, i \in W  \\ 
+    & t_j \notin d^T_{k} \implies \forall l \ d_{jkl} = 0,  && \forall j \in T , k \in D  \\
+    & t_j \notin w^T_{i} \implies \forall l \ d_{jkl} = 0, && \forall j \in T, i \in W  \\ 
     & \sum_{l \in d^P_k} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{ww}}, j \in T, k \in D \\
     & d^c_{k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D  \\ 
     & w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k,  \\
@@ -38,7 +38,7 @@
     & \sum_{i \in M_k} m_{ij} = |d^{M_k}_j|, && j \in D, k \in d^M_j  \\
     & m_{ij} + m_{ik} \leq 1, && \forall j \in D, k \in d^O_j, i \in M  \\
     & w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k  \\
-    & s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k  \\
+    & d_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k  \\
     & m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D  \\ 
     & l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D  
 \end{align*}

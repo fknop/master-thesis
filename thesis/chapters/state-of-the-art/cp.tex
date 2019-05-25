@@ -26,7 +26,7 @@ from the transformation of hard constraints into soft constraints.
 We now describe the principle of global constraints and how they are useful for our resource allocation problem 
 described in \autoref{chapter:problem}.
 
-As described in more depth in \cite{Hentenryck:2003}:
+As described in more depth in \cite{Hentenryck:2003}: 
 
 \begin{quotation}
   [\dots] a constraint $C$ is often called “global” when “processing” $C$ as a whole gives better results than “processing” any conjunction
@@ -39,7 +39,7 @@ is often worse than its global counterpart.
 
 There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
 a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a CSP.
-Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where we minimize the number of violations.
+Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where the number of violations is minimized.
 \subsubsection{Alldifferent constraint}
 \label{sota:alldifferent}
 
@@ -110,7 +110,7 @@ The LNS framework often goes as follows:
 \begin{enumerate}
   \item Use Constraint Programming to find a solution 
   \item Relax last best solution: we fix some variables to the last value in the best solutions. This is the 
-        step that can change the most for different types of problems. Most of the time, a simple random relaxation is used (i.e. fix a percentage of variable).
+        step that can change the most for different types of problems. Most of the time, a simple random relaxation is used (i.e. fix a percentage of variables).
   \item Restart
 \end{enumerate}
 

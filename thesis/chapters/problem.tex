@@ -36,7 +36,7 @@ Our resource allocation problem consists of:
   needs to work for a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem planning period.  
   \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{ww}$).
   Two incompatible workers cannot work with each other.  
-  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$)
+  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$).
   A worker incompatible with a client cannot work for that client.
 \end{itemize}
 
@@ -46,12 +46,12 @@ Each demand has:
   \item[$-$] A client ($d^c \in C$).
   \item[$-$] A given set of time periods ($d^T \subseteq T$).
   \item[$-$] A required number of workers per period ($d^w \in \mathbb{N}$).
-  \item[$-$] Some skills requirements to be fulfilled by different workers ($d^S \subseteq S$).
+  \item[$-$] Some skill requirements to be fulfilled by different workers ($d^S \subseteq S$).
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
-  \item[$-$] Additional skills requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($d^{S^{+}} \subseteq S$).
+  \item[$-$] Additional skill requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($d^{S^{+}} \subseteq S$).
   \item[$-$] A list of machines to perform the work ($d^M \subseteq M$).
-  \item[$-$] An eventual list of possible locations where the demand can be performed ($d^L \subseteq L$). 
-  Vehicles used to drive the workers to the work location are considered as machines.
+  \item[$-$] An eventual list of possible locations where the demand can be performed ($d^L \subseteq L$).
+  Vehicles used to drive the workers to a work location are considered as machines.
 \end{itemize}
 
 
@@ -77,7 +77,7 @@ Each resource (i.e. worker, machine, location) can only be assigned once per tim
 
 \section{Constraints}
 
-For these constraints, we define three types of assignments:
+To describe the problem constraints, we define three types of assignments:
 
 \begin{itemize}
   \item Worker assignment: we represent this with a 4-tuple $(t, d, k, w)$ where the worker $w$ is assigned to position $k$ of demand $d$ at time $t$.

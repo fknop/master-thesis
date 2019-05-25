@@ -25,9 +25,9 @@ To represent our problem in MIP, we need three types of variables, one per resou
                       0 \quad & \textrm{otherwise} 
                    \end{array}
                    \right . \\
-  f_{jkl} &=  \left \{
+  d_{jkl} &=  \left \{
   \begin{array}{l l}
-      1 \quad & \textrm{if no worker is assigned at time $j$ for demand $k$ at position $l$} \\
+      1 \quad & \textrm{if no worker is assigned at time $j$ for demand $k$ at position $l$ (dummy)} \\
       0 \quad & \textrm{otherwise} 
   \end{array}
   \right . \\
@@ -49,7 +49,7 @@ To represent our problem in MIP, we need three types of variables, one per resou
 This is, in fact, a binary Integer Programming model as every variable is a $\{0, 1\}$ integer.
 
 As solutions can be partial, we need to introduce a way to allow the absence of worker for a 
-given position. In MIP, we model this by having the variables $f_{jkl}$, $f$ for \emph{dummy}. This variable is one, if and only if all the 
+given position. In MIP, we model this by having the variables $d_{jkl}$, $d$ for \emph{dummy}. This variable is one, if and only if all the 
 corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal is to minimize 
 the number of dummy variables assigned to one.
 
@@ -62,7 +62,7 @@ the number of dummy variables assigned to one.
   solutions.
 
   \begin{align}
-    \sum_{i \in W} w_{ijkl} + f_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P & \label{wc1}
+    \sum_{i \in W} w_{ijkl} + d_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P & \label{wc1}
   \end{align}
 
 
@@ -113,7 +113,7 @@ However, to simplify, we suppose that demands only need one worker, thus ignorin
 
 \subsubsection{All workers assigned in a time period must be different}
 
-One worker can only work one time per time period. For each worker, we add the sum of all its variables 
+One worker can only work at one position per time period. For each worker, we add the sum of all its variables 
 over each time period. This sum must be less or equal than one to make sure a worker works at most once in the period.
 
 \begin{align}
@@ -128,7 +128,7 @@ Some resources (workers, locations, demands) cannot be assigned in some time per
 \begin{align}
   t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D &\label{wc3} \\
   t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W &\label{wc4} \\
-  t_j \notin d^T_{k} \implies \forall l \ s_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} \\ 
+  t_j \notin d^T_{k} \implies \forall l \ d_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} \\ 
   l_i \notin d^L_j \implies l_{ij} = 0, && \forall i \in L, j \in D& \label{lc1} \\ 
   m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D& \label{mc1} 
 \end{align}
@@ -310,7 +310,7 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
 
 \begin{align}
   w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k &\label{binary1} \\
-  s_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k& \label{binary2} \\
+  d_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k& \label{binary2} \\
   m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D& \label{binary3} \\ 
   l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D& \label{binary4} 
 \end{align}
@@ -328,7 +328,7 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
   \begin{align}
     \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) \label{obj:1} \\ 
       + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj:3} \\ 
-      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} f_{jkl} \label{obj:2} \\ 
+      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} d_{jkl} \label{obj:2} \\ 
      \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
                          & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \label{penalties:mip} \nonumber
   \end{align}
