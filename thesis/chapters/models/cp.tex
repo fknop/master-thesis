@@ -40,7 +40,7 @@ with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reaso
 
 
 As explained in the problem description and in the mathematical model section,
-we need to allow partial solutions where we have a dummy worker that can work at any time.
+we need to allow partial solutions in which we have a dummy worker that can work at any time.
 We add this value to every worker variable domain but ignore it during the constraint propagation. We define 
 this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we define $\sigma = -1$.
 
@@ -102,16 +102,16 @@ Clients are statically assigned to demands, we can solve this constraint by addi
 a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
-  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, \forall \ i, j, k
+  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land d^c = c \}, k \in d_j^P
 \end{equation}
 
 \subsubsection{Incompatibilities between workers}
 
-A worker might have an incompatibility with a worker or a set of workers. 
-We cannot solve this constraint with a series of \texttt{not\_equal} like the worker-client incompatibilities. We instead use a constraint 
+A worker might have an incompatibility with another worker or a set of workers. 
+Unlike the worker-client incompatibilities, we cannot solve this constraint with a series of \texttt{not\_equal} constraints. We instead use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
-The forbidden combinations of values are expressed by the table $I_{ww}$. 
+These combinations are expressed by the table $I_{ww}$. 
 We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
@@ -123,9 +123,9 @@ In practice, we can slightly reduce the number of constraints by checking first 
 
 \subsubsection{Additional skills must be satisfied}
 
-A demand can have what we call \emph{additional skills}. Those skills can be 
+A demand can have what we call additional skills. Those skills can be 
 satisfied by any workers in the demand. Unlike required skills by different workers,
-we cannot pre-assign possible values to the domains of variables. Any number of worker in the demand can have an additional skill.
+we cannot pre-assign possible values to the domains of variables. Any number of workers in the demand can have an additional skill.
 We use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} acts as a counter of occurrences for the workers that satisfy the skills,
 the sum states that at least one worker needs to be assigned.
@@ -139,7 +139,7 @@ Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in
   & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j
 \end{align}
 
-This is a different syntax for \texttt{gcc} from what we we introduced before. This variant takes 
+This is a different syntax for \texttt{gcc} from what we introduced before. This variant takes 
 variables and assigns the occurrences of values to them. In this case, the \texttt{gcc} assigns 
 occurrences of $w \in W_s$ to $o_{ijs}$ and the \texttt{sum} constraint ensures that 
 these occurrences sum to at least one.
@@ -206,14 +206,14 @@ in that range, hence only $\sigma$ in our case.
 We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:dummy}) as our working requirements and dummy worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
 of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
-constraint called \texttt{at\_least\_nvalue} \cite{nvalue} count this number.
-Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods of that demand:
+constraint called \texttt{at\_least\_nvalue} \cite{nvalue} to count this number.
+Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods for that demand:
 
 \begin{equation}
   \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in d^P_j
 \end{equation}
 
-We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations.
+We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations (change of worker).
 
 The final objective is a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
 in values, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
@@ -241,7 +241,7 @@ max degree heuristic while the value heuristic is a custom heuristic that select
 The variable heuristic used for the search is a custom max degree heuristic. 
 The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
 we add the number of required skills for a position to the degree. 
-We also make sure that if a variable is of size 2, it is always selected first to avoid having the dummy value $\sigma$ assigned to it by 
+We also make sure that if a variable is of size two, it is always selected first to avoid having the dummy value $\sigma$ assigned to it by 
 propagation.
 
 
@@ -287,7 +287,7 @@ To achieve this, we need to store some state during the search that will backtra
 \begin{enumerate}
   \item $occ_{wdp}$: the number of times worker $w$ already works for position $p$ of demand $d$.
   \item $occ_{w}$: the number of times worker $w$ already works in any demands.
-  \item $a_{w} \subseteq w^T$: the set of remaining availabilities of the worker.
+  \item $a_{w} \subseteq w^T$: the set of remaining availabilities of the worker $w$.
 \end{enumerate}
 
 We now have three levels of ordering in the heuristic:
@@ -300,7 +300,23 @@ We now have three levels of ordering in the heuristic:
         is already assigned $occ_w$.
 \end{enumerate}
 
-% Let us take another example with three workers $w_1$, $w_2$ and $w_3$ and with two demands $d_1$ and $d_2$.
+
+\subsubsection{Working requirements extension}
+
+One pitfall with our aforementioned heuristic is that a worker might have working requirements 
+but not enough availabilities for this worker to be selected by the search. We can slightly improve our most available heuristic by adding a small extension to take into account
+the working requirements. This extension adds two orderings in front of all other orderings:
+
+
+\begin{enumerate}
+  \item If $r_{max}$ is equal to $occ_{w}$ for worker $w$, we consider this worker last.
+  \item $\text{max}(r_{min} - occ_{w}, 0)$ orders the workers by their remaining requirements. We 
+  take the workers that have the most requirements first.
+  $r_{min}$ is the minimum requirement for worker $w$. We take the subtraction of this value with the current 
+  occurrences of worker $w$ and we max this result with 0 to avoid having negative values which are not relevant in our case.
+\end{enumerate}
+
+For the remaining of this thesis, when we talk about the most available heuristic, we also take into account this extension.
 
 \subsubsection{Breaking symmetries}
 

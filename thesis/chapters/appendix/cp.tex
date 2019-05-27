@@ -12,7 +12,9 @@
   &\texttt{softgcc}(\{ w_{ijk} \}, \sigma \rightarrow \sigma, [0], [0], v_{\sigma})  \\ 
   &\texttt{softgcc}(\{ w_{ijk} \}, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) \\
   &\texttt{alldifferent\_except}(\{w_{ijk} \mid j \in D, k \in d_j^P \}, \{ \sigma \}), &\forall i \in T \\ 
-  &\texttt{not\_equal}(w_{ijk}, w),  &\forall (w, c) \in I_{wc}, \forall \ i, j, k \\
+  &\texttt{not\_equal}(w_{ijk}, w), & \forall (w, c) \in I_{wc}, \\ 
+  && j \in \{ d \mid d \in D \land d^c = c \}, \\
+  && i \in d^T_j, k \in d_j^P \\
   &\texttt{negative\_table}(x, y, I_{ww}),  &\forall (x, y) \in P_{ij} \\ 
   &\texttt{gcc}(\{ w_{ijk} \mid k \in d^P_j \}, o_{ijs}) \\ 
   &\texttt{sum}(o_{ijs}) \geq 1 \\
