@@ -16,8 +16,8 @@ easier to analyze and discuss the results. Two of those plots are \emph{timeline
 \subsection{Timelines}
 
 A timeline is a decreasing function of the objective over time. 
-They represent the average evolution of the objective of all instances over time.
-However, as objectives can be 
+It represents the average evolution of the objective of all instances over time.
+However, as the scale of the objective can be 
 significantly different from one instance to another, all objectives are normalized to a $[0, 1]$ range.
 We call this the relative distance to the best objective. 
 The normalized objective ($no$) for instance $i$ at each timestamp $t$ can 
@@ -27,7 +27,7 @@ be computed with the following formula:
   no_i(t) = \frac{objective_i(t) - best_i}{objective_i(0) - best_i}
 \end{equation*}
 
-A value of $1$ is always the initial solution for each solver, even though each solver might have a different initial solution. 
+A value of $1$ is always the initial solution for each solver, even though each solver might have a different objective value for its initial solution.
 A value of $0$ is the best solution found at the end of the search. 
 
 For each time $t$, we take the average of all normalized objectives over all instances:

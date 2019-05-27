@@ -341,7 +341,7 @@ The objective function is stated in (\ref{obj}), it is a weighted sum split into
 \begin{enumerate}
   \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of those values for all workers is equal to the number of workers for that shift.
   \item The number of violations of working requirements (\ref{obj:3}).
-  \item The number of \emph{dummy} workers assigned to demands (\ref{obj:2}).
+  \item The number of dummy workers assigned to demands (\ref{obj:2}).
 \end{enumerate}
 
 $occ_i$ represents the occurrences of worker $i$ while the penalties $\bm{\delta}$ are representative of the importance of each sub-objective.

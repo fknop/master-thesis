@@ -105,11 +105,11 @@ This definition is used as follows:
 
 \begin{lstlisting}[style=scalaStyle,label={gcc_oscar_2},caption={Usage of \texttt{gcc} to count dummy workers},captionpos=b]
   // workerVariables: Array[CPIntVar]
-  // sentinelViolations: CPIntVar
-  // Constants.SentinelWorker: Int = -1
+  // dummyViolations: CPIntVar
+  // Constants.DummyWorker: Int = -1
   add(
     gcc(workerVariables, Array(
-        (Constants.SentinelWorker, sentinelViolations)
+        (Constants.DummyWorker, dummyViolations)
       )
     )
   )
@@ -189,7 +189,7 @@ the \texttt{assignSkill} value is responsible for the probability of a position 
 We can increase this value if we want more skilled positions and vice-versa.
 
 We also needed to be able to reproduce instances, the \texttt{InstanceGenerator} API can 
-take a seed which defaults at $0$.
+take a seed parameter which defaults to $0$.
 
   
 \begin{lstlisting}[style=scalaStyle,caption={Instance generator API},captionpos=b]
@@ -200,7 +200,8 @@ class InstanceGenerator(val seed: Long = 0L) {
 
 The generator makes sure that a solution is always possible by assigning periods to workers 
 that have been assigned to demands. It also adds the demand periods to $k$ random workers
-where $k$ is the number of required workers for that demand. This allows having more solutions variety.
+where $k$ is the number of required workers for that demand. 
+This allows to have more variety in the possible solutions.
     
 The generator tries as much as possible to create meaningful instances but it is of course not able to replicate the importance of real data properly.
 
@@ -231,22 +232,8 @@ We can specify a solution limit as well as a time limit. We can also repeat our 
 the average of results. We can also have dry runs to warm up the JVM (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
 we can specify the probabilities for our instances as explained in \autoref{section:instance-gen}.
 
-Our benchmark runner has a function \texttt{run} that takes a name (e.g. solver name, serie name, etc), and a solving function 
-which takes a generic model and returns a pair with the time spent in milliseconds and the objective value respectively.
-
-\begin{lstlisting}[style=scalaStyle,label={benchmark:run},caption={Benchmark run function},captionpos=b]
-class BenchmarkRunner(val options: BenchmarkOptions) {
-  def run (
-    name: String, 
-    solve: VillageOneModel => (Long, Int)
-  ): (BenchmarkSerie, BenchmarkSerie)
-}
-\end{lstlisting}
-
-This function returns a pair of benchmark series: one serie for the time values and one serie for the objective values.
-The \texttt{BenchmarkSerie} class is simply a class that takes a name and a list of benchmark measurements (i.e. mean, standard deviation, min and max).
-
-This implementation allows us to create a variety of benchmark by simply changing the \texttt{solve} function.
+We then pass these options to our benchmark runner in addition to our solver functions. The runner then returns 
+multiple results such as the time taken by the solvers, the final objective and the objective over time.
 
 
 \end{document}
