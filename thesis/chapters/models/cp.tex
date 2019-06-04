@@ -47,11 +47,11 @@ this worker by $\sigma \notin W$. The actual value of this worker does not matte
 
 The variables modeling already satisfies some constraints, like the number of required resources (i.e. worker, location, machine)
 per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
-possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
+possible workers. Let $W_{S_{d_j,k}} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
 
 \begin{equation}
   \label{wdomain}
-  w_{ijk} \in W_{S_{d_j}^{k}} \cap \{ w \mid t_i \in T_w \} \cup \{ \sigma \}, \forall j \in D, i \in T_{d_j}, k \in P_{d_j}
+  w_{ijk} \in W_{S_{d_j,k}} \cap \{ w \mid t_i \in T_w \} \cup \{ \sigma \}, \forall j \in D, i \in T_{d_j}, k \in P_{d_j}
 \end{equation}
 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
@@ -62,7 +62,7 @@ For each required machine in a demand, we take all possible machines of this typ
 
 \begin{equation}
   \label{mdomain}
-  m_{ij} \in \{ m \mid m \in M, m = m_j, m_j \in M_{{d_i}}  \}, \forall i \in D, j \in |M_{d_i}|
+  m_{ij} \in \{ m \mid m \in M, m \in M_{{d_i},j}  \}, \forall i \in D, j \in |M_{d_i}|
 \end{equation}
 
 For each location of a demand, the domain is the possible locations of that demand.
@@ -98,7 +98,7 @@ We use this constraint to ignore the $\sigma$ value from the propagation. Let $X
 \subsubsection{Incompatibilities between workers and clients}
 
 A worker might have an incompatibility with a client or a set of clients. 
-Clients are statically assigned to demands, we can solve this constraint by adding 
+Clients are characteristics of the demands, we can solve this constraint by adding 
 a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
@@ -119,7 +119,7 @@ be the permutations of worker variables for demand $j$ at period $i$:
   \texttt{negative\_table}(x, y, I_{ww}),  \forall (x, y) \in P_{ij}
 \end{equation}
 
-In practice, we can slightly reduce the number of constraints by checking first if each pair of workers are indeed working for these positions.
+In practice, we can slightly reduce the number of constraints by checking first if each pair of workers are indeed available at these positions.
 
 \subsubsection{Additional skills must be satisfied}
 
@@ -147,7 +147,7 @@ these occurrences sum to at least one.
 
 \subsubsection{Machines can only be assigned once per period}
 
-As machines can only be assigned once per period and are assigned for the entirety of a demand. We need 
+As machines can only be assigned once per period and are assigned for whole duration of the demand. We need 
 to ensure that a machine is not assigned to two overlapping demands in time.
 For each pair of overlapping demands,
 we add a \texttt{alldifferent} constraint with all the machine variables associated to the two demands.
@@ -159,7 +159,7 @@ we add a \texttt{alldifferent} constraint with all the machine variables associa
 
 \subsubsection{Locations can only be assigned once per period}
 
-As with machines, locations can only be assigned once per period and are assigned for the entirety of a demand. We need 
+As with machines, locations can only be assigned once per period and are assigned for the whole duration of the demand. We need 
 to ensure that a location is not assigned to two overlapping demands in time. For each pair of overlapping demands,
 we add a \texttt{not_equal} constraint with the two associated location variables.
 
@@ -216,7 +216,7 @@ Let  $W_{jk} = \{ w_{ijk} \mid i \in T_{d_j} \}$ be the set of worker variables 
 We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations (change of worker).
 
 The final objective is a weighted-sum of all sub-objectives in the model. However, not all objectives are equal 
-in values, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
+in priority, some objectives need bigger penalties when violated. This is the case for $v_r$ and $v_{\sigma}$.
 We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
 
 \begin{equation}
@@ -240,7 +240,8 @@ max degree heuristic while the value heuristic is a custom heuristic that select
 
 The variable heuristic used for the search is a custom max degree heuristic. 
 The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
-we add the number of required skills for a position to the degree. 
+we also add the number of required skills for a position $k$ ($| S_{d,k} |$) to the existing degree of the variable. 
+As an example, if a variable $X$ has a degree of 3 and the position defined by this variable requires 2 different skills, the final degree will be 5.
 We also make sure that if a variable is of size two, it is always selected first to avoid having the dummy value $\sigma$ assigned to it by 
 propagation.
 

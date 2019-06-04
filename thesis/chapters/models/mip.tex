@@ -145,7 +145,7 @@ demand is $c$ to zero.
 
 \subsubsection{Incompatibilities between workers}
 
-For each incompatibility, at each demand, two workers cannot have both their variables assigned to one. 
+For each incompatibility, for each demand, two workers cannot have both their variables assigned to one. 
 We define that the sum over all the positions of the two incompatible workers must be lower than two.
 
 \begin{align}
@@ -194,11 +194,11 @@ We define that the sum over all the positions of the two incompatible workers mu
 
 \subsubsection{Restrict skilled positions to skilled workers}
 
-These constraints ensure that no worker is working for a position at which he is not qualified to work.
+These constraints ensure that no worker is working for a position at which they are not qualified to work.
 $W_{d^{s_l}_k}$ defines the set of workers that satisfy skill(s) $s_l$ of demand $k$. 
 
 \begin{align}
-  w_{ijkl} = 0, && \forall j \in T, k \in D, l \in P_{d_k}, i \in W \setminus W_{S_{d_k}^l}  \label{wc6}
+  w_{ijkl} = 0, && \forall j \in T, k \in D, l \in P_{d_k}, i \in W \setminus W_{S_{d_k,l}}  \label{wc6}
 \end{align}
 
 \subsubsection{Additional skills must be satisfied}
