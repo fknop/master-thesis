@@ -21,10 +21,11 @@
   &\texttt{alldifferent}(\{ m_{ij} \mid j \in |d_i^M| \} \cup \{ m_{kj} \mid j \in |d_k^M| \}), &\forall i \in D, k \in d^O_i \\
   &\texttt{not_equal}(l_{i}, l_{k}), &\forall i \in D, k \in d^O_i \\
   \text{with} \quad & o_{ijs} \in \{ 0, 1 \}, & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j \\ 
-  &w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cap \{ \sigma \},& \forall j \in D, i \in d^T_j, k \in d^P_j \\ 
+  &w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cup \{ \sigma \},& \forall j \in D, i \in d^T_j, k \in d^P_j \\ 
   &m_{ij} \in M, & \forall i \in D, j \in |d^M| \\ 
   &l_{i} \in L, & \forall i \in D \\
-  &\bm{\delta} = (\delta_0, \delta_1, \delta_2)
+  &\bm{\delta} = (\delta_0, \delta_1, \delta_2), \\
+  &\bm{\delta} \in \mathbb{R}^3
 \end{align*}
 
 

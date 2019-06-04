@@ -38,17 +38,17 @@ the nature of the search (i.e. restarts). CP with LNS is instead more efficient 
 short amount of time.
 
 By taking the fast good feasible solution property from CP and the good optimization property from MIP, we can combine these two 
-search methods and profit from the advantages of both models.
+search methods and gain from the advantages of both models.
 
 Finally, we discuss in \ref{further-work} some improvements that could be made to our models and solvers.
 
 \section{Further Work}
 \label{further-work}
 
-\paragraph{Contiguous Shifts for the CP model}: Our implementation of the contiguous shifts constraint only take into account 
+\paragraph{Contiguous Shifts for the CP model}: Our implementation of the contiguous shifts constraint only takes into account 
 the number of different workers working for a position throughout the demand planning period.
 We tested the implementation with real contiguous shifts with a decomposition of equality constraints. However, the results 
-were disappointing as the decomposition slowed the search. While our implementation gives really good results for contiguous shifts,
+were disappointing as the decomposition slowed down the search. While our implementation gives us really good results for contiguous shifts,
 we could replace our constraint by another soft global constraint that would be more efficient than 
 a decomposition of equality constraints.
 
@@ -59,6 +59,6 @@ machines by name. Our model preprocessing could be more complete to allow any pr
 \paragraph{Self-Adaptive LNS}: Our solver only uses one relaxation method during the search. 
 Even though it already performs well, we could make 
 use of the self-adaptive large neighborhood search \cite{thomas:adaptive} to dynamically 
-and automatically change the relaxation method to the best available during the search.
+and automatically change the relaxation method to the best available one during the search.
 \end{document}
 

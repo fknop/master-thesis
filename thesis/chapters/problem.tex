@@ -25,16 +25,14 @@ the work that each worker can do.
 Our resource allocation problem consists of:
 
 \begin{itemize}
-  \item[$-$] A planning period ($T$) with each period ($t \in T$) equal in time.
+  \item[$-$] A planning period ($T$) with each period ($t \in T$) equal in duration.
   \item[$-$] A list of clients ($c \in C$). 
   \item[$-$] A list of demands ($d \in D$).
   \item[$-$] A list of workers ($w \in W$). 
   \item[$-$] A list of skills ($s \in S$).
   \item[$-$] A list of locations ($l \in L$).
   \item[$-$] A list of machines ($m \in M$).
-  \item[$-$] A list of working requirements associated with workers ($r \in R$). A requirement $r$ states that a worker $r_w$
-  needs to work for a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem planning period.  
-  \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{ww}$).
+  \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{w_{1}w_{2}} \mid w_1, w_2 \in W$).
   Two incompatible workers cannot work with each other.  
   \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$).
   A worker incompatible with a client cannot work for that client.
@@ -43,14 +41,14 @@ Our resource allocation problem consists of:
 Each demand has:
 
 \begin{itemize}
-  \item[$-$] A client ($d^c \in C$).
-  \item[$-$] A given set of time periods ($d^T \subseteq T$).
-  \item[$-$] A required number of workers per period ($d^w \in \mathbb{N}$).
-  \item[$-$] Some skill requirements to be fulfilled by different workers ($d^S \subseteq S$).
+  \item[$-$] A client ($c_d \in C$).
+  \item[$-$] A given set of time periods ($T_d \subseteq T$).
+  \item[$-$] A required number of workers per period ($n_d \in \mathbb{N}$).
+  \item[$-$] Some skill requirements to be fulfilled by different workers ($S_d \subseteq S$).
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
-  \item[$-$] Additional skill requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($d^{S^{+}} \subseteq S$).
-  \item[$-$] A list of machines to perform the work ($d^M \subseteq M$).
-  \item[$-$] An eventual list of possible locations where the demand can be performed ($d^L \subseteq L$).
+  \item[$-$] Additional skill requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($S^{+}_d \subseteq S$).
+  \item[$-$] A list of machines to perform the work ($M_d \subseteq M$).
+  \item[$-$] An eventual list of possible locations where the demand can be performed ($L_d \subseteq L$).
   Vehicles used to drive the workers to a work location are considered as machines.
 \end{itemize}
 
@@ -58,8 +56,10 @@ Each demand has:
 Each worker has:
 
 \begin{itemize}
-  \item[$-$] A list of skills (e.g. package lifter, supervisor, etc.) ($w^S \subseteq S$).
-  \item[$-$] A list of availabilities at which the worker can work ($w^T \subseteq T$).  
+  \item[$-$] A list of skills (e.g. package lifter, supervisor, etc.) ($S_w \subseteq S$).
+  \item[$-$] A list of availabilities at which the worker can work ($T_w \subseteq T$).  
+  \item[$-$] A list of working requirements ($r \in R$). A requirement $r$ states that a worker $r_w$
+  needs to work for a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem planning period.  
 \end{itemize}
 
 
@@ -94,14 +94,14 @@ To describe the problem constraints, we define three types of assignments:
 
 Each worker has a defined set of availabilities and cannot be assigned to a demand when 
 unavailable.
-For each worker assignment $(t, d, k, w)$, $t \in w^T$.
+For each worker assignment $(t, d, k, w)$, $t \in T_w$.
 
 \subsubsection{No worker should be assigned to a demand which is not occurring}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
 occurring. 
-For each worker assignment $(t, d, k, w)$, $t \in d^T$.
+For each worker assignment $(t, d, k, w)$, $t \in T_d$.
 
 \subsubsection{No worker can be assigned twice for the same period} 
 
@@ -127,7 +127,7 @@ A worker can also have more skills than the required skills by the position.
 
 Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
-For each incompatibility $(w_1, w_2) \in I_{ww}$ and for each worker assignments for time $t$ and demand $d$,
+For each incompatibility $(w_1, w_2) \in I_{w_1w_2}$ and for each worker assignments for time $t$ and demand $d$,
 there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
 
 \subsubsection{Worker-client incompatibilities}
@@ -135,7 +135,7 @@ there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
 A worker and a client might be incompatible with each other. 
 If this is the case, the worker must not be assigned at a demand for such client.
 For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, k, w)$ where 
-$d^c = c$.
+$c_d = c$.
 
 \subsubsection{The required machines must always be assigned}
 
@@ -149,20 +149,20 @@ For each required machine, there must exist one machine assignment $(d, m)$ wher
 A machine is assigned for the entirety of a demand. Moreover, it cannot be assigned twice 
 for the same period. In other words, it cannot be assigned for two overlapping (in time) demands.
 For every two machine assignments $(d_1, m_1)$ and $(d_2, m_2)$, if $m_1 = m_2$ then $d_1$ cannot overlap with $d_2$
-($d_1^T \cap d_2^T = \varnothing $).
+($T_{d_1} \cap T_{d_2} = \varnothing $).
 
 
 \subsubsection{The location assigned must be in the set of possible locations}
 
 A demand has a set of possible locations. Only one of those locations can be assigned 
 to that demand.
-For each assignment $(d, l)$, $l \in d^L$.
+For each assignment $(d, l)$, $l \in L_d$.
 
 \subsubsection{No location should be assigned twice for the same period}
 
 As with machines, locations must be assigned only once per time period.
 For every two location assignments $(d_1, l_1)$ and $(d_2, l_2)$, if $l_1 = l_2$ then $d_1$ cannot overlap with $d_2$
-($d_1^T \cap d_2^T = \varnothing $).
+($T_{d_1} \cap T_{d_2} = \varnothing $).
 
 
 \subsection{Soft constraints}

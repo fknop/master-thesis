@@ -62,7 +62,7 @@ the number of dummy variables assigned to one.
   solutions.
 
   \begin{align}
-    \sum_{i \in W} w_{ijkl} + d_{jkl} = 1, && \forall k \in D, j \in d_k^T, l \in d_k^P & \label{wc1}
+    \sum_{i \in W} w_{ijkl} + d_{jkl} = 1, && \forall k \in D, j \in T_{d_k}, l \in P_{d_k} & \label{wc1}
   \end{align}
 
 
@@ -117,7 +117,7 @@ One worker can only work at one position per time period. For each worker, we ad
 over each time period. This sum must be less than or equal to one to make sure a worker works at most once in the period.
 
 \begin{align}
-  \sum_{k \in D} \sum_{l \in d_k^P} w_{ijkl} \leq 1, && \forall i \in W, j \in T & \label{wc2} 
+  \sum_{k \in D} \sum_{l \in P_{d_k}} w_{ijkl} \leq 1, && \forall i \in W, j \in T & \label{wc2} 
 \end{align}
 
 
@@ -126,11 +126,11 @@ over each time period. This sum must be less than or equal to one to make sure a
 Some resources (workers, locations, demands) cannot be assigned in some time periods. We need to set the variables to 0 if this is the case.
 
 \begin{align}
-  t_j \notin d^T_{k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D &\label{wc3} \\
-  t_j \notin w^T_{i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W &\label{wc4} \\
-  t_j \notin d^T_{k} \implies \forall l \ d_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} \\ 
-  l_i \notin d^L_j \implies l_{ij} = 0, && \forall i \in L, j \in D& \label{lc1} \\ 
-  m_i \notin d^M_j \implies m_{ij} = 0, && \forall i \in M, j \in D& \label{mc1} 
+  t_j \notin T_{d_k} \implies \forall i, l \ w_{ijkl} = 0,  && \forall j \in T , k \in D &\label{wc3} \\
+  t_j \notin T_{w_i} \implies \forall k, l \ w_{ijkl} = 0, && \forall j \in T, i \in W &\label{wc4} \\
+  t_j \notin T_{d_k} \implies \forall l \ d_{jkl} = 0,  && \forall j \in T , k \in D &\label{sc1} \\ 
+  l_i \notin L_{d_j} \implies l_{ij} = 0, && \forall i \in L, j \in D& \label{lc1} \\ 
+  m_i \notin M_{d_j} \implies m_{ij} = 0, && \forall i \in M, j \in D& \label{mc1} 
 \end{align}
 
 
@@ -140,7 +140,7 @@ For each incompatibility $(i, c) \in I_{wc}$, we set every worker variables of w
 demand is $c$ to zero.
 
 \begin{align}
-  d^c_{k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D &\label{wc6}
+  c_{d_k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D &\label{wc6}
 \end{align}
 
 \subsubsection{Incompatibilities between workers}
@@ -149,7 +149,7 @@ For each incompatibility, at each demand, two workers cannot have both their var
 We define that the sum over all the positions of the two incompatible workers must be lower than two.
 
 \begin{align}
-  \sum_{l \in d^P_k} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{ww}}, j \in T, k \in D &\label{wc5}
+  \sum_{l \in P_{d_k}} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{w_1w_2}}, j \in T, k \in D &\label{wc5}
 \end{align}
 
 
@@ -198,7 +198,7 @@ These constraints ensure that no worker is working for a position at which he is
 $W_{d^{s_l}_k}$ defines the set of workers that satisfy skill(s) $s_l$ of demand $k$. 
 
 \begin{align}
-  w_{ijkl} = 0, && \forall j \in T, k \in D, l \in d^P_k, i \in W \setminus W_{d^{s_l}_k}  \label{wc6}
+  w_{ijkl} = 0, && \forall j \in T, k \in D, l \in P_{d_k}, i \in W \setminus W_{S_{d_k}^l}  \label{wc6}
 \end{align}
 
 \subsubsection{Additional skills must be satisfied}
@@ -207,7 +207,7 @@ An additional skill must be satisfied by at least one worker in a team. We sum
 over all the workers that satisfy the skill to check if at least one is working in the team.
 
 \begin{align}
-  \sum_{l \in d_k^P} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in d^{S^+}_k, i \in W_{d^{S^+}_k}& \label{wc8}
+  \sum_{l \in P_{d_k}} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in S^{+}_{d_k}, i \in W_{S^{+}_{d_k}}& \label{wc8}
 \end{align}
 
 
@@ -216,7 +216,7 @@ over all the workers that satisfy the skill to check if at least one is working 
 For each demand that requires a location, we sum over all the location variables for this demand and check if only one is assigned.
 
 \begin{align}
-  |d^L_j| > 0 \implies \sum_{i \in L} l_{ij} = 1, && \forall j \in D& \label{lc2}
+  |L_{d_j}| > 0 \implies \sum_{i \in L} l_{ij} = 1, && \forall j \in D& \label{lc2}
 \end{align}
 
 \subsubsection{No location should be assigned to overlapping demands}
@@ -236,11 +236,11 @@ In the set of machines $M$, we can have multiple machines equal to the same valu
 We define $M_k \subseteq M$ the set of all machines in $M$ equal to $k$.
 
 \begin{align}
-  \sum_{i \in M_k} m_{ij} = | \{ m \mid m \in d_j^M, m = k \} |, && j \in D, k \in d^M_j \label{mc2}
+  \sum_{i \in M_k} m_{ij} = | \{ m \mid m \in M_{d_j}, m = k \} |, && j \in D, k \in M_{d_j} \label{mc2}
 \end{align}
 
 
-As an example, let us take a demand $d_0$ with $d_0^M = \{ 1, 1, 2, 3 \}$. This demand needs 
+As an example, let us take a demand $d_0$ with $M_{d_0} = \{ 1, 1, 2, 3 \}$. This demand needs 
 two machines of type $1$, one machine of type $2$ and one machine of type $3$.
 Let us now imagine that we have in total three machines of type 1, two machines of type 2 and one machine of type 3.
 We have six variables associated with this demand: $m_{00}, \dots, m_{50}$ with 
@@ -309,8 +309,8 @@ to two overlapping demands.
 These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ variable.
 
 \begin{align}
-  w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in d^P_k &\label{binary1} \\
-  d_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in d^P_k& \label{binary2} \\
+  w_{ijkl} \in \{0, 1\}, && \forall i \in W, j \in T, k \in D, l \in P_{d_k} &\label{binary1} \\
+  d_{jkl} \in \{0, 1\}, && \forall j \in T, k \in D, l \in P_{d_k}& \label{binary2} \\
   m_{ij} \in \{0, 1\}, && \forall i \in M, j \in D& \label{binary3} \\ 
   l_{ij} \in \{0, 1\}, && \forall i \in L, j \in D& \label{binary4} 
 \end{align}
@@ -326,10 +326,10 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
 \begin{subequations}
   \label{obj}
   \begin{align}
-    \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in d^P_k} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) \label{obj:1} \\ 
+    \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in  P_{d_k}} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) \label{obj:1} \\ 
       + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj:3} \\ 
       + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} d_{jkl} \label{obj:2} \\ 
-     \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in d^P_j} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
+     \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in  P_{d_k}} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
                          & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \label{penalties:mip} \nonumber
   \end{align}
 \end{subequations}

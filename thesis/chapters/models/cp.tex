@@ -51,7 +51,7 @@ possible workers. Let $W_{d^{s_k}_j} \subseteq W$ be the subset of workers that 
 
 \begin{equation}
   \label{wdomain}
-  w_{ijk} \in W_{d^{s_k}_j} \cap \{ w \mid t_i \in w^T \} \cup \{ \sigma \}, \forall j \in D, i \in d^T_j, k \in d^P_j
+  w_{ijk} \in W_{S_{d_j}^{k}} \cap \{ w \mid t_i \in T_w \} \cup \{ \sigma \}, \forall j \in D, i \in T_{d_j}, k \in P_{d_j}
 \end{equation}
 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
@@ -62,14 +62,14 @@ For each required machine in a demand, we take all possible machines of this typ
 
 \begin{equation}
   \label{mdomain}
-  m_{ij} \in \{ m \mid m \in M, m = d_i^{M_j}  \}, \forall i \in D, j \in |d_i^M|
+  m_{ij} \in \{ m \mid m \in M, m = m_j, m_j \in M_{{d_i}}  \}, \forall i \in D, j \in |M_{d_i}|
 \end{equation}
 
 For each location of a demand, the domain is the possible locations of that demand.
 
 \begin{equation}
   \label{ldomain}
-  l_i \in d_i^L, \forall i \in D
+  l_i \in L_{d_i}, \forall i \in D
 \end{equation}
 
 
@@ -89,7 +89,7 @@ the constraint propagation.
    & d_i \notin v \ \land \ d_j \ \notin v \implies d_i \neq d_j \ \forall i \neq j \}
 \end{align*}
 
-We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in d_j^P \}$ be the set of all worker variables for period $i$. For each period, we define:
+We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in P_{d_j} \}$ be the set of all worker variables for period $i$. For each period, we define:
 
 \begin{equation}
   \texttt{alldifferent\_except}(X_i, \{ \sigma \}), \forall i \in T
@@ -102,7 +102,7 @@ Clients are statically assigned to demands, we can solve this constraint by addi
 a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
-  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land d^c = c \}, k \in d_j^P
+  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land c_d = c \}, k \in P_{d_j}
 \end{equation}
 
 \subsubsection{Incompatibilities between workers}
@@ -111,8 +111,8 @@ A worker might have an incompatibility with another worker or a set of workers.
 Unlike the worker-client incompatibilities, we cannot solve this constraint with a series of \texttt{not\_equal} constraints. We instead use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
-These combinations are expressed by the table $I_{ww}$. 
-We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k \in d_j^P, l \in d_j^P, k \neq l \}$ 
+These combinations are expressed by the table $I_{w_1w_2}$. 
+We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k, l \in P_{d_j}, k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
 \begin{equation}
@@ -133,10 +133,10 @@ the sum states that at least one worker needs to be assigned.
 Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
 
 \begin{align}
-  &\texttt{gcc}(\{ w_{ijk} \mid k \in d^P_j \}, o_{ijs}) \\ 
+  &\texttt{gcc}(\{ w_{ijk} \mid k \in P_{d_j} \}, o_{ijs}) \\ 
   &\texttt{sum}(o_{ijs}) \geq 1 \\
   \text{with} \quad & o_{ijs} \in \{ 0, 1 \} \\
-  & \forall j \in D, s \in d^{S^{+}}, i \in d^T_j
+  & \forall j \in D, s \in S^{+}_{d_j}, i \in T_{d_j}
 \end{align}
 
 This is a different syntax for \texttt{gcc} from what we introduced before. This variant takes 
@@ -154,7 +154,7 @@ we add a \texttt{alldifferent} constraint with all the machine variables associa
 
 \begin{equation}
   \label{}
-  \texttt{alldifferent}(\{ m_{ij} \mid j \in |d_i^M| \} \cup \{ m_{kj} \mid j \in |d_k^M| \}), \forall i \in D, k \in d^O_i
+  \texttt{alldifferent}(\{ m_{ij} \mid j \in |M_{d_i}| \} \cup \{ m_{kj} \mid j \in |M_{d_k}| \}), \forall i \in D, k \in d^O_i
 \end{equation}
 
 \subsubsection{Locations can only be assigned once per period}
@@ -181,14 +181,14 @@ $v_r$ the total number of violations.
   \texttt{softgcc}(X, [r_{1_{min}}, \dots, r_{n_{min}}], [r_{1_{max}}, \dots, r_{n_{max}}], v_{r}) \label{cp:wrequirements} 
 \end{equation}
 
-Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ is 0 and $r_{max}$ is $|{r_w}^T| $ (i.e. the number of availabilities of that worker).
+Note that from a model point of view, if a worker does not have any requirement, $r_{min}$ is 0 and $r_{max}$ is $|T_{r_w}| $ (i.e. the number of availabilities of that worker).
 
 
 \subsubsection{Minimizing the number of dummy workers}
 
 A solution might not always be possible, leading to a partial solution containing dummy workers.
 We defined this dummy worker by the value $\sigma$. This is again a case of soft constraint where 
-we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations.
+we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations and $X$ be again the entire set of variables.
 
 
 \begin{equation}
@@ -205,12 +205,12 @@ in that range, hence only $\sigma$ in our case.
 
 We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:dummy}) as our working requirements and dummy worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
-of different workers working for demand $j$ at position $k$ throughout the periods $d_j^T$. We use a 
+of different workers working for demand $j$ at position $k$ throughout the periods $T_{d_j}$. We use a 
 constraint called \texttt{at\_least\_nvalue} \cite{nvalue} to count this number.
-Let  $W_{jk} = \{ w_{ijk} \mid i \in d^T_j \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods for that demand:
+Let  $W_{jk} = \{ w_{ijk} \mid i \in T_{d_j} \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods for that demand:
 
 \begin{equation}
-  \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in d^P_j
+  \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in P_{d_j}
 \end{equation}
 
 We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations (change of worker).
@@ -220,7 +220,7 @@ in values, some objectives need bigger penalties when violated. This is the case
 We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
 
 \begin{equation}
-  \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in D^P_j} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
+  \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in P_{d_j}} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
 \end{equation}
 
 \begin{equation}
@@ -263,8 +263,8 @@ for the most available worker. This value heuristic will in practice find soluti
 Let us take an example to show how this heuristic works in practice, let us define 
 $w_1$, $w_2$ and $w_3$, three possible workers for two demands $d_1$ and $d_2$ that only need one worker each.
 The availabilities are defined as
-$w_1^T = \{ 0, 1, 2 \}$, $w_2^T = \{ 0, 2 \}$, $w_3^T = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
-$d_1^T = \{ 0, 1, 2 \}$, $d_2^T = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can see that worker 
+$T_{w_1} = \{ 0, 1, 2 \}$, $T_{w_2} = \{ 0, 2 \}$, $T_{w_3} = \{ 0, 1, 2, 3, 4\}$ and the demand occurrences as 
+$T_{d_1} = \{ 0, 1, 2 \}$, $T_{d_2} = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can see that worker 
 $w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand is as follows:
 
 \begin{align*}
@@ -285,9 +285,9 @@ we can reorder values at each value selection to select the best worker in the c
 To achieve this, we need to store some state during the search that will backtrack automatically.
 
 \begin{enumerate}
-  \item $occ_{wdp}$: the number of times worker $w$ already works for position $p$ of demand $d$.
-  \item $occ_{w}$: the number of times worker $w$ already works in any demands.
-  \item $a_{w} \subseteq w^T$: the set of remaining availabilities of the worker $w$.
+  \item $occ_{wdp} \in \mathbb{N}$: the number of times worker $w$ already works for position $p$ of demand $d$.
+  \item $occ_{w} \in \mathbb{N}$: the number of times worker $w$ already works in any demands.
+  \item $a_{w} \subseteq T_w$: the set of remaining availabilities of the worker $w$.
 \end{enumerate}
 
 We now have three levels of ordering in the heuristic:
@@ -387,7 +387,7 @@ our best solution. We discuss and compare these relaxations in \autoref{chapter:
 \label{cp:volns}
 
 Our problem uses a multi-objective (\ref{cp:objective}) model. 
-Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in D^P_j} N_{jk}}$
+Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in P_{d_j}} N_{jk}}$
 and $o_4$ is the original weighted sum described in (\ref{cp:objective}).
 
 
