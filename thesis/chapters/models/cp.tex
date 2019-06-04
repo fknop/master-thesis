@@ -111,12 +111,12 @@ A worker might have an incompatibility with another worker or a set of workers.
 Unlike the worker-client incompatibilities, we cannot solve this constraint with a series of \texttt{not\_equal} constraints. We instead use a constraint 
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
-These combinations are expressed by the table $I_{w_1w_2}$. 
+These combinations are expressed by the table $I_{w}$. 
 We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k, l \in P_{d_j}, k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
 \begin{equation}
-  \texttt{negative\_table}(x, y, I_{ww}),  \forall (x, y) \in P_{ij}
+  \texttt{negative\_table}(x, y, I_{w}),  \forall (x, y) \in P_{ij}
 \end{equation}
 
 In practice, we can slightly reduce the number of constraints by checking first if each pair of workers are indeed available at these positions.
