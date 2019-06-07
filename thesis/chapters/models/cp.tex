@@ -102,7 +102,7 @@ Clients are characteristics of the demands, we can solve this constraint by addi
 a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
-  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land c_d = c \}, k \in P(d_j)
+  \texttt{not\_equal}(w_{ijk}, w), \forall \langle w, c\rangle \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land c_d = c \}, k \in P(d_j)
 \end{equation}
 
 \subsubsection{Incompatibilities between workers}

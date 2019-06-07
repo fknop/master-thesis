@@ -136,11 +136,11 @@ Some resources (workers, locations, demands) cannot be assigned in some time per
 
 \subsubsection{Incompatibilities between workers and clients}
 
-For each incompatibility $(i, c) \in I_{wc}$, we set every worker variables of worker $i$ if the client of the 
+For each incompatibility $\langle i, c\rangle \in I_{wc}$, we set every worker variables of worker $i$ if the client of the 
 demand is $c$ to zero.
 
 \begin{align}
-  c_{d_k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {(i, c) \in I_{wc}}, j \in T, k \in D &\label{wc6}
+  c_{d_k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {\langle i, c\rangle \in I_{wc}}, j \in T, k \in D &\label{wc6}
 \end{align}
 
 \subsubsection{Incompatibilities between workers}
@@ -149,7 +149,7 @@ For each incompatibility, for each demand, two workers cannot have both their va
 We define that the sum over all the positions of the two incompatible workers must be lower than two.
 
 \begin{align}
-  \sum_{l \in P(d_k)} w_{ajkl} + w_{bjkl} < 2, &&  \forall {(a, b) \in I_{w}}, j \in T, k \in D &\label{wc5}
+  \sum_{l \in P(d_k)} w_{ajkl} + w_{bjkl} < 2, &&  \forall {\langle a, b\rangle \in I_{w}}, j \in T, k \in D &\label{wc5}
 \end{align}
 
 

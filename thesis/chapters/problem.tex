@@ -26,9 +26,9 @@ Our resource allocation problem consists of:
   \item[$-$] A list of skills ($s \in S$).
   \item[$-$] A list of locations ($l \in L$).
   \item[$-$] A list of machines ($m \in M$).
-  \item[$-$] A list of incompatibilities between workers ($(w_1, w_2) \in I_{w} \mid w_1, w_2 \in W$).
+  \item[$-$] A list of incompatibilities between workers ($\langle w_1, w_2\rangle \in I_{w} \mid w_1, w_2 \in W$).
   Two incompatible workers cannot work with each other.  
-  \item[$-$] A list of incompatibilities between workers and clients ($(w, c) \in I_{wc}$).
+  \item[$-$] A list of incompatibilities between workers and clients ($\langle w, c\rangle \in I_{wc}$).
   A worker incompatible with a client cannot work for that client.
 \end{itemize}
 
@@ -63,28 +63,29 @@ Each worker has:
 \end{itemize}
 
 
-This type of staff scheduling problem can be seen as a variant of the 
-well known \emph{Nurses Scheduling Problem} (NSP) \cite{Burke2004}. 
-This type of problem often contains hard constraints to state restrictions 
-and soft constraints to state preferences. 
+This type of problem can be seen as a variant of the 
+well known nurses scheduling problem (\texttt{NSP}) \cite{Burke2004}. 
+These problems often contain hard constraints to state restrictions 
+and soft constraints to state preferences and to minimize violations.
 
 
 
 
 Our goal is to assign workers to multi-skill positions as well as machines and locations to a list of demands over the planning period.
-Each resource (i.e. worker, machine, location) can only be assigned once per time period and needs to satisfy all the constraints stated by the demand. 
-% The possible objective is to assign workers in such a way that they work for the longest time possible at the same position.
+Each resource (i.e. worker, machine, location) must satisfy all the constraints described in \autoref{problem:constraints}.
+
 
 \section{Constraints}
+\label{problem:constraints}
 
 To describe the problem constraints, we define three types of assignments:
 
 \begin{itemize}
-  \item Worker assignment: we represent this with a 4-tuple $(t, d, p, w)$ where the worker $w$ is assigned to position $p$ of demand $d$ at time $t$.
-  \item Machine assignment: we represent this assignment with a 2-tuple $(d, m)$ where the machine $m$ is assigned to the 
+  \item $A_w$: set of worker assignments. We represent each assignment with a 4-tuple $\langle t, d, p, w\rangle$ where the worker $w$ is assigned to position $p$ of demand $d$ at time $t$.
+  \item $A_m$: set of machine assignments. We represent each assignment with a 2-tuple $\langle d, m\rangle$ where the machine $m$ is assigned to the 
         demand $d$ for the entire duration of that demand.
-  \item Location assignment: we represent this assignment 
-        with a 2-tuple $(d, l)$ where the location $l$ is assigned to the demand $d$ for the entire duration 
+  \item $A_l$: set of location assignments. We represent each assignment 
+        with a 2-tuple $\langle d, l\rangle$ where the location $l$ is assigned to the demand $d$ for the entire duration 
         of that demand.
 \end{itemize}
 
@@ -94,77 +95,110 @@ To describe the problem constraints, we define three types of assignments:
 
 Each worker has a defined set of availabilities and cannot be assigned to a demand when 
 unavailable.
-For each worker assignment $(t, d, p, w)$, $t \in T_w$.
+
+\begin{equation*}
+  t \in T_w, \ \forall \ \langle t, d, p, w\rangle \in A_w
+\end{equation*}
 
 \subsubsection{No worker should be assigned to a demand which is not occurring}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
 occurring. 
-For each worker assignment $(t, d, p, w)$, $t \in T_d$.
+
+\begin{equation*}
+  t \in T_d, \ \forall \ \langle t, d, p, w\rangle \in A_w
+\end{equation*}
 
 \subsubsection{No worker can be assigned twice for the same period} 
 
 A worker cannot do the work of two different workers at the same time.
 Hence, a worker can only work at most once per time period.
-For every two worker assignments $(t_1, d_1, p_1, w_1)$ and $(t_2, d_2, p_2, w_2)$, if $t_1 = t_2$ then $w_1 \neq w_2$.
+For every two worker assignments, there cannot be a worker assigned twice for the same time period.
+
+\begin{equation*}
+  w_1 \neq w_2, \ \forall \ \langle t, d_1, p_1, w_1\rangle \in A_w,  \langle t, d_2, p_2, w_2\rangle \in A_w
+\end{equation*}
 
 \subsubsection{Each demand has a required number of workers}
 
 Each demand needs a number of workers to be satisfied. 
 For each time period in which a demand is occurring, it should have the required 
-number of workers assigned to it.
-For each demand $d$, there exists $n_d$ worker assignments. 
-For every two assignments for $d$, $(t_1, d, p_1, w_1)$ and $(t_2, d, p_2, w_2)$: if $t_1 = t_2$ then $p_1 \neq p_2$.
+number of workers $n_d$ assigned to it.
+
+\begin{equation*}
+  |\{ \langle t, d, p, w\rangle \mid \langle t, d, p, w\rangle \in A_w \}| \ = n_d, \ \forall \ d \in D, t \in T_d
+\end{equation*}
+
+
 
 \subsubsection{Each assignment must respect skill restrictions}
 
 Each position of a demand might require skills to be satisfied. 
 To be assigned to that position, a worker must have the required skills. 
 A worker can also have more skills than the required skills by the position.
-For each assignment $(t, d, p, w)$, $s_{d,p} \in S_w$.
+
+\begin{equation*}
+  s_{d,p} \in S_w, \ \forall \ \langle t, d, p, w\rangle \in A_w
+\end{equation*}
 
 \subsubsection{Worker-worker incompatibilities}
 
 Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
-For each incompatibility $(w_1, w_2) \in I_{w_1w_2}$ and for each worker assignments for time $t$ and demand $d$,
-there cannot exist two assignments $(t, d, p_1, w_1)$ and $(t, d, p_2, w_2)$.
+
+\begin{equation*}
+  d_1 \neq d_2, \ \forall \ \langle w_1, w_2\rangle \in I_w, \langle t, d_1, p_1, w_1\rangle \in A_w,  \langle t, d_2, p_2, w_2\rangle \in A_w
+\end{equation*}
+
 
 \subsubsection{Worker-client incompatibilities}
 
 A worker and a client might be incompatible with each other. 
 If this is the case, the worker must not be assigned at a demand for such client.
-For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, p, w)$ where 
-$c_d = c$.
+
+
+\begin{equation*}
+  c_d \neq c, \ \forall \ \langle w, c \rangle \in I_{wc}, \langle t, d, p, w\rangle \in A_w
+\end{equation*}
+
 
 \subsubsection{The required machines must always be assigned}
 
 A demand has machine needs. Such machines should always be assigned 
 for a demand to be satisfied.
-For each required machine, there must exist one machine assignment $(d, m)$ where $m$ is the required machine.
 
+\begin{equation*}
+  \exists \ \langle d, m \rangle \in A_m, \ \forall \ d \in D, m \in M_d
+\end{equation*}
 
 \subsubsection{No machines should be assigned twice for the same period}
 
 A machine is assigned for the entirety of a demand. Moreover, it cannot be assigned twice 
-for the same period. In other words, it cannot be assigned for two overlapping (in time) demands.
-For every two machine assignments $(d_1, m_1)$ and $(d_2, m_2)$, if $m_1 = m_2$ then $d_1$ cannot overlap with $d_2$
-($T_{d_1} \cap T_{d_2} = \varnothing $).
+for the same period. In other words, it cannot be assigned for two overlapping demands in time.
+We define the set of overlapping demand with $O(d) = \{ d_o \mid T_{d_o} \cap T_d \neq \varnothing, \forall \ d_o \in D, d_o \neq d \}$
+
+\begin{equation*}
+  m_1 \neq m_2, \ \forall \ d \in D, d_o \in O(d), \langle d, m_1\rangle \in A_m, \langle d_o, m_2\rangle \in A_m
+\end{equation*}
 
 
 \subsubsection{The location assigned must be in the set of possible locations}
 
 A demand has a set of possible locations. Only one of those locations can be assigned 
 to that demand.
-For each assignment $(d, l)$, $l \in L_d$.
+
+\begin{equation*}
+  l \in L_d, \ \forall \ \langle d, l\rangle \in A_l
+\end{equation*}
 
 \subsubsection{No location should be assigned twice for the same period}
 
 As with machines, locations must be assigned only once per time period.
-For every two location assignments $(d_1, l_1)$ and $(d_2, l_2)$, if $l_1 = l_2$ then $d_1$ cannot overlap with $d_2$
-($T_{d_1} \cap T_{d_2} = \varnothing $).
 
+\begin{equation*}
+  l_1 \neq l_2, \ \forall \ d \in D, d_o \in O(d), \langle d, l_1\rangle \in A_l, \langle d_o, l_2\rangle \in A_l
+\end{equation*}
 
 \subsection{Soft constraints}
 
