@@ -161,19 +161,12 @@ We can change the filtering dynamically during the search before each restart de
 
 The backtracking algorithm uses two heuristics for its search. One heuristic chooses the variable while the other chooses 
 the value for the previously selected variable. Good heuristics can drive the search quickly to good solutions. 
-We present in \autoref{section:mipmodel} a value heuristic created for the needs of our staff scheduling problem.
+We present in \autoref{section:mipmodel} a value heuristic created for the needs of the problem.
 
 
 One of the biggest principle used for variable ordering is the first-fail principle. 
 This principle states that the search should first select the variable that most likely leads to 
 an inconsistency. Multiple heuristics follow this principle, the most simple being the smallest domain ordering.
-
-% \subsubsection{Conflict Ordering Search}
-
-% Conflict Ordering Search (COS) \cite{Gay:COS} is a variable ordering heuristic that 
-% reorders variables based on the number of conflicts that happen during the search.
-% It is a variant to the Last Conflict heuristic that selects the variable which caused the last conflict first.
-% COS was shown to be the most performant on scheduling problems.
 
 
 

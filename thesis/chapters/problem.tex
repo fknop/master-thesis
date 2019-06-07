@@ -16,12 +16,6 @@ as industrial jobs. Working with disabled people means that there are special ne
 the work that each worker can do.
 
 
-
-% In our problem, we have a planning period with each time period equal in time and work demands with multi-skill requirements
-% happening in those periods. 
-% A demand can occur in multiple time periods and consists of a required number of workers, an eventual work location 
-% and additional resources like machines.
-
 Our resource allocation problem consists of:
 
 \begin{itemize}
@@ -44,8 +38,13 @@ Each demand has:
   \item[$-$] A client ($c_d \in C$).
   \item[$-$] A given set of time periods ($T_d \subseteq T$).
   \item[$-$] A required number of workers per period ($n_d \in \mathbb{N}$).
+      This number translates into $n_d$ positions in the demand. 
+      $P(d)$ describes the set of positions from $0$ through $n_d - 1$. 
   \item[$-$] Some skill requirements to be fulfilled by different workers ($S_d \subseteq S$).
   It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
+  Each position $p \in P(d)$ requires the skill $s_{d,p} \in S_d$. Each skill in the set $S_d$ may represent
+  multiple real-life skills. For example, if position $p$ needs to have someone who is a \emph{lifter} and a \emph{supervisor} at the same 
+  time, $s_{d,p} = lifter \land supervisor$.
   \item[$-$] Additional skill requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($S^{+}_d \subseteq S$).
   \item[$-$] A list of machines to perform the work ($M_d \subseteq M$).
   \item[$-$] An eventual list of possible locations where the demand can be performed ($L_d \subseteq L$).
@@ -57,6 +56,7 @@ Each worker has:
 
 \begin{itemize}
   \item[$-$] A list of skills (e.g. package lifter, supervisor, etc.) ($S_w \subseteq S$).
+             A worker $w$ can only work for a demand $d$ at position $p \in P(d)$ if $s_{d,p} \in S_w$. 
   \item[$-$] A list of availabilities at which the worker can work ($T_w \subseteq T$).  
   \item[$-$] A list of working requirements ($r \in R$). A requirement $r$ states that a worker $r_w$
   needs to work for a minimum of $r_{min}$ and maximum of $r_{max}$ times in the problem planning period.  
@@ -80,7 +80,7 @@ Each resource (i.e. worker, machine, location) can only be assigned once per tim
 To describe the problem constraints, we define three types of assignments:
 
 \begin{itemize}
-  \item Worker assignment: we represent this with a 4-tuple $(t, d, k, w)$ where the worker $w$ is assigned to position $k$ of demand $d$ at time $t$.
+  \item Worker assignment: we represent this with a 4-tuple $(t, d, p, w)$ where the worker $w$ is assigned to position $p$ of demand $d$ at time $t$.
   \item Machine assignment: we represent this assignment with a 2-tuple $(d, m)$ where the machine $m$ is assigned to the 
         demand $d$ for the entire duration of that demand.
   \item Location assignment: we represent this assignment 
@@ -94,20 +94,20 @@ To describe the problem constraints, we define three types of assignments:
 
 Each worker has a defined set of availabilities and cannot be assigned to a demand when 
 unavailable.
-For each worker assignment $(t, d, k, w)$, $t \in T_w$.
+For each worker assignment $(t, d, p, w)$, $t \in T_w$.
 
 \subsubsection{No worker should be assigned to a demand which is not occurring}
 
 A demand has a set of time periods in which it occurs,
 no workers should be assigned to that demand if the demand is not 
 occurring. 
-For each worker assignment $(t, d, k, w)$, $t \in T_d$.
+For each worker assignment $(t, d, p, w)$, $t \in T_d$.
 
 \subsubsection{No worker can be assigned twice for the same period} 
 
 A worker cannot do the work of two different workers at the same time.
 Hence, a worker can only work at most once per time period.
-For every two worker assignments $(t_1, d_1, k_1, w_1)$ and $(t_2, d_2, k_2, w_2)$, if $t_1 = t_2$ then $w_1 \neq w_2$.
+For every two worker assignments $(t_1, d_1, p_1, w_1)$ and $(t_2, d_2, p_2, w_2)$, if $t_1 = t_2$ then $w_1 \neq w_2$.
 
 \subsubsection{Each demand has a required number of workers}
 
@@ -115,26 +115,27 @@ Each demand needs a number of workers to be satisfied.
 For each time period in which a demand is occurring, it should have the required 
 number of workers assigned to it.
 For each demand $d$, there exists $n_d$ worker assignments. 
-For every two assignments for $d$, $(t_1, d, k_1, w_1)$ and $(t_2, d, k_2, w_2)$: if $t_1 = t_2$ then $k_1 \neq k_2$.
+For every two assignments for $d$, $(t_1, d, p_1, w_1)$ and $(t_2, d, p_2, w_2)$: if $t_1 = t_2$ then $p_1 \neq p_2$.
 
 \subsubsection{Each assignment must respect skill restrictions}
 
 Each position of a demand might require skills to be satisfied. 
 To be assigned to that position, a worker must have the required skills. 
 A worker can also have more skills than the required skills by the position.
+For each assignment $(t, d, p, w)$, $s_{d,p} \in S_w$.
 
 \subsubsection{Worker-worker incompatibilities}
 
 Workers might be incompatible with each other. Such workers cannot
 be assigned together at the same time period.
 For each incompatibility $(w_1, w_2) \in I_{w_1w_2}$ and for each worker assignments for time $t$ and demand $d$,
-there cannot exist two assignments $(t, d, k_1, w_1)$ and $(t, d, k_2, w_2)$.
+there cannot exist two assignments $(t, d, p_1, w_1)$ and $(t, d, p_2, w_2)$.
 
 \subsubsection{Worker-client incompatibilities}
 
 A worker and a client might be incompatible with each other. 
 If this is the case, the worker must not be assigned at a demand for such client.
-For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, k, w)$ where 
+For each incompatibility $(w, c) \in I_{wc}$, there cannot exist any worker assignments $(t, d, p, w)$ where 
 $c_d = c$.
 
 \subsubsection{The required machines must always be assigned}
@@ -169,24 +170,24 @@ For every two location assignments $(d_1, l_1)$ and $(d_2, l_2)$, if $l_1 = l_2$
 
 \subsubsection{Satisfy the most assignments possible}
 
-Each demand needs a required number of workers. However, we can assign a dummy worker to demands 
-and minimize the number of dummy workers. This is done in the case where there are not enough workers
-or no worker that satisfy a particular skill. From a modeling point of view, the hard constraint which states that 
-a demand must have a required number of workers is still satisfied with a dummy worker.
+A demand might not have enough workers or have impossible constraints. We need to be able to have 
+a final result in which the worker assignments are all fulfilled.
+For this to happen, we can assign a dummy worker to positions and minimize the number of times this dummy worker is 
+assigned. This dummy worker can work at every time period, has every skills, 
+and can work as many times as possible even in the same time period.
+
 
 \subsubsection{Contiguous shifts}
 
-A demand comprises of multiple positions over a period of time. 
-For each position, a worker should keep working at that position for the longest time possible. 
-We want to avoid the hassle of changing shift every time. 
-As this constraint is harder to solve, we express it as a soft constraint and minimize the number of 
-violations.
+A demand has multiple positions and these positions should keep the same worker over time to avoid the hassle for the workers of changing positions. In practice,
+this is an unreal requirement as not every worker will be available for the entire duration of the demand. 
+We instead minimize the number of different workers over time for each position.
 
 \subsubsection{Working requirements}
 
-Workers can have minimum and maximum working periods. We want to make sure 
+Workers can have minimum and maximum working requirements. We want to make sure 
 that these requirements are satisfied. However, as this is not always possible to solve, we 
-state this as a soft constraint.
+state this as a soft constraint and minimize the number of times a requirement is not met.
 
 \end{document}
 

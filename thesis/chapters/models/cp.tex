@@ -47,11 +47,11 @@ this worker by $\sigma \notin W$. The actual value of this worker does not matte
 
 The variables modeling already satisfies some constraints, like the number of required resources (i.e. worker, location, machine)
 per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
-possible workers. Let $W_{S_{d_j,k}} \subseteq W$ be the subset of workers that satisfy the $k$th skill (set of skills) of demand $d_j$.
+possible workers. Let $W_{s_{d_j,k}} \subseteq W$ be the subset of workers that satisfy the $k$th skill of demand $d_j$.
 
 \begin{equation}
   \label{wdomain}
-  w_{ijk} \in W_{S_{d_j,k}} \cap \{ w \mid t_i \in T_w \} \cup \{ \sigma \}, \forall j \in D, i \in T_{d_j}, k \in P_{d_j}
+  w_{ijk} \in W_{s_{d_j,k}} \cap \{ w \mid t_i \in T_w \} \cup \{ \sigma \}, \forall j \in D, i \in T_{d_j}, k \in P(d_j)
 \end{equation}
 
 Note that initializing the variables with a reduced set of values is semantically equivalent to adding a \texttt{not\_equal} constraint for each impossible value.
@@ -89,7 +89,7 @@ the constraint propagation.
    & d_i \notin v \ \land \ d_j \ \notin v \implies d_i \neq d_j \ \forall i \neq j \}
 \end{align*}
 
-We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in P_{d_j} \}$ be the set of all worker variables for period $i$. For each period, we define:
+We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in P(d_j) \}$ be the set of all worker variables for period $i$. For each period, we define:
 
 \begin{equation}
   \texttt{alldifferent\_except}(X_i, \{ \sigma \}), \forall i \in T
@@ -102,7 +102,7 @@ Clients are characteristics of the demands, we can solve this constraint by addi
 a series of \texttt{not\_equal} constraints for each incompatible worker-client pair.
 
 \begin{equation}
-  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land c_d = c \}, k \in P_{d_j}
+  \texttt{not\_equal}(w_{ijk}, w), \forall (w, c) \in I_{wc}, i \in T, j \in \{ d \mid d \in D \land c_d = c \}, k \in P(d_j)
 \end{equation}
 
 \subsubsection{Incompatibilities between workers}
@@ -112,7 +112,7 @@ Unlike the worker-client incompatibilities, we cannot solve this constraint with
 called \texttt{negative\_table}. This constraint is a type of \emph{Table Constraints} \cite{Henteryck:Table} which in general can
 express either the allowed or forbidden combinations of values. In this case, \texttt{negative\_table} expresses the forbidden combinations of values.
 These combinations are expressed by the table $I_{w}$. 
-We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k, l \in P_{d_j}, k \neq l \}$ 
+We add a \texttt{negative\_table} constraint for each pair of workers for a demand at one given time. Let $P_{ij} = \{ (w_{ijk}, w_{ijl}) \mid k, l \in P(d_j), k \neq l \}$ 
 be the permutations of worker variables for demand $j$ at period $i$:
 
 \begin{equation}
@@ -133,7 +133,7 @@ the sum states that at least one worker needs to be assigned.
 Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
 
 \begin{align}
-  &\texttt{gcc}(\{ w_{ijk} \mid k \in P_{d_j} \}, o_{ijs}) \\ 
+  &\texttt{gcc}(\{ w_{ijk} \mid k \in P(d_j) \}, o_{ijs}) \\ 
   &\texttt{sum}(o_{ijs}) \geq 1 \\
   \text{with} \quad & o_{ijs} \in \{ 0, 1 \} \\
   & \forall j \in D, s \in S^{+}_{d_j}, i \in T_{d_j}
@@ -154,7 +154,7 @@ we add a \texttt{alldifferent} constraint with all the machine variables associa
 
 \begin{equation}
   \label{}
-  \texttt{alldifferent}(\{ m_{ij} \mid j \in |M_{d_i}| \} \cup \{ m_{kj} \mid j \in |M_{d_k}| \}), \forall i \in D, k \in d^O_i
+  \texttt{alldifferent}(\{ m_{ij} \mid j \in |M_{d_i}| \} \cup \{ m_{kj} \mid j \in |M_{d_k}| \}), \forall i \in D, k \in O(d_i)
 \end{equation}
 
 \subsubsection{Locations can only be assigned once per period}
@@ -165,7 +165,7 @@ we add a \texttt{not_equal} constraint with the two associated location variable
 
 \begin{equation}
   \label{}
-  \texttt{not_equal}(l_{i}, l_{k}), \forall i \in D, k \in d^O_i
+  \texttt{not_equal}(l_{i}, l_{k}), \forall i \in D, k \in O(d_i)
 \end{equation}
 
 
@@ -210,7 +210,7 @@ constraint called \texttt{at\_least\_nvalue} \cite{nvalue} to count this number.
 Let  $W_{jk} = \{ w_{ijk} \mid i \in T_{d_j} \}$ be the set of worker variables for demand $j$ at position $k$ across all time periods for that demand:
 
 \begin{equation}
-  \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in P_{d_j}
+  \texttt{at\_least\_nvalue}(W_{jk}, N_{jk}) \ \forall j \in D, k \in P(d_j)
 \end{equation}
 
 We now have the number of different workers for each shift and we need to minimize the sum of all $N_{jk}$ to avoid perturbations (change of worker).
@@ -220,7 +220,7 @@ in priority, some objectives need bigger penalties when violated. This is the ca
 We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associated with our three sub-objectives.
 
 \begin{equation}
-  \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in P_{d_j}} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
+  \text{min} \quad \delta_0 \big( \sum_{j \in D} \sum_{k \in P(d_j)} N_{jk} \big) + \delta_1 v_r + \delta_2 v_{\sigma} \label{cp:objective}
 \end{equation}
 
 \begin{equation}
@@ -240,7 +240,7 @@ max degree heuristic while the value heuristic is a custom heuristic that select
 
 The variable heuristic used for the search is a custom max degree heuristic. 
 The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
-we also add the number of required skills for a position $k$ ($| S_{d,k} |$) to the existing degree of the variable. 
+we also add the number of required skills for a position $k$ to the existing degree of the variable. 
 As an example, if a variable $X$ has a degree of 3 and the position defined by this variable requires 2 different skills, the final degree will be 5.
 We also make sure that if a variable is of size two, it is always selected first to avoid having the dummy value $\sigma$ assigned to it by 
 propagation.
@@ -388,7 +388,7 @@ our best solution. We discuss and compare these relaxations in \autoref{chapter:
 \label{cp:volns}
 
 Our problem uses a multi-objective (\ref{cp:objective}) model. 
-Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in P_{d_j}} N_{jk}}$
+Let us define $o_1 = \text{min} \ v_{\sigma}$, $o_2 = {\text{min} \ v_r}$, $o_3 = {\text{min} \ \sum_{j \in D} \sum_{k \in P(d_j)} N_{jk}}$
 and $o_4$ is the original weighted sum described in (\ref{cp:objective}).
 
 

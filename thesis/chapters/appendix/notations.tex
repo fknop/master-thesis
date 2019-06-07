@@ -56,13 +56,13 @@
   T_d \subseteq T && \text{Periods in which demand occurs} \\ 
   c_d \in C && \text{Client of demand} \\ 
   S_d \subseteq S && \text{List of required skills} \\
-  S_{d,i} \in d^S && \text{The $i$th skill of $d^S$} \\ 
+  s_{d,i} \in S_d && \text{The $i$th skill (or set) of $S_d$} \\ 
   S^{+}_d \subseteq S && \text{List of additional skills} \\ 
-  S^{+}_{d,i} \in d^{S^+} && \text{The $i$th skill of $d^{S^+}$} \\ 
-  P_d \in \{ 0, \dots, n_d - 1 \} && \text{List of positions} \\
+  s^{+}_{d,i} \in S^{+}_d && \text{The $i$th skill (or set) of $S^{+}_d$} \\ 
   M_d \subseteq M && \text{List of required machines} \\ 
   L_d \subseteq L && \text{List of possible locations} \\
-  d^O = \{ d_i \mid T_{d_i} \cap T_d \neq \varnothing, \forall \ d_i \in D, d_i \neq d \} && \text{List of overlapping demands}
+  P(d) = \{ 0, \dots, n_d - 1 \} && \text{List of positions} \\
+  O(d) = \{ d_i \mid T_{d_i} \cap T_d \neq \varnothing, \forall \ d_i \in D, d_i \neq d \} && \text{List of overlapping demands}
 \end{align*}
 
 \paragraph{Working requirements}
