@@ -13,7 +13,7 @@ needed to model our problem and the constraints associated to them.
 
 \subsection{Variables}
 
-To represent our problem in MIP, we need three types of variables, one per resource.
+To represent our problem in \texttt{MIP}, we need three types of variables, one per resource and an additional type of variable for the dummy workers.
 
 
 
@@ -46,10 +46,10 @@ To represent our problem in MIP, we need three types of variables, one per resou
 \end{split}
 \end{equation*}
 
-This is, in fact, a binary Integer Programming model as every variable is a $\{0, 1\}$ integer.
+This is, in fact, a binary integer programming model as every variable is a $\{0, 1\}$ integer.
 
 As solutions can be partial, we need to introduce a way to allow the absence of worker for a 
-given position. In MIP, we model this by having the variables $d_{jkl}$, $d$ for \emph{dummy}. This variable is one, if and only if all the 
+given position. In \texttt{MIP}, we model this by having the variables $d_{jkl}$, $d$ for \emph{dummy}. This variable is one, if and only if all the 
 corresponding worker variables ($w_{ijkl}, \forall_i$) are equal to zero. The goal is to minimize 
 the number of dummy variables assigned to one.
 
@@ -328,9 +328,9 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
   \begin{align}
     \textrm{min} \quad & \delta_0 \sum_{k \in D} \sum_{l \in  P(d_k)} \sum_{i \in W} min(\sum_{j \in T} w_{ijkl}, 1) \label{obj:1} \\ 
       + \ & \delta_1 \sum_{r \in R} \big( max(r_{min} - occ_{r_{w}}, 0) + max(r_{max} - occ_{r_{w}}, 0) \big)  \label{obj:3} \\ 
-      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in d^P_k} d_{jkl} \label{obj:2} \\ 
+      + \ &\delta_2 \sum_{j \in T}\sum_{k\in D}\sum_{l \in P(d_k)} d_{jkl} \label{obj:2} \\ 
      \textrm{with} \quad & occ_i = \sum_{j \in T} \sum_{k \in D} \sum_{l \in P(d_k)} w_{ijkl}, \quad \forall i \in W  \nonumber \\ 
-                         & \bm{\delta} = (\delta_0, \delta_1, \delta_2) \label{penalties:mip} \nonumber
+                         & \bm{\delta} = \langle\delta_0, \delta_1, \delta_2\rangle \label{penalties:mip} \nonumber
   \end{align}
 \end{subequations}
 \endgroup

@@ -9,7 +9,7 @@ In this chapter, we experiment with our solvers and discuss the results.
 \section{Benchmark process}
 
 We used our benchmark runner described in \autoref{section:benchmark-runner} to run our experiments.
-Once all the tested solvers have finished their run, we extract the results and create a JSON file 
+Once all the tested solvers have finished their run, we extract the results and create a \texttt{JSON} file 
 with the final results (objective, time, etc.). We can then create plots that make it 
 easier to analyze and discuss the results. Two of those plots are \emph{timelines} and \emph{performance profiles}.
 
@@ -95,7 +95,7 @@ of having a performance ratio within a factor $\tau$ of the best possible ratio.
 We can plot multiple performance profiles of different solvers, with different baselines, to compare them.
 \autoref{example-profile} shows an example of performance profiles with the objective as performance metric.
 These profiles represent the objective after a fixed amount of time 
-with three solvers MIP, CP and CP+MIP with CP as baseline.
+with three solvers \texttt{MIP}, \texttt{CP} and \texttt{CP+MIP} with \texttt{CP} as baseline.
 
 \begin{figure}
   \centering
@@ -108,8 +108,8 @@ with three solvers MIP, CP and CP+MIP with CP as baseline.
 
 We can see on the $y$ axis the percentage of instances solved by the solvers and on the $x$ axis the objective expressed
 as a ratio of the objective obtained by the baseline. We can see in this example that for around 60\% of instances,
-the objective is better or equal for the CP+MIP solver with an improvement of up to 10\% compared to the baseline.
-In the remaining 40\% of instances, we can see that the CP+MIP solver is worse also up to around 10\%.
+the objective is better or equal for the \texttt{CP+MIP} solver with an improvement of up to 10\% compared to the baseline.
+In the remaining 40\% of instances, we can see that the \texttt{CP+MIP} solver is worse also up to around 10\%.
 
 
 
@@ -141,7 +141,7 @@ All the experiments were performed on a UCLouvain server \cite{jabba} from the I
 The tests were run mostly during the night due to the long running times and to avoid having 
 perturbations from other users. However, as this machine has a high number of cores, running tests 
 during the day did not impact the results. 
-The server load was monitored through the INGI website \cite{jabba:monitoring} and the server did not show any sign of being overloaded.
+The server load was monitored through the INGI website \cite{jabba:monitoring} and the server did not show any sign of overload.
 
 \subsection{Benchmark instances}
 
@@ -260,7 +260,7 @@ We presented in \autoref{obj} and \autoref{penalties:cp} the penalties of our su
 We define for our experiments the following penalty vector:
 
 \begin{equation*}
-  \bm{\delta} = (\delta_0, \delta_1, \delta_2) = (1, 15, 100)
+  \bm{\delta} = \langle\delta_0, \delta_1, \delta_2\rangle = \langle1, 15, 100\rangle
 \end{equation*}
 
 \section{Constraint Programming}
@@ -396,46 +396,46 @@ one second, using \texttt{COS} or \texttt{MS} would be preferable.
 \subsubsection{Large neighborhood search}
 
 
-As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, LNS is used to expand the exploration
-of the search tree. We now compare our solver with the use of LNS and without. We also compare multiple 
+As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, \texttt{LNS} is used to expand the exploration
+of the search tree. We now compare our solver with the use of \texttt{LNS} and without. We also compare multiple 
 relaxation methods.
 
 
 \autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
-between a standard search and LNS. As expected, we can see that LNS outperforms the standard search 
+between a standard search and \texttt{LNS}. As expected, we can see that \texttt{LNS} outperforms the standard search 
 in almost every instance. 
 
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.55]{experiments/lns-profile.png}
-  \caption{Performance profiles of CP with and without Large Neighborhood Search with CP as baseline [216 instances/30s].}
+  \caption{Performance profiles of \texttt{CP} with and without Large Neighborhood Search with \texttt{CP} as baseline [216 instances/30s].}
   \label{experiments:lns}
 \end{figure}
 
 
 \autoref{experiments:lns-oot} shows that the standard search quickly gets stuck
-while the LNS manages to find better solutions quickly after relaxing the initial solution.
+while the \texttt{LNS} manages to find better solutions quickly after relaxing the initial solution.
 
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/lns-oot.png}
-  \caption{Timeline of CP with and without Large Neighborhood Search [216 instances/3s].}
+  \caption{Timeline of \texttt{CP} with and without Large Neighborhood Search [216 instances/3s].}
   \label{experiments:lns-oot}
 \end{figure}
 
 
 \FloatBarrier
 
-The trouble of the standard search to find good solutions is also due to the lack of VO-LNS (\autoref{cp:volns}) as 
-this method is an extension of the LNS framework. The standard search can only minimize the weighted sum of sub-objectives
+The trouble of the standard search to find good solutions is also due to the lack of \texttt{VO-LNS} (\autoref{cp:volns}) as 
+this method is an extension of the \texttt{LNS} framework. The standard search can only minimize the weighted sum of sub-objectives
 which causes issues when trying to minimize more important (more weighted) sub-objectives first.
 
 
 
 \subsubsection{Relaxations}
 
-We also experiment with multiple relaxations in the LNS framework. We compare:
+We also experiment with multiple relaxations within the \texttt{LNS} framework. We compare:
 
 \begin{itemize}
   \item Random relaxation 
@@ -517,12 +517,12 @@ the \texttt{MIP} solver underperforms for most instances. However, it outperform
   \label{experiments:solvers:profile}
 \end{figure}
 
-From \autoref{instances:mip}, we can observe that only small instances are best solved by the MIP solver. 
-This highlights the fact that MIP has trouble finding good objectives as the problem size grows.
-The problem size directly correlates with the number of binary variables of the MIP model. As an example,
+From \autoref{instances:mip}, we can observe that only small instances are best solved by the \texttt{MIP} solver. 
+This highlights the fact that \texttt{MIP} has trouble finding good objectives as the problem size grows.
+The problem size directly correlates with the number of binary variables of the \texttt{MIP} model. As an example,
 if the problem contains 50 demands over 15 periods with 300 workers and we have 3 workers per demand on average,
 we obtain 675.000 binary variables which is more than ten times the number of variables for small instances shown 
-in \autoref{instances:mip}. MIP is NP-complete and this high number of variables makes it hard for the solver to find good solutions.
+in \autoref{instances:mip}. \texttt{MIP} is \texttt{NP}-complete and this high number of variables makes it hard for the solver to find good solutions.
 
 
 \begin{table}[H]
@@ -572,8 +572,9 @@ The \texttt{MIP} solver performs a lot better when given an initial solution to 
 
 \autoref{experiments:solvers:oot} gives the objective per time for the three solvers. As expected from our previous results, the \texttt{MIP} solver does not 
 manage to find a good solution after the elapsed time. 
-However, the \texttt{CP} solver manages to find good solutions in less than one second. While the \texttt{CP+MIP} solver find a 
-better objective compared to the \texttt{CP} solver, it takes on average 10 seconds to do so.
+However, the \texttt{CP} solver manages to find good solutions in less than one second. 
+While the \texttt{CP} solvers finds a good solution quickly, the \texttt{CP+MIP} solver finds a better solution but takes on average ten seconds to catch up with \texttt{CP} solver.
+
 
 
 \begin{figure}

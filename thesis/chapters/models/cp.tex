@@ -8,9 +8,9 @@
 \section{Constraint Programming model}
 \label{section:cpmodel}
 
-We now present our Constraint Programming model. This model contains some differences
+We now present our Constraint Programming (\texttt{CP}) model. This model contains some differences
 with the mathematical model described in \autoref{section:mipmodel}.
-For example, a Constraint Programming model rarely contains binary variables to refer to multiple values 
+For example, a \texttt{CP} model rarely contains binary variables to refer to multiple values 
 of a domain. Instead, it uses integer variables having the entire domain. 
 Typically, binary variables $w_0, \dots, w_i, \dots, w_n$ where $i \in W$ and $w = i$ if $w_i = 1$ are equivalent to 
 one variable $w \in \{0, \dots, n\}$.
@@ -28,7 +28,7 @@ First, we need to express the set of workers for each demand at each time period
 \end{equation}
 
 (\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k$th position 
-with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in d^P_j$. The same reasoning is used for locations and machines:
+with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in P(d_j)$. The same reasoning is used for locations and machines:
 
 \begin{align}
     m_{ij} &\in M \label{cpmachinevariable} \\ 
@@ -225,7 +225,7 @@ We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associ
 
 \begin{equation}
   \label{penalties:cp}
-  \bm{\delta} = (\delta_0, \delta_1, \delta_2)
+  \bm{\delta} = \langle\delta_0, \delta_1, \delta_2\rangle
 \end{equation}
 
 
@@ -269,8 +269,8 @@ $T_{d_1} = \{ 0, 1, 2 \}$, $T_{d_2} = \{ 0, 1, 2, 3, 4 \}$. Intuitively, we can 
 $w_3$ should be assigned to $d_2$ and $w_1$ should be assigned to $d_1$. This is what the heuristic tries to achieve, the ordering for each demand is as follows:
 
 \begin{align*}
-  \texttt{mostavailable}(d_1) &= [w_1 = (3, 0), w_3 = (3, 2), w_2 = (2, 0)] \\ 
-  \texttt{mostavailable}(d_2) &= [w_3 = (5, 0), w_3 = (3, 0), w_2 = (2, 0)] \\ 
+  \texttt{mostavailable}(d_1) &= [w_1 = \langle3, 0\rangle, w_3 = \langle3, 2\rangle, w_2 = \langle2, 0\rangle] \\ 
+  \texttt{mostavailable}(d_2) &= [w_3 = \langle5, 0\rangle, w_3 = \langle3, 0\rangle, w_2 = \langle2, 0\rangle] \\ 
 \end{align*}
 
 First, we can see that $w_2$ is never considered in this case as it is not available enough. For $d_1$, both $w_1$ and $w_3$ have the 3 availabilities. However, 
@@ -379,8 +379,8 @@ $x_1$ is assigned the value $2$, we ignore the permutation $x_1 = 2, x_2 = 1$ be
 
 \subsubsection{Large Neighborhood Search}
 
-We use LNS to ensure that we explore as much of the search space as possible. 
-We used both Random Relaxation and Propagation Guided Relaxation \cite{Propagation:LNS} to relax 
+We use \texttt{LNS} to ensure that we explore as much of the search space as possible. 
+We used both random relaxation and propagation guided relaxation \cite{Propagation:LNS} to relax 
 our best solution. We discuss and compare these relaxations in \autoref{chapter:experiments}.
 
 

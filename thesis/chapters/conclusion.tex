@@ -28,16 +28,16 @@ It allows us to implement custom heuristics such as the one presented in \autore
 better solutions faster. 
 
 From the work presented in this thesis, we can conclude that Mixed Integer Programming and Constraint Programming both have their advantages and disadvantages.
-MIP has the advantage of having its search algorithms already implemented in the solver (e.g. Gurobi). There is no need 
+\texttt{MIP} has the advantage of having its search algorithms already implemented in the solver (e.g. Gurobi). There is no need 
 to implement additional heuristics which may be time consuming. However, this lack of knowledge about the problem makes 
 it harder to find solutions on bigger instances. Implementing complex constraints also complicates the model making it harder to understand. 
 
-The CP model offers a better expressiveness which makes it easier to understand. We can take advantage of the local search 
+The \texttt{CP} model offers a better expressiveness which makes it easier to understand. We can take advantage of the local search 
 framework the explore more of the search space. However, finding optimal solutions with LNS becomes harder because of 
-the nature of the search (i.e. restarts). CP with LNS is instead more efficient at finding good feasible solutions in a 
+the nature of the search (i.e. restarts). \texttt{CP} with LNS is instead more efficient at finding good feasible solutions in a 
 short amount of time.
 
-By taking the fast good feasible solution property from CP and the good optimization property from MIP, we can combine these two 
+By taking the fast good feasible solution property from \texttt{CP} and the good optimization property from \texttt{MIP}, we can combine these two 
 search methods and gain from the advantages of both models.
 
 Finally, we discuss in \ref{further-work} some improvements that could be made to our models and solvers.

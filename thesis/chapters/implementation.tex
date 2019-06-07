@@ -10,9 +10,9 @@ We also discuss some differences between the models and the implementation and s
 have the most performant solver.
 
 The implementation was done in Scala using 
-\emph{OscaR} (\ref{subsection:oscar}) as CP solver and
-\emph{Gurobi Optimizer} (\ref{subsection:gurobi}) as MIP solver. The general implementation 
-tries to keep the same API (Application Programming Interface) for the CP and MIP solvers with the only changes being optional options 
+\emph{OscaR} (\ref{subsection:oscar}) for the \texttt{CP} solver and
+\emph{Gurobi Optimizer} (\ref{subsection:gurobi}) for the \texttt{MIP} solver. The general implementation 
+tries to keep the same \texttt{API} (Application Programming Interface) for the \texttt{CP} and \texttt{MIP} solvers with the only change being optional options 
 that can be passed to it. 
 
 
@@ -20,13 +20,13 @@ that can be passed to it.
 \section{Input and output format}
 
 For consistency, both solvers take the same input format and return the same output format.
-We created a JSON (JavaScript Object Notation) Schema \cite{json:schema} to formulate our problems and solution assignments.
-Those schemas allow us to create a typed data structure for JSON objects. All the typing validation 
-is handled by the JSON Schema library \cite{playjson:validator}. A small example of JSON schema can be found in \autoref{json:example}. 
+We created a \texttt{JSON} (JavaScript Object Notation) Schema \cite{json:schema} to formulate our problems and solution assignments.
+Those schemas allow us to create a typed data structure for \texttt{JSON} objects. All the typing validation 
+is handled by the \texttt{JSON} Schema library \cite{playjson:validator}. A small example of \texttt{JSON} schema can be found in \autoref{json:example}. 
 This example defines a client structure which takes a required string property called \textit{name}.
 
 
-\begin{lstlisting}[language=json,firstnumber=1,caption={JSON Schema example},captionpos=b,label={json:example}]
+\begin{lstlisting}[language=json,firstnumber=1,caption={\texttt{JSON} Schema example},captionpos=b,label={json:example}]
   "client": {
     "type": "object",
     "properties": {
@@ -59,7 +59,7 @@ case class Problem(
 \section{Common solver API}
 
 Both solvers implement a \texttt{solve} function which takes the same set of parameters.
-This function can take generic options implemented by the subclasses (i.e. specific MIP or CP options).
+This function can take generic options implemented by the subclasses (i.e. specific \texttt{MIP} or \texttt{CP} options).
 The solve function returns a data structure containing a solution and the time spent in the solver and an optional solution.
 
 \begin{lstlisting}[style=scalaStyle,caption={Solver API},captionpos=b]
@@ -77,7 +77,7 @@ trait Search[T <: SearchOptions] {
 
 We used the Java API \cite{gurobi:java} of the Gurobi Optimizer in Scala to create our implementation. 
 The implementation did not change from the theoretical model presented in \autoref{section:mipmodel} as 
-MIP solvers are less flexible in their modeling abilities than CP solvers as we discuss later. The Gurobi solver 
+\texttt{MIP} solvers are less flexible in their modeling abilities than \texttt{CP} solvers as we discuss later. The Gurobi solver 
 comes with default parameters \cite{gurobi:parameters}, it is advised to keep default parameters as 
 changing them does not give much gain. Multiple different parameters were tested but as advised from the Gurobi website, 
 no change was noticed.
@@ -91,7 +91,7 @@ This is what happened with our model and the use of \texttt{softgcc} constraints
 
 The minimization of dummy workers described in (\ref{cp:dummy}) used a \texttt{softgcc} in the model.
 However, this constraint is slow to propagate in practice due to the high number of variables.
-Using a CPU profiler, we noticed the \texttt{softgcc} constraint took up to 20\% of the solver runtime. 
+Using a \texttt{CPU} profiler, we noticed the \texttt{softgcc} constraint took up to 20\% of the solver runtime. 
 OscaR proposes a variant of the \texttt{gcc} constraint which simply counts the number of occurrences of values.
 
 
@@ -188,11 +188,11 @@ map of probabilities to generate easier or harder instances. For example,
 the \texttt{assignSkill} value is responsible for the probability of a position to be assigned a skill. 
 We can increase this value if we want more skilled positions and vice-versa.
 
-We also needed to be able to reproduce instances, the \texttt{InstanceGenerator} API can 
+We also needed to be able to reproduce instances, the \texttt{InstanceGenerator} \texttt{API} can 
 take a seed parameter which defaults to $0$.
 
   
-\begin{lstlisting}[style=scalaStyle,caption={Instance generator API},captionpos=b]
+\begin{lstlisting}[style=scalaStyle,caption={Instance generator \texttt{API}},captionpos=b]
 class InstanceGenerator(val seed: Long = 0L) {
   def generate(options: InstanceOptions): Problem
 }
@@ -208,11 +208,11 @@ The generator tries as much as possible to create meaningful instances but it is
 \section{Benchmark runner}
 \label{section:benchmark-runner}
 
-A benchmark API is created on top of the instances generation API. The API takes an options structure (\autoref{benchmark:options}).
+A benchmark \texttt{API} is created on top of the instances generation \texttt{API}. The \texttt{API} takes an options structure (\autoref{benchmark:options}).
 The arrays \texttt{T}, \texttt{D} and \texttt{W} determine the sizes of the instances. The benchmark runner 
 will create instances with a combination of those parameters. For example, with the values in \autoref{benchmark:options},
-the benchmark runner creates 6 instances with the sizes: $(5, 30, 100)$, $(5, 50, 100)$, $(5, 30, 200)$, $(5, 50, 200)$, $(5, 30, 300)$ and $(5, 50, 300)$ with the 
-three values being $(T, D, W)$.
+the benchmark runner creates six instances with the sizes: $\langle5, 30, 100\rangle$, $\langle5, 50, 100\rangle$, $\langle5, 30, 200\rangle$, $(5, 50, 200\rangle$, $\langle5, 30, 300\rangle$ and $\langle5, 50, 300\rangle$ with the 
+three values being $\langle T, D, W\rangle$.
 
 \begin{lstlisting}[style=scalaStyle,label={benchmark:options},caption={Benchmark options},captionpos=b]
 trait BenchmarkOptions {
@@ -229,7 +229,7 @@ trait BenchmarkOptions {
 \end{lstlisting}
 
 We can specify a solution limit as well as a time limit. We can also repeat our benchmark and takes 
-the average of results. We can also have dry runs to warm up the JVM (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
+the average of results. We can also have dry runs to warm up the \texttt{JVM} (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
 we can specify the probabilities for our instances as explained in \autoref{section:instance-gen}.
 
 We then pass these options to our benchmark runner in addition to our solver functions. The runner then returns 

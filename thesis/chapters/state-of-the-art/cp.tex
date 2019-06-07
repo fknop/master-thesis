@@ -9,15 +9,15 @@ where relations between variables are stated as constraints to create a Constrai
 
 \paragraph{}
 
-A \emph{Constraint Satisfaction Problem} (CSP) consists of a set of $n$ variable, 
+A \emph{Constraint Satisfaction Problem} (\texttt{CSP}) consists of a set of $n$ variable, 
 $\{x_1, \dots, x_n \}$; a domain $D(x_i)$ of possible values for each variable $x_i$, 
 $1 \leq i \leq n$; and a collection of $m$ constraints $\{ C_1, \dots, C_m \}$. 
 Each constraint $C_j$, $1 \leq j \leq m$, is a constraint over some set of variables called the scheme 
 of the constraint. The size of this set is known as the arity of the constraint. 
 A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all the constraints. \cite{cp-definition}
 
-Problems are sometimes over-constrained and hard to solve with a CSP. In those cases, we can transform our 
-CSP to a Constraint Optimization Problem (COP) where we try to optimize one or multiple objectives coming 
+Problems are sometimes over-constrained and hard to solve with a \texttt{CSP}. In those cases, we can transform our 
+\texttt{CSP} to a Constraint Optimization Problem (\texttt{COP}) where we try to optimize one or multiple objectives coming 
 from the transformation of hard constraints into soft constraints.
 
 \subsection{Global constraints}
@@ -38,8 +38,9 @@ Those constraints can be decomposed into multiple simpler constraints but the fi
 is often worse than its global counterpart. 
 
 There also exists soft variants \cite{Regin:2000} of global constraints where a constraint is associated with 
-a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a CSP.
-Instead, the CSP is transformed into a \emph{Constraint Optimization Problem} (COP) where the number of violations is minimized.
+a number of violations. This is particularly useful for over-constrained problems which cannot be solved by a \texttt{CSP}.
+Instead, the \texttt{CSP} is transformed into a \texttt{COP} where the number of violations is minimized.
+
 \subsubsection{Alldifferent constraint}
 \label{sota:alldifferent}
 
@@ -103,9 +104,9 @@ The violation associated with this constraint is the sum of excess or shortage \
 A Constraint Programming solver can often get stuck in a search tree that does not lead to good solutions.
 We want instead to explore as much of the search space as possible. 
 
-Large Neighborhood Search (LNS) is a technique that makes use of the principles of \emph{Local Search}.
-LNS uses Constraint Programming as a tool to find solutions and local search to expand the exploration of the search space. 
-The LNS framework often goes as follows:
+Large Neighborhood Search (\texttt{LNS}) is a technique that makes use of the principles of local search.
+\texttt{LNS} uses Constraint Programming as a tool to find solutions and local search to expand the exploration of the search space. 
+The \texttt{LNS} framework often goes as follows:
 
 \begin{enumerate}
   \item Use Constraint Programming to find a solution 
@@ -133,20 +134,20 @@ usually solved by assigning more weight to more important objectives. However, t
 
 \paragraph{}
 
-Variable Objective Large Neighborhood Search (VO-LNS) \cite{Schaus:VOLNS} is an extension of LNS for multi-objective 
+Variable Objective Large Neighborhood Search (\texttt{VO-LNS}) \cite{Schaus:VOLNS} is an extension of \texttt{LNS} for multi-objective 
 problems which offers
 \begin{enumerate*}[label=(\roman*)]
   \item prioritization of sub-objectives;
   \item better pruning.
 \end{enumerate*}
-Each objective in the VO-LNS framework has three types of filtering available:
+Each objective in the \texttt{VO-LNS} framework has three types of filtering available:
 \begin{enumerate}
   \item \emph{No-Filtering}: The objective has no impact.
   \item \emph{Weak-Filtering}: When a solution is found, it has to be better or equal to the bound of the objective. 
   \item \emph{Strong-Filtering}: When a solution is found, it has to be strictly improving the bound of the objective.
 \end{enumerate}
 
-The VO-LNS formulation is expressed as follows:
+The \texttt{VO-LNS} formulation is expressed as follows:
 
 \begin{align*}
   \text{min} \quad & obj = (obj_1, \dots, obj_n, obj_{n+1}) \\
