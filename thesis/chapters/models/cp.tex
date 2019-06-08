@@ -62,7 +62,7 @@ For each required machine in a demand, we take all possible machines of this typ
 
 \begin{equation}
   \label{mdomain}
-  m_{ij} \in \{ m \mid m \in M, m \in M_{{d_i},j}  \}, \forall i \in D, j \in |M_{d_i}|
+  m_{ij} \in \{ m \mid m \in M, m = M_{{d_i},j}  \}, \forall i \in D, j \in 1..|M_{d_i}|
 \end{equation}
 
 For each location of a demand, the domain is the possible locations of that demand.
@@ -154,7 +154,7 @@ we add a \texttt{alldifferent} constraint with all the machine variables associa
 
 \begin{equation}
   \label{}
-  \texttt{alldifferent}(\{ m_{ij} \mid j \in |M_{d_i}| \} \cup \{ m_{kj} \mid j \in |M_{d_k}| \}), \forall i \in D, k \in O(d_i)
+  \texttt{alldifferent}(\{ m_{ij} \mid j \in M_{d_i} \} \cup \{ m_{kj} \mid j \in M_{d_k} \}), \forall i \in D, k \in O(d_i)
 \end{equation}
 
 \subsubsection{Locations can only be assigned once per period}
