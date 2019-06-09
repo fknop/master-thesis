@@ -7,7 +7,7 @@
 In this thesis, we presented an optimization problem for production planning 
 with resource allocation.
 
-We introduced two models that try to solve
+We introduced two models that solve
 this problem: a Mixed Integer Programming and a Constraint Programming model.
 The Constraint Programming model required the most work with custom heuristics that take into account knowledge of the problem.
 
@@ -60,5 +60,9 @@ machines by name. Our model preprocessing could be more complete to allow any pr
 Even though it already performs well, we could make 
 use of the self-adaptive large neighborhood search \cite{thomas:adaptive} to dynamically 
 and automatically change the relaxation method to the best available one during the search.
+
+\paragraph{Multi-objective search}: Our \texttt{CP} solver uses the \texttt{VO-LNS} framework to optimize sub-objectives separately.
+We could explore other approaches such as a \emph{Pareto} optimization.  
+
 \end{document}
 
