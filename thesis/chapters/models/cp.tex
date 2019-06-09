@@ -130,7 +130,7 @@ We use the \texttt{gcc} constraint coupled with a \texttt{sum} constraint.
 The \texttt{gcc} acts as a counter of occurrences for the workers that satisfy the skills,
 the sum states that at least one worker needs to be assigned.
 
-Let us define $o_{ijs}$ the occurrences of workers at time $i$ for demand $j$ in $W_s$ (the set of workers that satisfy skill $s$).
+Let us define $o_{ijs}$ the occurrences of workers ($\in W_s$) at time $i$ for demand $j$.
 
 \begin{align}
   &\texttt{gcc}(\{ w_{ijk} \mid k \in P(d_j) \}, o_{ijs}) \\ 
@@ -147,7 +147,7 @@ these occurrences sum to at least one.
 
 \subsubsection{Machines can only be assigned once per period}
 
-As machines can only be assigned once per period and are assigned for whole duration of the demand. We need 
+As machines can only be assigned once per period and are assigned for the whole duration of the demand. We need 
 to ensure that a machine is not assigned to two overlapping demands in time.
 For each pair of overlapping demands,
 we add a \texttt{alldifferent} constraint with all the machine variables associated to the two demands.
@@ -188,7 +188,7 @@ Note that from a model point of view, if a worker does not have any requirement,
 
 A solution might not always be possible, leading to a partial solution containing dummy workers.
 We defined this dummy worker by the value $\sigma$. This is again a case of soft constraint where 
-we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations and $X$ be again the entire set of variables.
+we use a \texttt{softgcc}. Let $v_{\sigma}$ be the total number of violations and $X$ be, again, the entire set of variables.
 
 
 \begin{equation}
