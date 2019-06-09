@@ -28,7 +28,7 @@ First, we need to express the set of workers for each demand at each time period
 \end{equation}
 
 (\ref{cpworkervariable}) is the worker working at time $i$ for demand $j$ at the $k$th position 
-with $t_i \in T$, $d_i \in D$, $t_i \in d_j^T$ and $k \in P(d_j)$. The same reasoning is used for locations and machines:
+with $t_i \in T$, $d_i \in D$, $t_i \in T_{d_j}$ and $k \in P(d_j)$. The same reasoning is used for locations and machines:
 
 \begin{align}
     m_{ij} &\in M \label{cpmachinevariable} \\ 
@@ -45,7 +45,7 @@ We add this value to every worker variable domain but ignore it during the const
 this worker by $\sigma \notin W$. The actual value of this worker does not matter as long as it does not belong to $W$. For simplicity, we define $\sigma = -1$.
 
 
-The variables modeling already satisfies some constraints, like the number of required resources (i.e. worker, location, machine)
+This modeling already satisfies some constraints, such as the number of required resources (i.e. worker, location, machine)
 per demand. We also satisfy the required skills and availabilities for each position by only initializing variables with the 
 possible workers. Let $W_{s_{d_j,k}} \subseteq W$ be the subset of workers that satisfy the $k$th skill of demand $d_j$.
 
@@ -89,10 +89,10 @@ the constraint propagation.
    & d_i \notin v \ \land \ d_j \ \notin v \implies d_i \neq d_j \ \forall i \neq j \}
 \end{align*}
 
-We use this constraint to ignore the $\sigma$ value from the propagation. Let $X_i = \{w_{ijk} \mid j \in D, k \in P(d_j) \}$ be the set of all worker variables for period $i$. For each period, we define:
+We use this constraint to ignore the $\sigma$ value from the propagation. For each period, we define:
 
 \begin{equation}
-  \texttt{alldifferent\_except}(X_i, \{ \sigma \}), \forall i \in T
+  \texttt{alldifferent\_except}( \{w_{ijk} \mid j \in D, k \in P(d_j) \}, \{ \sigma \}), \forall i \in T
 \end{equation}
 
 \subsubsection{Incompatibilities between workers and clients}
@@ -280,7 +280,7 @@ The search always considers $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
 \subsubsection{Dynamic Value Heuristic}
 
 The \emph{most available} heuristic works fairly well in practice as seen in \autoref{chapter:experiments}. 
-We can, however, improve it by making it more dynamic to the search. Instead of one static ordering at the start of the search,
+We can, however, improve it by making it adapt dynamically to the search. Instead of one static ordering at the start of the search,
 we can reorder values at each value selection to select the best worker in the current search tree.
 
 To achieve this, we need to store some state during the search that will backtrack automatically.

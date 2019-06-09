@@ -136,8 +136,8 @@ Some resources (workers, locations, demands) cannot be assigned in some time per
 
 \subsubsection{Incompatibilities between workers and clients}
 
-For each incompatibility $\langle i, c\rangle \in I_{wc}$, we set every worker variables of worker $i$ if the client of the 
-demand is $c$ to zero.
+For each incompatibility $\langle i, c\rangle \in I_{wc}$, we set every worker variables of worker $i$, if the client of the 
+demand is $c$, to zero.
 
 \begin{align}
   c_{d_k} = c \implies \forall l \ w_{ijkl} = 0, && \forall {\langle i, c\rangle \in I_{wc}}, j \in T, k \in D &\label{wc6}
@@ -145,7 +145,7 @@ demand is $c$ to zero.
 
 \subsubsection{Incompatibilities between workers}
 
-For each incompatibility, for each demand, two workers cannot have both their variables assigned to one. 
+For each incompatibility and each demand, two incompatible workers cannot have both their variables assigned to one. 
 We define that the sum over all the positions of the two incompatible workers must be lower than two.
 
 \begin{align}
@@ -188,7 +188,7 @@ We define that the sum over all the positions of the two incompatible workers mu
      (fv3.west) to [out=180,in=0] (M1-5-10.east);
   \end{tikzpicture}
 
-  \caption{Example of (\ref{wc5}) if $(w_1, w_2)$ and $(w_2, w_3)$ are incompatible pairs).}
+  \caption{Example of (\ref{wc5}) if $(w_1, w_2)$ and $(w_2, w_3)$ are incompatible pairs.}
   \label{wc5:visu}
 \end{figure}
 
@@ -203,11 +203,11 @@ $W_{s_{d_k,l}}$ defines the set of workers that satisfy the skill of demand $k$ 
 
 \subsubsection{Additional skills must be satisfied}
 
-An additional skill must be satisfied by at least one worker in a team. We sum 
+An additional skill must be satisfied by at least one worker in a team. For each additional skill, we sum 
 over all the workers that satisfy the skill to check if at least one is working in the team.
 
 \begin{align}
-  \sum_{l \in P(d_k)} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in S^{+}_{d_k}, i \in W_{S^{+}_{d_k}}& \label{wc8}
+  \sum_{i \in W_s} \sum_{l \in P(d_k)} w_{ijkl} \geq 1, && \forall j \in T, k \in D, s \in S^{+}_{d_k} & \label{wc8}
 \end{align}
 
 
@@ -232,11 +232,11 @@ We do this with a sum lower than or equal to one.
 \subsubsection{Machine assignments should be satisfied}
 
 For each demand, we check that each required machine is assigned to that demand.
-In the set of machines $M$, we can have multiple machines equal to the same value $k$.
-We define $M_k \subseteq M$ the set of all machines in $M$ equal to $k$.
+In the set of machines $M$, we can have multiple machines equal to the same value $v$.
+We define $M_v \subseteq M$ the set of all machines in $M$ equal to $v$.
 
 \begin{align}
-  \sum_{i \in M_k} m_{ij} = | \{ m \mid m \in M_{d_j}, m = k \} |, && j \in D, k \in M_{d_j} \label{mc2}
+  \sum_{i \in M_v} m_{ij} = | \{ m \mid m \in M_{d_j}, m = v \} |, && j \in D, v \in M_{d_j} \label{mc2}
 \end{align}
 
 
@@ -339,7 +339,7 @@ These constraints simply state that each variable must be a binary $\{ 0, 1 \}$ 
 The objective function is stated in (\ref{obj}), it is a weighted sum split into multiple parts, it minimizes:
 
 \begin{enumerate}
-  \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at that time, 0 otherwise. Hence, the sum of those values for all workers is equal to the number of workers for that shift.
+  \item The number of different workers for every position between periods of that demand (\ref{obj:1}), $min(\sum_{j \in T} w_{ijkl}, 1)$ is one if the worker $i$ is working for that position at any time, 0 otherwise. Hence, the sum of those values for all workers is equal to the number of workers for that shift.
   \item The number of violations of working requirements (\ref{obj:3}).
   \item The number of dummy workers assigned to demands (\ref{obj:2}).
 \end{enumerate}

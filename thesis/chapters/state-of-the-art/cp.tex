@@ -13,8 +13,9 @@ A \emph{Constraint Satisfaction Problem} (\texttt{CSP}) consists of a set of $n$
 $\{x_1, \dots, x_n \}$; a domain $D(x_i)$ of possible values for each variable $x_i$, 
 $1 \leq i \leq n$; and a collection of $m$ constraints $\{ C_1, \dots, C_m \}$. 
 Each constraint $C_j$, $1 \leq j \leq m$, is a constraint over some set of variables called the scheme 
-of the constraint. The size of this set is known as the arity of the constraint. 
-A solution to a CSP is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all the constraints. \cite{cp-definition}
+of the constraint. The size of this set is known as the arity of the constraint. The number of constraints associated with 
+a variable is called the degree of the variable.
+A solution to a \texttt{CSP} is an assignment of values $a_i \in D_i$ to $x_i$, that satisfies all the constraints. \cite{cp-definition}
 
 Problems are sometimes over-constrained and hard to solve with a \texttt{CSP}. In those cases, we can transform our 
 \texttt{CSP} to a Constraint Optimization Problem (\texttt{COP}) where we try to optimize one or multiple objectives coming 
@@ -75,7 +76,7 @@ limit those occurrences to a minimum and maximum.
 
 
 The global cardinality constraint (\texttt{gcc}) \cite{Regin:1996} is a generalization of the 
-\texttt{alldifferent} constraint. It does not enforce (although it can) the uniqueness of values of its variables
+\texttt{alldifferent} constraint. It does not enforce, although it can, the uniqueness of values of its variables
 but enforces that the cardinality of each value $d_i$ for all its variables in its scope lies
 between a lower bound and an upper bound, respectively $l_i$ and $u_i$. 
 
@@ -109,13 +110,13 @@ Large Neighborhood Search (\texttt{LNS}) is a technique that makes use of the pr
 The \texttt{LNS} framework often goes as follows:
 
 \begin{enumerate}
-  \item Use Constraint Programming to find a solution 
+  \item Use Constraint Programming to find a solution.
   \item Relax last best solution: we fix some variables to the last value in the best solutions. This is the 
-        step that can change the most for different types of problems. Most of the time, a simple random relaxation is used (i.e. fix a percentage of variables).
-  \item Restart
+        step that can change the most for different types of problems. Most of the time, a simple random relaxation is used (i.e. randomly fix a percentage of variables).
+  \item Restart.
 \end{enumerate}
 
-The entire search might be limited with a time limit, number of solutions or number of restarts. Each independent search 
+The entire search can be limited with a time limit, number of solutions or number of restarts. Each independent search 
 is often limited with a number of backtracks or a time limit.
 
 \subsection{Variable Objective Search}
@@ -129,7 +130,7 @@ single objective.
 \end{align*}
 
 Our resource allocation problem (\autoref{chapter:problem}) uses such an objective. One issue with this objective modeling is how 
-to prioritize sub-objectives (e.g. is it more important to minimize contiguous workers or requirements). This is 
+to prioritize sub-objectives (e.g. is it more important to minimize contiguous workers or requirements?). This is 
 usually solved by assigning more weight to more important objectives. However, the pruning of such method alone is inefficient.
 
 \paragraph{}

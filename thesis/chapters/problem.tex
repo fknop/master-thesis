@@ -13,7 +13,7 @@ the formal models are then described in \autoref{chapter:models}.
 The resource allocation problem described in this thesis is a staff scheduling problem based on the needs of the \vone\ company. 
 This company employs people with disabilities, they offer services to companies and private individuals such 
 as industrial jobs. Working with disabled people means that there are special needs concerning
-the work that each worker can do.
+the work that each worker can perform.
 
 
 Our resource allocation problem consists of:
@@ -41,14 +41,13 @@ Each demand has:
       This number translates into $n_d$ positions in the demand. 
       $P(d)$ describes the set of positions from $0$ through $n_d - 1$. 
   \item[$-$] Some skill requirements to be fulfilled by different workers ($S_d \subseteq S$).
-  It imposes that some workers have the needed capacities to work at a given position (e.g. package lifter).
+  It imposes that some workers have the required capacities to work at a given position (e.g. package lifter).
   Each position $p \in P(d)$ requires the skill $s_{d,p} \in S_d$. Each skill in the set $S_d$ may represent
   multiple real-life skills. For example, if position $p$ needs to have someone who is a \emph{lifter} and a \emph{supervisor} at the same 
   time, $s_{d,p} = lifter \land supervisor$.
   \item[$-$] Additional skill requirements to be fulfilled by any workers assigned to that demand (e.g. driver license) ($S^{+}_d \subseteq S$).
-  \item[$-$] A list of machines to perform the work ($M_d \subseteq M$).
+  \item[$-$] A list of machines to perform the work ($M_d \subseteq M$). Vehicles used to drive the workers to a work location are considered as machines.
   \item[$-$] An eventual list of possible locations where the demand can be performed ($L_d \subseteq L$).
-  Vehicles used to drive the workers to a work location are considered as machines.
 \end{itemize}
 
 
@@ -64,9 +63,8 @@ Each worker has:
 
 
 This type of problem can be seen as a variant of the 
-well known nurses scheduling problem (\texttt{NSP}) \cite{Burke2004}. 
-These problems often contain hard constraints to state restrictions 
-and soft constraints to state preferences and to minimize violations.
+well known nurse scheduling problem (\texttt{NSP}) \cite{Burke2004}. 
+These problems often contain hard constraints to state restrictions and soft constraints to state preferences and to minimize violations.
 
 
 
@@ -114,7 +112,7 @@ occurring.
 
 A worker cannot do the work of two different workers at the same time.
 Hence, a worker can only work at most once per time period.
-For every two worker assignments, there cannot be a worker assigned twice for the same time period.
+For every pair of worker assignments, there cannot be a worker assigned twice for the same time period.
 
 \begin{equation*}
   w_1 \neq w_2, \ \forall \ \langle t, d_1, p_1, w_1\rangle \in A_w,  \langle t, d_2, p_2, w_2\rangle \in A_w
@@ -134,7 +132,7 @@ number of workers $n_d$ assigned to it.
 
 \subsubsection{Each assignment must respect skill restrictions}
 
-Each position of a demand might require skills to be satisfied. 
+Each position of a demand may require skills to be satisfied. 
 To be assigned to that position, a worker must have the required skills. 
 A worker can also have more skills than the required skills by the position.
 
@@ -145,7 +143,7 @@ A worker can also have more skills than the required skills by the position.
 \subsubsection{Worker-worker incompatibilities}
 
 Workers might be incompatible with each other. Such workers cannot
-be assigned together at the same time period.
+be assigned together (i.e. in the same demand) at the same time period.
 
 \begin{equation*}
   d_1 \neq d_2, \ \forall \ \langle w_1, w_2\rangle \in I_w, \langle t, d_1, p_1, w_1\rangle \in A_w,  \langle t, d_2, p_2, w_2\rangle \in A_w
@@ -176,7 +174,7 @@ for a demand to be satisfied.
 
 A machine is assigned for the entirety of a demand. Moreover, it cannot be assigned twice 
 for the same period. In other words, it cannot be assigned for two overlapping demands in time.
-We define the set of overlapping demand with $O(d) = \{ d_o \mid T_{d_o} \cap T_d \neq \varnothing, \forall \ d_o \in D, d_o \neq d \}$
+We define the set of overlapping demands with $O(d) = \{ d_o \mid T_{d_o} \cap T_d \neq \varnothing, \forall \ d_o \in D, d_o \neq d \}$
 
 \begin{equation*}
   m_1 \neq m_2, \ \forall \ d \in D, d_o \in O(d), \langle d, m_1\rangle \in A_m, \langle d_o, m_2\rangle \in A_m
