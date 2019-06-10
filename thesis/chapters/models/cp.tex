@@ -201,7 +201,7 @@ in that range, hence only $\sigma$ in our case.
 
 
 
-\subsubsection{Objective Function}
+\subsubsection{Objective function}
 
 We already defined violations $v_r$ (\ref{cp:wrequirements}) and $v_{\sigma}$ (\ref{cp:dummy}) as our working requirements and dummy worker violations respectively.
 We also need to define a final part of our objective function which is not a violation per se. Let $N_{jk}$ be the number 
@@ -236,7 +236,7 @@ We define three penalties $\delta_0$, $\delta_1$ and $\delta_2$ which are associ
 We now define the variable and value heuristics used in our model. The variable heuristic is a variant of the 
 max degree heuristic while the value heuristic is a custom heuristic that selects the most available worker for a position.
 
-\subsubsection{Variable Heuristic}
+\subsubsection{Variable heuristic}
 
 The variable heuristic used for the search is a custom max degree heuristic. 
 The degree of a variable is the number of constraints assigned to it. However, as skills are not stated with constraints, 
@@ -246,19 +246,19 @@ We also make sure that if a variable is of size two, it is always selected first
 propagation.
 
 
-\subsubsection{Most Available Value Heuristic}
+\subsubsection{Most available value heuristic}
 
 We define a value heuristic that we call the \emph{most available heuristic}. 
 This heuristic consists of two value orderings.
 \begin{enumerate}
   \item The first ordering orders the workers from most available to least available throughout the duration of the demand.
         This allows the search to select workers that are more likely to work for that demand throughout all periods.
-  \item If workers have the same availabilities for a demand, they are ordered with respect to their remaining availabilities in other demands. This 
-        second ordering is important for smaller demands, the search chooses workers that are less likely to be needed in other demands.
+  \item If workers have the same number of availabilities for a demand, they are ordered with respect to their remaining availabilities in other demands. This 
+        second ordering is important for smaller demands as the search chooses workers that are less likely to be needed in other demands.
 \end{enumerate}
 
-It also never considers the dummy worker $\sigma$ for the worker value as it is not even considered 
-for the most available worker. This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic 
+The heuristic also never considers the dummy worker $\sigma$ for most available worker.
+This value heuristic will in practice find solutions much quicker than a traditional \emph{min} value heuristic 
 (see \autoref{section:experiments:heuristics}).
 
 Let us take an example to show how this heuristic works in practice, let us define 
@@ -277,7 +277,7 @@ First, we can see that $w_2$ is never considered in this case as it is not avail
 $w_3$ has two remaining availabilities. This heuristic guesses that those two remaining availabilities could be used elsewhere. In this case, it is used on $d_2$ where $w_3$ has all his 5 availabilities.
 The search always considers $w_1$ first for $d_1$ and $w_3$ first for $d_2$.
 
-\subsubsection{Dynamic Value Heuristic}
+\subsubsection{Dynamic value heuristic}
 
 The \emph{most available} heuristic works fairly well in practice as seen in \autoref{chapter:experiments}. 
 We can, however, improve it by making it adapt dynamically to the search. Instead of one static ordering at the start of the search,
@@ -377,14 +377,14 @@ $x_1$ is assigned the value $2$, we ignore the permutation $x_1 = 2, x_2 = 1$ be
   \label{tree:symmetry}
 \end{figure}
 
-\subsubsection{Large Neighborhood Search}
+\subsubsection{Large neighborhood search}
 
 We use \texttt{LNS} to ensure that we explore as much of the search space as possible. 
 We used both random relaxation and propagation guided relaxation \cite{Propagation:LNS} to relax 
 our best solution. We discuss and compare these relaxations in \autoref{chapter:experiments}.
 
 
-\subsubsection{Variable Objective LNS}
+\subsubsection{Variable objective LNS}
 \label{cp:volns}
 
 Our problem uses a multi-objective (\ref{cp:objective}) model. 

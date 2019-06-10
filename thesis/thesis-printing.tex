@@ -1,5 +1,5 @@
 % EPL master thesis covers template
-\documentclass{template/EPL-master-thesis-covers-EN}
+\documentclass[twoside]{template/EPL-master-thesis-covers-EN}
 
 % Please fill in the following boxes
 % Title of the thesis
@@ -113,6 +113,10 @@
   tabsize=3,
 }
 
+\newcommand*\cleartoleftpage{%
+  \clearpage
+  \ifodd\value{page}\hbox{}\newpage\fi
+}
 
 
 
@@ -146,6 +150,10 @@
   % Front cover page
   
   \maketitle
+
+
+  \clearpage\null\newpage
+  \cleardoublepage
 
 
   \begin{abstract}
@@ -245,6 +253,8 @@
 
 
   \end{appendices}
+
+  \cleartoleftpage
 
   % Back cover page
   \backcoverpage

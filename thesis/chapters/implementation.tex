@@ -62,11 +62,10 @@ Both solvers implement a \texttt{solve} function which takes the same set of par
 This function can take generic options implemented by the subclasses (i.e. specific \texttt{MIP} or \texttt{CP} options).
 The solve function returns a data structure containing a solution and the time spent in the solver and an optional solution.
 
-\begin{lstlisting}[style=scalaStyle,caption={Solver API},captionpos=b]
+\begin{lstlisting}[style=scalaStyle,caption={Solver \texttt{API}},captionpos=b]
 case class SearchResult(solution: Option[Solution], time: Long)
 
 trait SearchOptions
-
 
 trait Search[T <: SearchOptions] {
   def solve(timeLimit: Int, solutionLimit: Int, silent: Boolean, options: Option[T] = None): SearchResult
@@ -75,7 +74,7 @@ trait Search[T <: SearchOptions] {
 
 \section{Mixed Integer Programming solver}
 
-We used the Java API \cite{gurobi:java} of the Gurobi Optimizer in Scala to create our implementation. 
+We used the Java \texttt{API} \cite{gurobi:java} of the Gurobi Optimizer in Scala to create our implementation. 
 The implementation did not change from the theoretical model presented in \autoref{section:mipmodel} as 
 \texttt{MIP} solvers are less flexible in their modeling abilities than \texttt{CP} solvers as we discuss later. The Gurobi solver 
 comes with default parameters \cite{gurobi:parameters}, it is advised to keep default parameters as 
@@ -229,7 +228,7 @@ trait BenchmarkOptions {
 \end{lstlisting}
 
 We can specify a solution limit as well as a time limit. We can also repeat our benchmark and takes 
-the average of results. We can also have dry runs to warm up the \texttt{JVM} (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
+the average of the results. We can also have dry runs to warm up the \texttt{JVM} (Java Virtual Machine) and a seed to have reproducible benchmarks. Finally,
 we can specify the probabilities for our instances as explained in \autoref{section:instance-gen}.
 
 We then pass these options to our benchmark runner in addition to our solver functions. The runner then returns 

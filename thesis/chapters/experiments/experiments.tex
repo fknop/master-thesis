@@ -254,6 +254,10 @@ For our experiments, we generated 216 instances of different sizes. The problem 
   \end{tabular}
 \end{table}
 
+Locations and machines do not affect the results as much as the number of workers, demands, and time periods. This is due to the fact 
+that locations and machines have a low number of constraints and only need to be assigned once and are neither optimized nor relaxed (in \texttt{CP}). 
+Because of this, we simply add a fixed number of locations and machines (i.e. 30 each) throughout the entire set of instances.
+
 \subsection{Model parameters}
 
 We presented in \autoref{obj} and \autoref{penalties:cp} the penalties of our sub-objectives.
@@ -268,8 +272,8 @@ We define for our experiments the following penalty vector:
 \subsection{Comparison between heuristics}
 \label{section:experiments:heuristics}
 
-We talked in \autoref{section:cpmodel} about our custom heuristic called the Most Available heuristic.
-We now compare the performance of this heuristic with standard heuristics such as the Max Value heuristic.
+We talked in \autoref{section:cpmodel} about our custom heuristic called the \emph{most available} heuristic.
+We now compare the performance of this heuristic with standard heuristics such as the \emph{max value} heuristic.
 We also compare the variable heuristics used in addition to our aforementioned heuristic.
 
 \subsubsection{Value heuristic}
@@ -277,22 +281,22 @@ We also compare the variable heuristics used in addition to our aforementioned h
 We compare multiple value heuristics:
 
 \begin{itemize}
-  \item The Max Value heuristic (\texttt{CP-MV}). This heuristic simply takes the maximum value in the domain of the variable. We 
+  \item The \emph{max value} heuristic (\texttt{CP-MV}). This heuristic simply takes the maximum value in the domain of the variable. We 
   take the maximum instead of the minimum because of the dummy value being equal to -1 in every domain. 
-  \item The Most Available heuristic discussed in \autoref{section:cpmodel} (\texttt{CP-MA}).
-  \item The Dynamic Most Available heuristic also discussed in \autoref{section:cpmodel} (\texttt{CP-MA-D}).
+  \item The \emph{most available} heuristic discussed in \autoref{section:cpmodel} (\texttt{CP-MA}).
+  \item The \emph{dynamic most available} heuristic also discussed in \autoref{section:cpmodel} (\texttt{CP-MA-D}).
 \end{itemize}
 
-We first start by comparing the Max Value and the static Most Available heuristics together.
+We first start by comparing the \emph{max value} and the static \emph{most available} heuristics together.
 
-\autoref{experiments:ma-mv-profile} shows performance profiles of the max value heuristic compared to the most available heuristic 
-as baseline. We observe that our custom heuristic outperforms the max value heuristic in almost every instances with 
+\autoref{experiments:ma-mv-profile} shows performance profiles of the  \emph{max value} heuristic compared to the  \emph{most available} heuristic 
+as baseline. We observe that our custom heuristic outperforms the  \emph{max value} heuristic in almost every instance with 
 up to a $4.8$ times improvement after 30 seconds of search.
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/ma-mv-profile.png}
-  \caption{Performance profiles of Most Available and Max Value heuristics [216 instances/30s].}
+  \caption{Performance profiles of \emph{most available} and \emph{max value} heuristics [216 instances/30s].}
   \label{experiments:ma-mv-profile}
 \end{figure}
 
@@ -302,23 +306,23 @@ find better solutions faster.
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/ma-mv-timeline.png}
-  \caption{Timeline of Most Available and Max Value heuristics [216 instances/30s].}
+  \caption{Timeline of \emph{most available} and  \emph{max value} heuristics [216 instances/30s].}
   \label{experiments:ma-mv-timeline}
 \end{figure}
 
-Heuristics such as the max value are ones of the simpler heuristics to implement but often offer bad performances due to 
+Heuristics such as the  \emph{max value} are ones of the simpler heuristics to implement but often offer bad performances due to 
 the lack of knowledge of the problem.
 
 \FloatBarrier
 
-We now compare our static and dynamic most available heuristics together.
-\autoref{experiments:ma-ma-d-profile} shows the performance profiles of the dynamic and static most available heuristics.
+We now compare our static and dynamic  \emph{most available} heuristics together.
+\autoref{experiments:ma-ma-d-profile} shows the performance profiles of the dynamic and static  \emph{most available} heuristics.
 We can see that the dynamic version of the heuristic outperforms the static one in 90\% of instances after 30 seconds of search.
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/ma-ma-d-profile.png}
-  \caption{Performance profiles of static and dynamic most available heuristics with \texttt{CP-MA} as baseline [216 instances/30s].}
+  \caption{Performance profiles of static and dynamic  \emph{most available} heuristics with \texttt{CP-MA} as baseline [216 instances/30s].}
   \label{experiments:ma-ma-d-profile}
 \end{figure}
 
@@ -332,7 +336,7 @@ at the current state of the search.
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/ma-ma-d-timeline.png}
-  \caption{Timeline of static and dynamic most available heuristics [216 instances/30s].}
+  \caption{Timeline of static and dynamic  \emph{most available} heuristics [216 instances/30s].}
   \label{experiments:ma-ma-d-timeline}
 \end{figure}
 
@@ -340,35 +344,35 @@ at the current state of the search.
 \FloatBarrier
 
 As our dynamic value heuristic outperforms other tested value heuristics, we assume for the rest of this chapter 
-that the value heuristic for the Constraint Programming solver is the dynamic most available.
+that the value heuristic for the Constraint Programming solver is the dynamic  \emph{most available}.
 
 
 \subsubsection{Variable heuristic}
 
-In addition to our most available heuristic, we use a variation of the max degree heuristic. 
+In addition to our most available heuristic, we use a variation of the  \emph{max degree} heuristic. 
 This heuristic is a first-fail variable heuristic that selects the most constrained unbound variable. However,
 as stated in our model in \autoref{section:cpmodel}, skills are not represented with constraints but instead, values 
-are removed from the domain at initialization. To express skills as part of the max degree, we simply add the number of 
+are removed from the domain at initialization. To express skills as part of the degree, we simply add the number of 
 skills required by a variable to the degree of that variable.
 
 
 We compare multiple variable heuristics:
 
 \begin{itemize}
-  \item Custom Max Degree (\texttt{MD}) heuristic
-  \item Min Size (\texttt{MS}) heuristic. The Min Size heuristic simply selects the variable with minimum domain size.
-  \item Conflict Ordering Search (\texttt{COS}) heuristic \cite{Gay:COS}
+  \item The custom  \emph{max degree} (\texttt{MD}) heuristic
+  \item The \emph{min size} (\texttt{MS}) heuristic. This heuristic simply selects the variable with minimum domain size.
+  \item The \emph{conflict ordering search} (\texttt{COS}) heuristic \cite{Gay:COS}
 \end{itemize}
 
 
-Conflict Ordering Search is a variable ordering heuristic that 
+\emph{Conflict ordering search} is a variable ordering heuristic that 
 reorders variables based on the number of conflicts that happen during the search.
-It is a variant to the Last Conflict heuristic which selects the variable which caused the last conflict first.
+It is a variant to the \emph{last conflict} heuristic which selects the variable which caused the last conflict first.
 \texttt{COS} was shown in \cite{Gay:COS} to be the most performant on scheduling problems. 
 We now see how it performs in our problem in comparison with the aforementioned heuristics.
 
-\autoref{experiments:v-heuristics-profile} shows the performance profiles of the objective after 30s for each solver.
-We can see that the conflict ordering search and min size heuristics are underperforming in comparison to the max degree heuristic.
+\autoref{experiments:v-heuristics-profile} shows the performance profiles of the objective after 30 seconds for each solver.
+We can see that the  \emph{conflict ordering search} and  \emph{min size} heuristics are underperforming in comparison to the  \emph{max degree} heuristic.
 
 
 \begin{figure}
@@ -378,8 +382,7 @@ We can see that the conflict ordering search and min size heuristics are underpe
   \label{experiments:v-heuristics-profile}
 \end{figure}
 
-However, as we can see from the first five seconds of search in \autoref{experiments:v-heuristics-timeline}, the 
-max degree heuristics performs slightly worse than \texttt{COS} and \texttt{MS} for the first second of search. If a solver only runs for 
+However, as we can see from the first five seconds of search in \autoref{experiments:v-heuristics-timeline}, \texttt{MD} performs slightly worse than \texttt{COS} and \texttt{MS} for the first second of search. If a solver only runs for 
 one second, using \texttt{COS} or \texttt{MS} would be preferable.
 
 \begin{figure}
@@ -397,18 +400,18 @@ one second, using \texttt{COS} or \texttt{MS} would be preferable.
 
 
 As stated in \autoref{chapter:sota} and \autoref{section:cpmodel}, \texttt{LNS} is used to expand the exploration
-of the search tree. We now compare our solver with the use of \texttt{LNS} and without. We also compare multiple 
-relaxation methods.
+of the search tree. We now compare our solver with and without the use of \texttt{LNS}. We also compare multiple 
+relaxation techniques.
 
 
-\autoref{experiments:lns} shows the performance profiles of the final objective after 30s of search 
+\autoref{experiments:lns} shows the performance profiles of the final objective after 30 seconds of search 
 between a standard search and \texttt{LNS}. As expected, we can see that \texttt{LNS} outperforms the standard search 
 in almost every instance. 
 
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.55]{experiments/lns-profile.png}
-  \caption{Performance profiles of \texttt{CP} with and without Large Neighborhood Search with \texttt{CP} as baseline [216 instances/30s].}
+  \caption{Performance profiles of \texttt{CP} and \texttt{CP-LNS} with \texttt{CP} as baseline [216 instances/30s].}
   \label{experiments:lns}
 \end{figure}
 
@@ -420,7 +423,7 @@ while the \texttt{LNS} manages to find better solutions quickly after relaxing t
 \begin{figure}
   \centering
   \includegraphics[scale=0.55]{experiments/lns-oot.png}
-  \caption{Timeline of \texttt{CP} with and without Large Neighborhood Search [216 instances/3s].}
+  \caption{Timeline of \texttt{CP} and \texttt{CP-LNS} [216 instances/30s].}
   \label{experiments:lns-oot}
 \end{figure}
 
@@ -438,11 +441,11 @@ which causes issues when trying to minimize more important (more weighted) sub-o
 We also experiment with multiple relaxations within the \texttt{LNS} framework. We compare:
 
 \begin{itemize}
-  \item Random relaxation 
+  \item Random relaxation:
     \begin{itemize}
-      \item 10\% through 90\% relaxation (\texttt{CP-Random-N\%})
+      \item 10\% through 90\% relaxation (\texttt{CP-Random-\{P\}\%}).
     \end{itemize}
-  \item Propagation based relaxation (\texttt{CP-Prop})
+  \item Propagation based relaxation (\texttt{CP-Prop}).
 \end{itemize}
 
 \autoref{experiments:random-relax-profile} first shows performance profiles of all random relaxations 
@@ -469,7 +472,7 @@ offers a slightly better objective at the start and the 10\% and 20\% catch up a
 We now compare our best random relaxation with a propagation based relaxation.
 We choose \texttt{CP-Random-20} to compare our propagation based relaxation with, as the performances of 
 the two best random relaxations are almost the same.
-Propagation Guided relaxation takes a neighborhood size parameter, we compare five values for this parameter:
+The propagation guided relaxation takes a neighborhood size parameter, we compare five values for this parameter:
 
 \begin{itemize}
   \item \texttt{CP-Prop-1/3}: the size of the neighborhood to attain is one third of the size of variables.
@@ -507,7 +510,7 @@ We now start by comparing different solvers together. We experiment with three s
 
 \autoref{experiments:solvers:profile} 
 shows performance profiles of \texttt{CP}, \texttt{MIP} and \texttt{CP+MIP} solvers. We can clearly see that 
-the \texttt{MIP} solver underperforms for most instances. However, it outperforms the \texttt{CP} solver for approximately
+the \texttt{MIP} solver underperforms for most instances. However, it slightly outperforms the \texttt{CP} solver for approximately
 20\% of instances. 
 
 \begin{figure}
